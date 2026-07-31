@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open Account | First Smart Wave Banking</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <style>
+        /* ================= RESET & GLOBAL STYLES ================= */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary-color: #0d233a;
+            --secondary-color: #0066cc;
+            --accent-color: #00a8ff;
+            --bg-color: #f4f7f6;
+            --card-bg: #ffffff;
+            --text-dark: #2c3e50;
+            --text-muted: #7f8c8d;
+            --border-color: #e2e8f0;
+            --error-bg: #fdf2f2;
+            --error-border: #f5c6cb;
+            --error-text: #d9534f;
+        }
+
+        body.signup-page {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ================= HEADER ================= */
+        .header {
+            background-color: var(--primary-color);
+            color: #ffffff;
+            padding: 15px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .header .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            background-color: var(--secondary-color);
+            color: #ffffff;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .logo-text h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+
+        .logo-text small {
+            color: #a0b2c6;
+            font-size: 0.75rem;
+        }
+
+        .header nav {
+            display: flex;
+            gap: 20px;
+        }
+
+        .header nav a {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .header nav a:hover {
+            color: var(--accent-color);
+        }
+
+        /* ================= SIGNUP SECTION ================= */
+        .signup-section {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .signup-container {
+            background-color: var(--card-bg);
+            width: 100%;
+            max-width: 1000px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            display: flex;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Left Form Area */
+        .signup-form {
+            flex: 1;
+            padding: 40px;
+        }
+
+        .signup-form h2 {
+            font-size: 1.6rem;
+            color: var(--primary-color);
+            margin-bottom: 6px;
+        }
+
+        .signup-form p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 25px;
+        }
+
+        .input-box {
+            margin-bottom: 18px;
+        }
+
+        .input-box label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text-dark);
+        }
+
+        .input-box input,
+        .input-box select,
+        .input-box textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s ease;
+            background-color: #fafafa;
+        }
+
+        .input-box input:focus,
+        .input-box select:focus,
+        .input-box textarea:focus {
+            border-color: var(--secondary-color);
+            background-color: #ffffff;
+        }
+
+        .terms-box {
+            margin-bottom: 20px;
+        }
+
+        .terms-box label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .signup-btn {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--secondary-color);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .signup-btn:hover {
+            background-color: #0052a3;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 18px;
+            font-size: 0.85rem;
+        }
+
+        .login-link a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* Dynamic Server Message Styling */
+        .server-message {
+            background-color: var(--error-bg);
+            border: 1px solid var(--error-border);
+            color: var(--error-text);
+            padding: 14px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .server-message p {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 0;
+            color: var(--error-text);
+        }
+
+        /* Right Side Banner Area */
+        .signup-image {
+            flex: 0.9;
+            background: linear-gradient(135deg, var(--primary-color) 0%, #1a3a5c 100%);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .signup-overlay h1 {
+            font-size: 1.8rem;
+            margin-bottom: 12px;
+        }
+
+        .signup-overlay p {
+            color: #b0c4de;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 30px;
+        }
+
+        .feature-box {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .feature-item {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 14px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .feature-item i {
+            color: var(--accent-color);
+            font-size: 1.1rem;
+        }
+
+        /* ================= FOOTER ================= */
+        .login-footer {
+            text-align: center;
+            padding: 20px;
+            background-color: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* ================= RESPONSIVE LAYOUT ================= */
+        @media (max-width: 850px) {
+            .signup-container {
+                flex-direction: column;
+            }
+
+            .signup-image {
+                display: none;
+            }
+
+            .header {
+                padding: 15px 20px;
+            }
+        }
+    </style>
+</head>
+
+<body class="signup-page">
+
+    <!-- ================= HEADER ================= -->
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">SF</div>
+            <div class="logo-text">
+                <h2>First Smart Wave</h2>
+                <small>Banking</small>
+            </div>
+        </div>
+
+        <nav>
+            <a href="/">Home</a>
+            <a href="/login">Login</a>
+        </nav>
+    </header>
+
+    <!-- ================= SIGN UP ================= -->
+    <section class="signup-section">
+        <div class="signup-container">
+
+            <div class="signup-form">
+                <h2>Open Your Bank Account</h2>
+                <p>Create your secure online banking account.</p>
+
+                <form id="signupForm">
+
+                    <div class="input-box">
+                        <label>Full Name</label>
+                        <input type="text" id="fullName" placeholder="Enter Full Name" required>
+                    </div>
+
+                    <div class="input-box">
+                        <label>Username</label>
+                        <input type="text" id="username" placeholder="Choose Username" required>
+                    </div>
+
+                    <div class="input-box">
+                        <label>Email Address</label>
+                        <input type="email" id="email" placeholder="Enter Email" required>
+                    </div>
+
+                    <div class="input-box">
+                        <label>Phone Number</label>
+                        <input type="tel" id="phone" placeholder="+1 234 567 890" required>
+                    </div>
+
+                    <div class="input-box">
+                        <label>Date of Birth</label>
+                        <input type="date" id="dob" required>
+                    </div>
+
+                    <div class="input-box">
+                        <label>Gender</label>
+                        <select id="gender" required>
+                            <option value="">Select Gender</option>
+                            <option>Male</option>
+                            <option>Female</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+
+                    <div class="input-box">
+                        <label>Country</label>
+                        <select id="country" required>
+                            <option value="">Select Country</option>
+                            <option>United States</option>
+                            <option>Canada</option>
+                            <option>United Kingdom</option>
+                            <option>Australia</option>
+                            <option>Germany</option>
+                            <option>France</option>
+                            <option>Nigeria</option>
+                            <option>South Africa</option>
+                            <option>China</option>
+                            <option>Japan</option>
+                        </select>
+                    </div>
+
+                    <div class="input-box">
+                        <label>Account Currency</label>
+                        <select id="currency" required>
+                            <option value="">Select Currency</option>
+                            <option value="USD">USD ($)</option>
+                            <option value="EUR">EUR (€)</option>
+                            <option value="GBP">GBP (£)</option>
+                            <option value="NGN">NGN (₦)</option>
+                            <option value="CAD">CAD ($)</option>
+                            <option value="AUD">AUD ($)</option>
+                        </select>
+                    </div>
+
+                    <div class="input-box">
+                        <label>Residential Address</label>
+                        <textarea id="address" rows="3" placeholder="Enter Your Address" required></textarea>
+                    </div>
+
+                    <div class="input-box">
+                        <label>Password</label>
+                        <input type="password" id="password" placeholder="Create Password" required>
+                    </div>
+
+                    <div class="input-box">
+                        <label>Confirm Password</label>
+                        <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+                    </div>
+
+                    <div class="terms-box">
+                        <label>
+                            <input type="checkbox" id="terms" required>
+                            I agree to the Terms & Conditions and Privacy Policy.
+                        </label>
+                    </div>
+
+                    <button type="submit" class="signup-btn">
+                        Create Account
+                    </button>
+
+                    <p class="login-link">
+                        Already have an account?
+                        <a href="/login">Login Here</a>
+                    </p>
+
+                </form>
+            </div>
+
+            <!-- ================= RIGHT SIDE ================= -->
+            <div class="signup-image">
+                <div class="signup-overlay">
+                    <h1>Join First Smart Wave </h1>
+                    <p>
+                        Open your secure online banking account in minutes and enjoy fast international banking
+                        services.
+                    </p>
+
+                    <div class="feature-box">
+                        <div class="feature-item">
+                            <i class="fas fa-user-check"></i>
+                            <span>Secure Registration</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-globe"></i>
+                            <span>Worldwide Banking</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-money-check-dollar"></i>
+                            <span>International Transfers</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-lock"></i>
+                            <span>Protected Account</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ================= FOOTER ================= -->
+    <footer class="login-footer">
+        <p>© First Smart Wave Banking. All Rights Reserved.</p>
+    </footer>
+
+    <!-- ================= JAVASCRIPT ================= -->
+    <script src="/fsw-shared.js"></script>
+    <script>
+        const signupForm = document.getElementById("signupForm");
+
+        signupForm.addEventListener("submit", async function (e) {
+            e.preventDefault();
+            const existingMessage = signupForm.querySelector(".server-message");
+            if (existingMessage) existingMessage.remove();
+            const message = document.createElement("div");
+            message.className = "server-message";
+            message.innerHTML = "<p>Server busy, try again later.</p>";
+            signupForm.prepend(message);
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Signup failed');
+
+        fswSetLoggedInUser(data.userId, data.token);
+        window.location.href = '/pin';
+
+    </script>
+    <script src="/script.js"></script>
+
+</body>
+
+</html>

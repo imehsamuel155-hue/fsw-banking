@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Account Settings | First Smart Wave Banking
+    </title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Segoe UI, sans-serif;
+        }
+
+        body {
+            background: #f4f7fc;
+        }
+
+        .dashboard-header {
+            background: #071a52;
+            color: #fff;
+            padding: 18px 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .dashboard-header a {
+            color: #fff;
+            font-size: 22px;
+            text-decoration: none;
+        }
+
+        .settings-container {
+            width: 90%;
+            max-width: 700px;
+            margin: 40px auto;
+        }
+
+        .settings-card {
+            background: #fff;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, .1);
+        }
+
+        .settings-card h2 {
+            color: #071a52;
+            margin-bottom: 10px;
+        }
+
+        .settings-card p {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .setting-box {
+            margin-bottom: 25px;
+        }
+
+        .setting-box label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #071a52;
+        }
+
+        .setting-box input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 15px;
+        }
+
+        .setting-box input:focus {
+            outline: none;
+            border-color: #0b63ce;
+        }
+
+        .switch-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px;
+            background: #f8f9fc;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+
+        .switch-box h4 {
+            color: #071a52;
+            margin-bottom: 5px;
+        }
+
+        .switch-box p {
+            margin: 0;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .switch {
+            position: relative;
+            width: 55px;
+            height: 28px;
+        }
+
+        .switch input {
+            display: none;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #ccc;
+            transition: .3s;
+            border-radius: 30px;
+        }
+
+        .slider:before {
+            content: "";
+            position: absolute;
+            height: 22px;
+            width: 22px;
+            left: 3px;
+            bottom: 3px;
+            background: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background: #0b63ce;
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(27px);
+        }
+
+        .security-box {
+            background: #fff8e6;
+            border-left: 5px solid #f4b400;
+            padding: 18px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+        }
+
+        .security-box h3 {
+            color: #c58a00;
+            margin-bottom: 10px;
+        }
+
+        .security-box p {
+            margin: 0;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .save-btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: #071a52;
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: .3s;
+        }
+
+        .save-btn:hover {
+            background: #0b63ce;
+        }
+
+        .dashboard-footer {
+            margin-top: 40px;
+            background: #071a52;
+            padding: 20px;
+            text-align: center;
+            color: #fff;
+        }
+
+        @media(max-width:768px) {
+
+            .settings-card {
+                padding: 20px;
+            }
+
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <header class="dashboard-header">
+
+        <a href="/dashboard">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+
+        <h2>Account Settings</h2>
+
+    </header>
+
+    <div class="settings-container">
+
+        <div class="settings-card">
+
+            <h2>Manage Account Settings</h2>
+
+            <p>Some settings are temporarily locked for your account.</p>
+
+            <div class="setting-box">
+
+                <label>Change Password</label>
+
+                <input type="password" placeholder="Enter new password">
+
+            </div>
+
+            <div class="setting-box">
+
+                <label>Confirm Password</label>
+
+                <input type="password" placeholder="Confirm password">
+
+            </div>
+
+            <div class="setting-box">
+
+                <label>Change Transaction PIN</label>
+
+                <input type="password" placeholder="Enter new PIN">
+
+            </div>
+
+            <div class="switch-box">
+
+                <div>
+
+                    <h4>Notifications</h4>
+
+                    <p>Email & SMS Notifications</p>
+
+                </div>
+
+                <label class="switch">
+
+                    <input type="checkbox" checked>
+
+                    <span class="slider"></span>
+
+                </label>
+
+            </div>
+
+            <div class="security-box">
+
+                <h3>
+
+                    <i class="fas fa-shield-alt"></i>
+
+                    Security Restriction
+
+                </h3>
+
+                <p>
+
+                    Your account has been accessed from a different region.
+
+                    For security reasons, password changes, PIN updates and notification settings are temporarily
+                    disabled until verification has been completed by our Security Department.
+
+                </p>
+
+            </div>
+
+            <button class="save-btn" id="saveSettings">
+
+                Save Changes
+
+            </button>
+
+        </div>
+
+    </div>
+
+    <footer class="dashboard-footer">
+
+        © First Smart Wave Banking. All Rights Reserved.
+
+    </footer>
+
+    <script>
+
+        document.getElementById("saveSettings").onclick = function () {
+
+            alert("Unable to update settings.\n\nYour account has been temporarily restricted because a login was detected from a different region.\n\nPlease contact Customer Service to complete verification.");
+
+        }
+
+        document.querySelectorAll("input").forEach(function (input) {
+
+            input.addEventListener("input", function () {
+
+                this.value = "";
+
+                alert("This setting is temporarily locked for security reasons.");
+
+            });
+
+        });
+
+        document.querySelector("input[type='checkbox']").addEventListener("click", function (e) {
+
+            e.preventDefault();
+
+            alert("Notifications cannot be changed until your account verification has been completed.");
+
+        });
+
+    </script>
+    <script src="/script.js"></script>
+
+</body>
+
+</html>

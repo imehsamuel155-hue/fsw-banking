@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In | First Smart Wave Banking</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary-color: #0d233a;
+            --secondary-color: #0066cc;
+            --error-color: #e74c3c;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0d233a 0%, #1a3a5c 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: #fff;
+            width: 100%;
+            max-width: 440px;
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, .25);
+            overflow: hidden;
+        }
+
+        .login-header {
+            background: var(--primary-color);
+            color: #fff;
+            padding: 30px 20px;
+            text-align: center;
+        }
+
+        .logo-icon {
+            background: var(--secondary-color);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+            font-weight: bold;
+            font-size: 1.4rem;
+        }
+
+        .login-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .login-header small {
+            color: #a0b2c6;
+            font-size: 0.85rem;
+        }
+
+        .login-body {
+            padding: 30px 25px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .input-field {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-field i {
+            position: absolute;
+            left: 14px;
+            color: #666;
+        }
+
+        .input-field input {
+            width: 100%;
+            padding: 12px 14px 12px 42px;
+            border: 1.5px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        .input-field input:focus {
+            border-color: var(--secondary-color);
+        }
+
+        .error-message {
+            background: #fceae9;
+            color: var(--error-color);
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #f5c6cb;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            background: var(--secondary-color);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-submit:hover {
+            background: #0052a3;
+        }
+
+        .login-footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+
+        .login-footer a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-card">
+        <div class="login-header">
+            <div class="logo-icon">FSW</div>
+            <h2>First Smart Wave</h2>
+            <small>Secure Internet Banking</small>
+        </div>
+        <div class="login-body">
+            <div id="errorBanner" class="error-message">
+                <i class="fas fa-exclamation-circle"></i>
+                <span id="errorText">Invalid login details.</span>
+            </div>
+            <form id="loginForm">
+                <div class="input-group">
+                    <label>Username</label>
+                    <div class="input-field">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="username" placeholder="Enter username" required autocomplete="username">
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <div class="input-field">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" placeholder="Enter password" required
+                            autocomplete="current-password">
+                    </div>
+                </div>
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-sign-in-alt"></i> Sign In
+                </button>
+            </form>
+            <div class="login-footer">
+                <p><a href="/"><i class="fas fa-arrow-left"></i> Back to Homepage</a></p>
+            </div>
+        </div>
+    </div>
+    <script src="/fsw-shared.js"></script>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const errorBanner = document.getElementById('errorBanner');
+            const errorText = document.getElementById('errorText');
+            submitBtn.disabled = true;
+            errorBanner.style.display = 'none';
+            try {
+                const res = await fetch(FSW_API_BASE + '/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password, country: Intl.DateTimeFormat().resolvedOptions().timeZone }),
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Login failed');
+                fswSetLoggedInUser(data.userId, data.token);
+                window.location.href = '/pin';
+            } catch (err) {
+                errorText.textContent = err.message === 'Failed to fetch'
+                    ? "Can't reach the backend — start the server (node server.js)."
+                    : err.message;
+                errorBanner.style.display = 'flex';
+            } finally {
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+
+</html>

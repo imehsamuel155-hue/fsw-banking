@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* Global responsive safety patch: prevents horizontal overflow / broken layout on small screens */
+        html,
+        body {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        * {
+            min-width: 0;
+        }
+
+        img,
+        table {
+            max-width: 100%;
+        }
+
+        input,
+        select,
+        textarea,
+        button {
+            max-width: 100%;
+        }
+    </style>
+
+    <title>Deposit Funds | First Smart Wave Banking</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Segoe UI", sans-serif;
+        }
+
+        body {
+            background: #f4f7fc;
+        }
+
+        .dashboard-header {
+            background: #071a52;
+            color: #fff;
+            padding: 18px 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .dashboard-header a {
+            color: #fff;
+            font-size: 22px;
+            text-decoration: none;
+        }
+
+        .deposit-section {
+            width: 90%;
+            max-width: 700px;
+            margin: 40px auto;
+        }
+
+        .deposit-card {
+            background: #fff;
+            padding: 35px;
+            border-radius: 18px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, .1);
+        }
+
+        .deposit-card h2 {
+            color: #071a52;
+            margin-bottom: 10px;
+        }
+
+        .deposit-card p {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .input-box {
+            margin-bottom: 20px;
+        }
+
+        .input-box label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #071a52;
+        }
+
+        .input-box input,
+        .input-box select,
+        .input-box textarea {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .input-box input:focus,
+        .input-box select:focus,
+        .input-box textarea:focus {
+            border-color: #0b63ce;
+        }
+
+        .deposit-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .deposit-buttons button {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .cancel-btn {
+            background: #999;
+            color: #fff;
+        }
+
+        .continue-btn {
+            background: #0b63ce;
+            color: #fff;
+        }
+
+        .popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, .55);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            z-index: 9999;
+        }
+
+        .popup-box {
+            background: #fff;
+            width: 100%;
+            max-width: 520px;
+            border-radius: 18px;
+            padding: 35px;
+            text-align: center;
+        }
+
+        .popup-box i {
+            font-size: 70px;
+            color: #e74c3c;
+            margin-bottom: 20px;
+        }
+
+        .popup-box h2 {
+            color: #071a52;
+            margin-bottom: 15px;
+        }
+
+        .popup-box p {
+            line-height: 1.7;
+            color: #555;
+            margin-bottom: 25px;
+        }
+
+        .popup-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .popup-buttons button {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .support {
+            background: #0b63ce;
+            color: #fff;
+        }
+
+        .dashboard {
+            background: #071a52;
+            color: #fff;
+        }
+
+        .dashboard-footer {
+            margin-top: 40px;
+            background: #071a52;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+
+        @media(max-width:768px) {
+
+            .deposit-buttons,
+            .popup-buttons {
+                flex-direction: column;
+            }
+
+        }
+
+        #customerPopup {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            width: 380px;
+            max-width: calc(100% - 20px);
+            height: 520px;
+            max-height: calc(100vh - 40px);
+            background: #fff;
+            border-radius: 18px;
+            overflow: hidden;
+            display: none;
+            /* Changed from display: flex to display: none */
+            box-shadow: 0 20px 40px rgba(0, 0, 0, .25);
+            z-index: 99999;
+            flex-direction: column;
+        }
+
+        .popup-header {
+            background: #071a52;
+            color: #fff;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .popup-header h3 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .popup-header button {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .popup-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 18px;
+            background: #f5f7fb;
+        }
+
+        .message {
+            padding: 12px 15px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            max-width: 85%;
+            line-height: 1.5;
+        }
+
+        .message.support {
+            background: #071a52;
+            color: #fff;
+        }
+
+        .message.user {
+            background: #0b63ce;
+            color: #fff;
+            margin-left: auto;
+        }
+
+        .popup-footer {
+            display: flex;
+            gap: 10px;
+            padding: 15px;
+        }
+
+        .popup-footer input {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+
+        .popup-footer button {
+            width: 50px;
+            border: none;
+            background: #0b63ce;
+            color: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        @media (max-width:768px) {
+
+            #customerPopup {
+                right: 10px;
+                left: 10px;
+                width: auto;
+                bottom: 10px;
+                height: 75vh;
+                max-height: 75vh;
+                border-radius: 15px;
+            }
+
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <header class="dashboard-header">
+
+        <a href="/dashboard">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+
+        <h2>Deposit Funds</h2>
+
+    </header>
+
+    <section class="deposit-section">
+
+        <div class="deposit-card">
+
+            <h2><i class="fas fa-money-bill-wave"></i> Deposit Funds</h2>
+
+            <p>Complete the information below to make a deposit.</p>
+
+            <form id="depositForm">
+
+                <div class="input-box">
+                    <label>Deposit Method</label>
+
+                    <select id="depositMethod" required>
+
+                        <option value="">Select Method</option>
+
+                        <option>Bank Transfer</option>
+
+                        <option>Cash Deposit</option>
+
+                        <option>Cheque Deposit</option>
+
+                        <option>Cryptocurrency</option>
+
+                        <option>Mobile Deposit</option>
+
+                    </select>
+
+                </div>
+
+                <div class="input-box">
+
+                    <label>Amount</label>
+
+                    <input type="number" id="depositAmount" required>
+
+                </div>
+
+                <div class="input-box">
+
+                    <label>Currency</label>
+
+                    <select required>
+
+                        <option value="">Select Currency</option>
+
+                        <option>USD ($)</option>
+
+                        <option>EUR (€)</option>
+
+                        <option>GBP (£)</option>
+
+                    </select>
+
+                </div>
+
+                <div class="input-box">
+
+                    <label>Sender Full Name</label>
+
+                    <input type="text" required>
+
+                </div>
+
+                <div class="input-box">
+
+                    <label>Sender Bank</label>
+
+                    <input type="text" required>
+
+                </div>
+
+                <div class="input-box">
+
+                    <label>Reference Number</label>
+
+                    <input type="text" required>
+
+                </div>
+
+                <div class="input-box">
+
+                    <label>Deposit Date</label>
+
+                    <input type="date" required>
+
+                </div>
+
+                <div class="input-box">
+
+                    <label>Description</label>
+
+                    <textarea rows="4"></textarea>
+
+                </div>
+
+                <div class="deposit-buttons">
+
+                    <button type="button" class="cancel-btn" onclick="location.href='/dashboard'">
+
+                        Cancel
+
+                    </button>
+
+                    <button type="submit" class="continue-btn">
+
+                        Continue
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </section>
+
+    <div class="popup" id="depositPopup">
+
+        <div class="popup-box">
+
+            <i class="fas fa-circle-exclamation"></i>
+
+            <h2>Deposit Unavailable</h2>
+
+            <p>
+
+                We're currently working on improving our deposit services.
+
+                Please try again later.
+
+                If you require immediate assistance, kindly contact Customer Service.
+
+            </p>
+
+            <div class="popup-buttons">
+
+                <button class="support" id="customerService">
+                    <i class="fas fa-headset"></i>
+                    Customer Service
+                </button>
+
+                <button class="dashboard" onclick="location.href='/dashboard'">
+
+                    <i class="fas fa-house"></i>
+
+                    Dashboard
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div id="customerPopup">
+
+        <div class="popup-header">
+
+            <h3>
+                <i class="fas fa-headset"></i>
+                Customer Service
+            </h3>
+
+            <button id="closeChat">
+                <i class="fas fa-times"></i>
+            </button>
+
+        </div>
+
+        <div class="popup-body" id="chatMessages">
+
+            <div class="message support">
+                Hello 👋
+                <br>
+                Welcome to Sheyrove Financial Trust Banking.
+            </div>
+
+            <div class="message support">
+                We are sorry for the inconvenience.
+                <br>
+                Deposit services are currently undergoing maintenance.
+            </div>
+
+            <div class="message support">
+                Kindly try again later or contact us for further assistance.
+            </div>
+
+        </div>
+
+        <div class="popup-footer">
+
+            <input type="text" id="chatInput" placeholder="Type your message...">
+
+
+            <label style="cursor:pointer;">
+                <i class="fas fa-image"></i>
+
+                <input type="file" accept="image/*" hidden onchange="sendCustomerImage(event)">
+
+            </label>
+
+
+            <button id="sendMessage">
+
+                <i class="fas fa-paper-plane"></i>
+
+            </button>
+
+
+        </div>
+    </div>
+
+    <footer class="dashboard-footer">
+
+        © First Smart Wave Banking. All Rights Reserved.
+
+    </footer>
+
+    <script src="/fsw-shared.js"></script>
+    <script>if (!fswRequireAuth()) { }</script>
+    <script>
+
+        document.getElementById("depositForm").addEventListener("submit", async function (e) {
+
+            e.preventDefault();
+
+            const method = document.getElementById('depositMethod').value;
+            const amount = parseFloat(document.getElementById('depositAmount').value);
+
+            try {
+                const userId = await fswGetCurrentUserId();
+                const res = await fetch(`${FSW_API_BASE}/deposits`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, method, amount }),
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Deposit failed');
+
+                document.getElementById("depositPopup").style.display = "flex";
+            } catch (err) {
+                alert(err.message === 'Failed to fetch'
+                    ? "Can't reach the backend — make sure it's running (npm run dev)."
+                    : err.message);
+            }
+
+        });
+
+        fswInitChatWidget({
+            icon: 'customerService', popup: 'customerPopup', messages: 'chatMessages',
+            input: 'chatInput', send: 'sendMessage', close: 'closeChat', openDisplay: 'flex'
+        });
+
+    </script>
+    <script src="/script.js"></script>
+
+</body>
+
+</html>

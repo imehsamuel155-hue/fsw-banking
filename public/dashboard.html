@@ -1,0 +1,2255 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* Global responsive safety patch: prevents horizontal overflow / broken layout on small screens */
+        html,
+        body {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        * {
+            min-width: 0;
+        }
+
+        img,
+        table {
+            max-width: 100%;
+        }
+
+        input,
+        select,
+        textarea,
+        button {
+            max-width: 100%;
+        }
+    </style>
+
+    <title>Dashboard | First Smart Wave Banking
+    </title>
+
+    <link rel="stylesheet" href="/style.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <style>
+        /*======================================
+DASHBOARD
+======================================*/
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        .dashboard-page {
+            background: #f4f7fc;
+            font-family: Segoe UI, sans-serif;
+            overflow-x: hidden;
+            top: 0px !important;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Hide Google Translate original top toolbar banner */
+        .goog-te-banner-frame.skiptranslate,
+        .goog-te-banner-frame,
+        .goog-te-balloon-frame {
+            display: none !important;
+        }
+
+        body {
+            top: 0px !important;
+            position: static !important;
+        }
+
+        /*======================================
+HEADER & TRANSLATOR STYLING
+======================================*/
+
+        .dashboard-header {
+
+            position: sticky;
+
+            top: 0;
+
+            width: 100%;
+
+            min-height: 75px;
+
+            background: #071a52;
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            padding: 10px 20px;
+
+            color: #fff;
+
+            z-index: 1000;
+
+            box-shadow: 0 5px 20px rgba(0, 0, 0, .15);
+
+            flex-wrap: wrap;
+
+            gap: 10px;
+
+        }
+
+        .left-header {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 15px;
+
+        }
+
+        .left-header h2 {
+
+            font-size: 20px;
+
+            margin: 0;
+
+        }
+
+        #openSidebar {
+
+            background: none;
+
+            border: none;
+
+            color: white;
+
+            font-size: 24px;
+
+            cursor: pointer;
+
+            padding: 5px;
+
+        }
+
+        .right-header {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+            z-index: 1001;
+
+            margin-left: auto;
+
+        }
+
+        /* Compact Google Translate Box in Header */
+        #google_translate_element {
+
+            background: #ffffff;
+
+            padding: 2px 4px;
+
+            border-radius: 6px;
+
+            display: inline-block;
+
+            max-width: 130px;
+
+            overflow: hidden;
+
+        }
+
+        .goog-te-gadget {
+
+            font-family: Segoe UI, sans-serif !important;
+
+            font-size: 11px !important;
+
+            color: transparent !important;
+
+        }
+
+        .goog-te-gadget .goog-te-combo {
+
+            padding: 4px 6px;
+
+            border-radius: 4px;
+
+            border: 1px solid #0b63ce;
+
+            font-size: 11px;
+
+            cursor: pointer;
+
+            outline: none;
+
+            background: #fff;
+
+            color: #333;
+
+            width: 100%;
+
+            max-width: 120px;
+
+        }
+
+        .goog-logo-link,
+        .goog-te-gadget span,
+        .goog-te-gadget-icon {
+
+            display: none !important;
+
+        }
+
+        /*======================================
+WELCOME
+======================================*/
+
+        .welcome-section {
+
+            padding: 30px 8% 10px;
+
+        }
+
+        .welcome-section h2 {
+
+            font-size: 32px;
+
+            color: #071a52;
+
+            margin-bottom: 10px;
+
+        }
+
+        .welcome-section p {
+
+            font-size: 17px;
+
+            color: #666;
+
+        }
+
+        /*======================================
+ACCOUNT CARD & EYE ICON
+======================================*/
+
+        .account-card {
+
+            padding: 20px 8%;
+
+            display: grid;
+
+            grid-template-columns: 2fr 1fr;
+
+            gap: 30px;
+
+        }
+
+        .balance-card {
+
+            position: relative;
+
+            background: linear-gradient(135deg, #071a52, #0b63ce);
+
+            padding: 35px;
+
+            border-radius: 20px;
+
+            color: white;
+
+            box-shadow: 0 20px 40px rgba(0, 0, 0, .15);
+
+        }
+
+        /* ATM Golden EMV Chip - Top Right Position */
+        .card-chip {
+
+            width: 48px;
+
+            height: 36px;
+
+            background: linear-gradient(135deg, #ffe066 0%, #d4af37 50%, #aa7c11 100%);
+
+            border-radius: 8px;
+
+            position: absolute;
+
+            top: 30px;
+
+            right: 30px;
+
+            border: 1px solid #996e00;
+
+            box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.3);
+
+            overflow: hidden;
+
+        }
+
+        .card-chip::before {
+
+            content: '';
+
+            position: absolute;
+
+            top: 50%;
+
+            left: 0;
+
+            width: 100%;
+
+            height: 1px;
+
+            background: rgba(0, 0, 0, 0.3);
+
+            transform: translateY(-50%);
+
+        }
+
+        .card-chip::after {
+
+            content: '';
+
+            position: absolute;
+
+            left: 50%;
+
+            top: 0;
+
+            width: 1px;
+
+            height: 100%;
+
+            background: rgba(0, 0, 0, 0.3);
+
+            transform: translateX(-50%);
+
+        }
+
+        .card-chip-inner {
+
+            position: absolute;
+
+            top: 8px;
+
+            left: 8px;
+
+            right: 8px;
+
+            bottom: 8px;
+
+            border: 1px solid rgba(0, 0, 0, 0.25);
+
+            border-radius: 4px;
+
+            pointer-events: none;
+
+        }
+
+        /* Account & Name Details */
+        .card-details-top-left {
+
+            margin-bottom: 20px;
+
+            text-align: left;
+
+        }
+
+        .card-acc-number {
+
+            font-size: 16px;
+
+            font-weight: 600;
+
+            letter-spacing: 1.2px;
+
+            margin-bottom: 4px;
+
+            color: #e0e9f8;
+
+        }
+
+        .card-holder-name {
+
+            font-size: 15px;
+
+            font-weight: 700;
+
+            text-transform: uppercase;
+
+            letter-spacing: 1px;
+
+            color: #ffffff;
+
+        }
+
+        .balance-card h4 {
+
+            font-size: 14px;
+
+            margin-bottom: 8px;
+
+            opacity: 0.9;
+
+        }
+
+        .balance-amount-wrapper {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+            margin-bottom: 20px;
+
+            flex-wrap: wrap;
+
+        }
+
+        /* Reduced Balance Size */
+        .balance-card h1 {
+
+            font-size: 28px;
+
+            margin: 0;
+
+            font-weight: 700;
+
+        }
+
+        /* Reduced & Thinner Eye Toggle Button */
+        .toggle-balance-btn {
+
+            background: rgba(255, 255, 255, 0.15);
+
+            border: none;
+
+            color: #fff;
+
+            font-size: 14px;
+
+            width: 32px;
+
+            height: 32px;
+
+            padding: 0;
+
+            border-radius: 50%;
+
+            cursor: pointer;
+
+            transition: 0.3s;
+
+            display: inline-flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+        }
+
+        .toggle-balance-btn:hover {
+
+            background: rgba(255, 255, 255, 0.3);
+
+        }
+
+        .balance-time {
+
+            margin-bottom: 15px;
+
+            font-size: 13px;
+
+        }
+
+        .active {
+
+            background: #19b5fe;
+
+            padding: 4px 12px;
+
+            border-radius: 30px;
+
+            font-size: 13px;
+
+        }
+
+        .quick-buttons {
+
+            display: flex;
+
+            flex-direction: column;
+
+            gap: 20px;
+
+        }
+
+        .quick-buttons button,
+        .quick-buttons a.quick-link-btn {
+
+            padding: 20px;
+
+            border: none;
+
+            border-radius: 15px;
+
+            background: white;
+
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .08);
+
+            font-size: 17px;
+
+            cursor: pointer;
+
+            transition: .3s;
+
+            display: block;
+
+            text-align: center;
+
+            text-decoration: none;
+
+            color: inherit;
+
+        }
+
+        .quick-buttons button:hover,
+        .quick-buttons a.quick-link-btn:hover {
+
+            background: #071a52;
+
+            color: white;
+
+        }
+
+        .quick-buttons i {
+
+            margin-right: 10px;
+
+        }
+
+        /*======================================
+SIDEBAR
+======================================*/
+
+        .sidebar {
+
+            position: fixed;
+
+            left: -280px;
+
+            top: 0;
+
+            width: 280px;
+
+            height: 100vh;
+
+            background: #071a52;
+
+            color: white;
+
+            transition: .4s;
+
+            z-index: 99999;
+
+            overflow-y: auto;
+
+            box-shadow: 5px 0 25px rgba(0, 0, 0, 0.3);
+
+        }
+
+        .showSidebar {
+
+            left: 0;
+
+        }
+
+        .sidebar-header {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            padding: 20px;
+
+            border-bottom: 1px solid rgba(255, 255, 255, .15);
+
+        }
+
+        .sidebar ul {
+
+            padding: 15px;
+
+            margin: 0;
+
+            list-style: none;
+
+        }
+
+        .sidebar li {
+
+            margin-bottom: 10px;
+
+        }
+
+        .sidebar a {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 12px;
+
+            color: white;
+
+            padding: 12px;
+
+            border-radius: 8px;
+
+            transition: .3s;
+
+            text-decoration: none;
+
+            font-size: 15px;
+
+        }
+
+        .sidebar a:hover {
+
+            background: #0b63ce;
+
+        }
+
+        .sidebar i {
+
+            width: 20px;
+
+            text-align: center;
+
+        }
+
+        #closeSidebar {
+
+            background: none;
+
+            border: none;
+
+            color: white;
+
+            font-size: 22px;
+
+            cursor: pointer;
+
+        }
+
+        /* Overlay behind the sidebar so tapping outside it closes it */
+        .sidebar-overlay {
+
+            position: fixed;
+
+            inset: 0;
+
+            background: rgba(0, 0, 0, .35);
+
+            z-index: 99998;
+
+            display: none;
+
+        }
+
+        .sidebar-overlay.show {
+
+            display: block;
+
+        }
+
+        /*======================================
+RECENT ACTIVITY
+======================================*/
+
+        .recent-activity {
+
+            padding: 20px 8%;
+
+        }
+
+        .recent-activity h2 {
+
+            color: #071a52;
+
+            margin-bottom: 20px;
+
+        }
+
+        .activity-card {
+
+            background: #fff;
+
+            padding: 25px;
+
+            border-radius: 15px;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 20px;
+
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .08);
+
+            margin-bottom: 30px;
+
+        }
+
+        .activity-card i {
+
+            font-size: 35px;
+
+            color: #0b63ce;
+
+        }
+
+        .activity-card h4 {
+
+            margin-bottom: 8px;
+
+            color: #071a52;
+
+        }
+
+        .activity-card p {
+
+            color: #666;
+
+        }
+
+        /*======================================
+QUICK ACTIONS
+======================================*/
+
+        .quick-actions {
+
+            padding: 20px 8%;
+
+        }
+
+        .quick-actions h2 {
+
+            margin-bottom: 20px;
+
+            color: #071a52;
+
+        }
+
+        .action-grid {
+
+            display: grid;
+
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+
+            gap: 20px;
+
+        }
+
+        .action-card {
+
+            background: #fff;
+
+            padding: 30px;
+
+            border-radius: 15px;
+
+            text-align: center;
+
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .08);
+
+            transition: .3s;
+
+            cursor: pointer;
+
+            text-decoration: none;
+
+            color: inherit;
+
+            display: block;
+
+        }
+
+        .action-card:hover {
+
+            transform: translateY(-8px);
+
+            background: #071a52;
+
+            color: #fff;
+
+        }
+
+        .action-card i {
+
+            font-size: 36px;
+
+            color: #0b63ce;
+
+            margin-bottom: 15px;
+
+        }
+
+        .action-card:hover i {
+
+            color: #fff;
+
+        }
+
+        /*======================================
+NOTIFICATIONS
+======================================*/
+
+        .notifications {
+
+            padding: 20px 8%;
+
+        }
+
+        .notifications h2 {
+
+            margin-bottom: 20px;
+
+            color: #071a52;
+
+        }
+
+        .notification-card {
+
+            background: #fff;
+
+            padding: 25px;
+
+            display: flex;
+
+            gap: 20px;
+
+            align-items: center;
+
+            border-radius: 15px;
+
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .08);
+
+        }
+
+        .notification-card i {
+
+            font-size: 35px;
+
+            color: #f7b500;
+
+        }
+
+        /*======================================
+EXCHANGE RATE
+======================================*/
+
+        .exchange-rates {
+
+            padding: 20px 8%;
+
+        }
+
+        .exchange-rates h2 {
+
+            margin-bottom: 20px;
+
+            color: #071a52;
+
+        }
+
+        .rate-grid {
+
+            display: grid;
+
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+
+            gap: 20px;
+
+        }
+
+        .rate-card {
+
+            background: white;
+
+            padding: 25px;
+
+            text-align: center;
+
+            border-radius: 15px;
+
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .08);
+
+            transition: .3s;
+
+        }
+
+        .rate-card:hover {
+
+            background: #0b63ce;
+
+            color: white;
+
+            transform: translateY(-8px);
+
+        }
+
+        /*======================================
+ADDITIONAL HOME VIEW STYLES
+======================================*/
+
+        .analytics-summary {
+
+            padding: 10px 8% 20px;
+
+        }
+
+        .analytics-grid {
+
+            display: grid;
+
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+
+            gap: 20px;
+
+        }
+
+        .analytics-card {
+
+            background: #fff;
+
+            padding: 20px;
+
+            border-radius: 15px;
+
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .08);
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 15px;
+
+        }
+
+        .analytics-icon {
+
+            width: 50px;
+
+            height: 50px;
+
+            border-radius: 12px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            font-size: 22px;
+
+        }
+
+        .analytics-icon.income {
+
+            background: #e6f9f0;
+
+            color: #10b981;
+
+        }
+
+        .analytics-icon.expenses {
+
+            background: #fef2f2;
+
+            color: #ef4444;
+
+        }
+
+        .analytics-icon.savings {
+
+            background: #eff6ff;
+
+            color: #3b82f6;
+
+        }
+
+        .analytics-info h5 {
+
+            margin: 0 0 5px 0;
+
+            color: #666;
+
+            font-size: 13px;
+
+            text-transform: uppercase;
+
+        }
+
+        .analytics-info h3 {
+
+            margin: 0;
+
+            color: #071a52;
+
+            font-size: 20px;
+
+        }
+
+        .savings-goals {
+
+            padding: 20px 8%;
+
+        }
+
+        .savings-goals h2 {
+
+            margin-bottom: 20px;
+
+            color: #071a52;
+
+        }
+
+        .goals-grid {
+
+            display: grid;
+
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+
+            gap: 20px;
+
+        }
+
+        .goal-card {
+
+            background: #fff;
+
+            padding: 20px;
+
+            border-radius: 15px;
+
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .08);
+
+        }
+
+        .goal-header {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            margin-bottom: 12px;
+
+        }
+
+        .goal-header h4 {
+
+            margin: 0;
+
+            color: #071a52;
+
+        }
+
+        .goal-header span {
+
+            font-size: 12px;
+
+            color: #0b63ce;
+
+            font-weight: 600;
+
+        }
+
+        .progress-bar-container {
+
+            background: #e2e8f0;
+
+            border-radius: 10px;
+
+            height: 10px;
+
+            overflow: hidden;
+
+            margin-bottom: 8px;
+
+        }
+
+        .progress-bar-fill {
+
+            background: linear-gradient(90deg, #0b63ce, #19b5fe);
+
+            height: 100%;
+
+            border-radius: 10px;
+
+        }
+
+        .goal-footer {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            font-size: 13px;
+
+            color: #666;
+
+        }
+
+        /*======================================
+CUSTOMER SERVICE
+======================================*/
+
+        .customer-service {
+
+            position: fixed;
+
+            right: 25px;
+
+            bottom: 25px;
+
+            background: #071a52;
+
+            color: #fff;
+
+            padding: 12px 18px;
+
+            border-radius: 999px;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 8px;
+
+            font-size: 14px;
+
+            font-weight: 600;
+
+            cursor: pointer;
+
+            box-shadow: 0 8px 20px rgba(7, 26, 82, .25);
+
+            z-index: 2999;
+
+            transition: transform .15s, background .15s;
+
+        }
+
+        .customer-service:hover {
+
+            background: #0b63ce;
+
+            transform: translateY(-2px);
+
+        }
+
+        #customerPopup {
+
+            position: fixed;
+
+            right: 25px;
+
+            bottom: 100px;
+
+            width: 360px;
+
+            max-width: 90vw;
+
+            background: #fff;
+
+            border-radius: 15px;
+
+            overflow: hidden;
+
+            display: none;
+
+            flex-direction: column;
+
+            box-shadow: 0 20px 40px rgba(0, 0, 0, .18);
+
+            z-index: 3000;
+
+        }
+
+        .popup-header {
+
+            background: #071a52;
+
+            color: #fff;
+
+            padding: 15px 20px;
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+        }
+
+        .popup-header h3 {
+
+            font-size: 16px;
+
+            margin: 0;
+
+        }
+
+        #closeChat {
+
+            background: none;
+
+            border: none;
+
+            color: #fff;
+
+            font-size: 18px;
+
+            cursor: pointer;
+
+            transition: opacity .2s;
+
+        }
+
+        #closeChat:hover {
+
+            opacity: 0.8;
+
+        }
+
+        .popup-body {
+
+            height: 320px;
+
+            overflow-y: auto;
+
+            padding: 20px;
+
+            background: #f5f7fb;
+
+        }
+
+        .message {
+
+            padding: 12px 16px;
+
+            border-radius: 12px;
+
+            margin-bottom: 15px;
+
+            max-width: 85%;
+
+        }
+
+        .support {
+
+            background: #071a52;
+
+            color: white;
+
+        }
+
+        .user {
+
+            background: #19b5fe;
+
+            color: white;
+
+            margin-left: auto;
+
+        }
+
+        .popup-footer {
+
+            display: flex;
+
+            padding: 15px;
+
+            gap: 10px;
+
+            background: #fff;
+
+        }
+
+        .popup-footer input {
+
+            flex: 1;
+
+            padding: 12px;
+
+            border: 1px solid #ccc;
+
+            border-radius: 8px;
+
+        }
+
+        .popup-footer button {
+
+            width: 50px;
+
+            background: #0b63ce;
+
+            color: white;
+
+            border: none;
+
+            border-radius: 8px;
+
+            cursor: pointer;
+
+        }
+
+        /*======================================
+FOOTER
+======================================*/
+
+        .dashboard-footer {
+
+            margin-top: 50px;
+
+            background: #071a52;
+
+            color: white;
+
+            text-align: center;
+
+            padding: 20px;
+
+        }
+
+
+
+        /*======================================
+RESPONSIVE
+======================================*/
+
+        @media(max-width:900px) {
+
+            .account-card {
+
+                grid-template-columns: 1fr;
+
+            }
+
+            .dashboard-header {
+
+                padding: 10px 15px;
+
+            }
+
+            .left-header h2 {
+
+                font-size: 16px;
+
+            }
+
+        }
+
+        @media(max-width:600px) {
+
+            .welcome-section h2 {
+
+                font-size: 24px;
+
+            }
+
+            .balance-card h1 {
+
+                font-size: 24px;
+
+            }
+
+            .toggle-balance-btn {
+
+                width: 28px;
+
+                height: 28px;
+
+                font-size: 12px;
+
+            }
+
+            .card-chip {
+
+                top: 20px;
+
+                right: 20px;
+
+                width: 38px;
+
+                height: 28px;
+
+            }
+
+            #customerPopup {
+
+                width: 95%;
+
+                right: 2.5%;
+
+            }
+
+            .action-grid {
+
+                grid-template-columns: 1fr;
+
+            }
+
+            .rate-grid {
+
+                grid-template-columns: 1fr 1fr;
+
+            }
+
+        }
+
+        /*======================================
+SCHEDULED PAYMENTS
+======================================*/
+        .scheduled-payments {
+            padding: 20px 8%;
+        }
+
+        .scheduled-payments h2 {
+            color: #071a52;
+            margin-bottom: 20px;
+        }
+
+        .payments-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .payment-item {
+            background: #fff;
+            padding: 18px 25px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .08);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .payment-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .payment-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            background: #eef2ff;
+            color: #0b63ce;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .payment-details h4 {
+            margin: 0 0 5px 0;
+            color: #071a52;
+        }
+
+        .payment-details p {
+            margin: 0;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .payment-right {
+            text-align: right;
+        }
+
+        .payment-amount {
+            font-weight: 700;
+            color: #071a52;
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .payment-status {
+            font-size: 12px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            background: #fef3c7;
+            color: #d97706;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body class="dashboard-page">
+
+    <!-- ================= HEADER ================= -->
+
+    <header class="dashboard-header">
+
+        <div class="left-header">
+
+            <button id="openSidebar">
+
+                <i class="fas fa-bars"></i>
+
+            </button>
+
+            <h2>
+
+                First Smart Wave Banking
+
+            </h2>
+
+        </div>
+
+        <div class="right-header">
+
+            <!-- Google Translate Widget -->
+            <div id="google_translate_element"></div>
+
+        </div>
+
+    </header>
+
+    <!-- ================= SIDEBAR OVERLAY ================= -->
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+    <!-- ================= WELCOME ================= -->
+
+    <section class="welcome-section">
+
+        <h2 id="welcomeName">
+
+            Welcome Back
+
+        </h2>
+
+        <p>
+
+            Manage your finances securely.
+
+        </p>
+
+    </section>
+
+    <!-- ================= FINANCIAL ANALYTICS SUMMARY ================= -->
+
+
+
+
+
+
+
+
+
+
+    </section>
+
+    <!-- ================= ACCOUNT CARD ================= -->
+
+    <section class="account-card">
+
+        <div class="balance-card">
+
+            <!-- Golden ATM Card EMV Chip (Top Right) -->
+            <div class="card-chip">
+                <div class="card-chip-inner"></div>
+            </div>
+
+            <!-- Account Number & Name -->
+            <div class="card-details-top-left">
+                <div class="card-acc-number" id="dashAccountNumber">Acc: 21*****00</div>
+                <div class="card-holder-name" id="dashAccountName">Feng Harrson</div>
+            </div>
+
+            <h4>
+
+                Available Balance
+
+            </h4>
+
+            <div class="balance-amount-wrapper">
+
+                <h1>
+
+                    <span id="currencySymbol">€</span>
+
+                    <span id="accountBalance">
+
+                        2
+
+                    </span>
+
+                </h1>
+
+                <!-- Reduced & Thinner Eye Toggle Button -->
+                <button id="toggleBalance" class="toggle-balance-btn" title="Toggle Balance Visibility">
+
+                    <i class="far fa-eye" id="eyeIcon"></i>
+
+                </button>
+
+            </div>
+
+
+            <div class="balance-time">
+
+                <i class="fas fa-clock"></i>
+
+                <span id="liveTime"></span>
+
+            </div>
+
+            <p>
+
+                Account Status:
+                <span class="active">
+
+                    Active
+
+                </span>
+
+            </p>
+
+        </div>
+
+        <div class="quick-buttons">
+
+            <a href="/international-transfer" id="quickTransfer" class="quick-link-btn">
+
+                <i class="fas fa-paper-plane"></i>
+
+                Quick Transfer
+
+            </a>
+
+            <a href="/deposit" class="quick-link-btn">
+
+                <i class="fas fa-plus-circle"></i>
+
+                Quick Deposit
+
+            </a>
+
+            <a href="/cards" class="quick-link-btn">
+
+                <i class="fas fa-shield-halved"></i>
+
+                Card Security
+
+            </a>
+
+        </div>
+
+    </section>
+
+    <!-- ================= SIDEBAR ================= -->
+
+    <aside id="sidebar" class="sidebar">
+
+        <div class="sidebar-header">
+
+            <h3>Dashboard Menu</h3>
+
+            <button id="closeSidebar">
+
+                <i class="fas fa-times"></i>
+
+            </button>
+
+        </div>
+
+        <ul>
+
+            <li>
+
+                <a href="/profile">
+
+                    <i class="fas fa-user"></i>
+
+                    Profile
+
+                </a>
+
+            </li>
+
+            <li>
+
+                <a href="/international-transfer" id="internationalTransfer">
+
+                    <i class="fas fa-globe"></i>
+
+                    International Wire Transfer
+
+                </a>
+
+            </li>
+
+            <li>
+
+                <a href="/local-transfer" id="localTransfer">
+
+                    <i class="fas fa-building-columns"></i>
+
+                    Local Transfer
+
+                </a>
+
+            </li>
+
+            <li>
+
+                <a href="/cards" id="bankCards">
+
+                    <i class="fas fa-credit-card"></i>
+
+                    Bank Cards
+
+                </a>
+
+            </li>
+
+            <li>
+
+                <a href="/statement" id="transactionBtn">
+
+                    <i class="fas fa-file-invoice"></i>
+
+                    Transaction Statement
+
+                </a>
+
+            </li>
+
+            <li>
+
+                <a href="/deposit" id="makeDeposit">
+
+                    <i class="fas fa-money-bill-wave"></i>
+
+                    Make Deposit
+
+                </a>
+
+            </li>
+
+            <li>
+
+                <a href="/deposit-history">
+
+                    <i class="fas fa-clock-rotate-left"></i>
+
+                    Deposit History
+
+                </a>
+
+            </li>
+
+
+
+            <li>
+
+                <a href="/settings">
+
+                    <i class="fas fa-cog"></i>
+
+                    <span>Account Settings</span>
+
+                </a>
+
+            </li>
+
+            <li>
+
+                <a href="#" id="logout">
+
+                    <i class="fas fa-right-from-bracket"></i>
+
+                    Logout
+
+                </a>
+
+            </li>
+
+        </ul>
+
+    </aside>
+
+    <!-- ================= RECENT ACTIVITY ================= -->
+
+    <section class="recent-activity">
+
+        <h2>
+
+            Recent Activity
+
+        </h2>
+
+        <!-- ================= SCHEDULED BILLS & AUTO-PAY ================= -->
+        <section class="scheduled-payments">
+            <h2>Upcoming Scheduled Bills</h2>
+            <div class="payments-list">
+                <div class="payment-item">
+                    <div class="payment-left">
+                        <div class="payment-icon"><i class="fas fa-bolt"></i></div>
+                        <div class="payment-details">
+                            <h4>Electric &amp; Utilities Direct Debit</h4>
+                            <p>Scheduled for 3rd of Next Month</p>
+                        </div>
+                    </div>
+                    <div class="payment-right">
+                        <div class="payment-amount">€2,000.80</div>
+                        <span class="payment-status">Auto-Pay Enabled</span>
+                    </div>
+                </div>
+
+                <div class="payment-item">
+                    <div class="payment-left">
+                        <div class="payment-icon"><i class="fas fa-wifi"></i></div>
+                        <div class="payment-details">
+                            <h4>High-Speed Fiber Internet</h4>
+                            <p>Scheduled for 10th of Next Month</p>
+                        </div>
+                    </div>
+                    <div class="payment-right">
+                        <div class="payment-amount">€3,000.99</div>
+                        <span class="payment-status">Auto-Pay Enabled</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+        </div>
+
+    </section>
+
+    <!-- ================= QUICK ACTIONS ================= -->
+
+    <section class="quick-actions">
+
+        <h2>Quick Actions</h2>
+
+        <div class="action-grid">
+
+            <a href="/international-transfer" class="action-card">
+
+                <i class="fas fa-paper-plane"></i>
+
+                <h4>Transfer</h4>
+
+            </a>
+
+            <a href="/deposit" class="action-card">
+
+                <i class="fas fa-money-check-dollar"></i>
+
+                <h4>Deposit</h4>
+
+            </a>
+
+            <a href="/cards" class="action-card">
+
+                <i class="fas fa-credit-card"></i>
+
+                <h4>Cards</h4>
+
+            </a>
+
+            <a href="/statement" class="action-card">
+
+                <i class="fas fa-file-lines"></i>
+
+                <h4>Statement</h4>
+
+            </a>
+
+            <a href="/settings" class="action-card">
+
+                <i class="fas fa-user-shield"></i>
+
+                <h4>Security</h4>
+
+            </a>
+
+            <a href="/profile" class="action-card">
+
+                <i class="fas fa-id-card"></i>
+
+                <h4>My Profile</h4>
+
+            </a>
+
+        </div>
+
+    </section>
+
+    <!-- ================= SAVINGS GOALS ================= -->
+
+    <section class="savings-goals">
+
+        <h2>Savings & Goals</h2>
+
+        <div class="goals-grid">
+
+            <div class="goal-card">
+
+                <div class="goal-header">
+
+                    <h4>Emergency Reserve</h4>
+
+                    <span>75% Target</span>
+
+                </div>
+
+                <div class="progress-bar-container">
+
+                    <div class="progress-bar-fill" style="width: 75%;"></div>
+
+                </div>
+
+                <div class="goal-footer">
+
+                    <span>Saved: €15,000</span>
+
+                    <span>Goal: €20,000</span>
+
+                </div>
+
+            </div>
+
+            <div class="goal-card">
+
+                <div class="goal-header">
+
+                    <h4>Investment Vault</h4>
+
+                    <span>40% Target</span>
+
+                </div>
+
+                <div class="progress-bar-container">
+
+                    <div class="progress-bar-fill" style="width: 40%;"></div>
+
+                </div>
+
+                <div class="goal-footer">
+
+                    <span>Saved: €20,000</span>
+
+                    <span>Goal: €50,000</span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- ================= NOTIFICATIONS ================= -->
+
+    <section class="notifications">
+
+        <h2>Notifications</h2>
+
+        <div class="notification-card">
+
+            <i class="fas fa-bell"></i>
+
+            <div>
+
+                <h4>No New Notifications</h4>
+
+                <p>Your latest banking notifications will appear here.</p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- ================= EXCHANGE RATES ================= -->
+
+    <section class="exchange-rates">
+
+        <h2>Exchange Rates</h2>
+
+        <div class="rate-grid">
+
+            <div class="rate-card">
+
+                <h3>USD</h3>
+
+                <p>$1.00</p>
+
+            </div>
+
+            <div class="rate-card">
+
+                <h3>EUR</h3>
+
+                <p>€0.92</p>
+
+            </div>
+
+            <div class="rate-card">
+
+                <h3>GBP</h3>
+
+                <p>£0.79</p>
+
+            </div>
+
+            <div class="rate-card">
+
+                <h3>CAD</h3>
+
+                <p>C$1.36</p>
+
+            </div>
+
+            <div class="rate-card">
+
+                <h3>JPY</h3>
+
+                <p>¥155.20</p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- ================= CUSTOMER SERVICE ================= -->
+
+    <div class="customer-service" id="customerIcon">
+
+        <i class="fas fa-headset"></i>
+
+        <span>Customer Service</span>
+
+    </div>
+
+    <div id="customerPopup">
+
+        <div class="popup-header">
+
+            <h3>Customer Service</h3>
+
+            <button id="closeChat">
+
+                <i class="fas fa-times"></i>
+
+            </button>
+
+        </div>
+
+        <div class="popup-body" id="chatMessages">
+
+            <div class="message support">
+
+                Hello 👋<br>
+                Welcome to First Smart Wave Banking.
+
+            </div>
+
+            <div class="message support">
+
+                How may we assist you today?
+
+            </div>
+
+        </div>
+
+        <div class="popup-footer">
+
+            <input type="text" id="chatInput" placeholder="Type your message...">
+
+
+            <label style="cursor:pointer;">
+                <i class="fas fa-image"></i>
+
+                <input type="file" accept="image/*" hidden onchange="sendCustomerImage(event)">
+
+            </label>
+
+
+            <button id="sendMessage">
+
+                <i class="fas fa-paper-plane"></i>
+
+            </button>
+
+
+        </div>
+
+    </div>
+
+    <!-- ================= FOOTER ================= -->
+
+    <footer class="dashboard-footer">
+
+        <p>
+
+            © First Smart Wave Banking
+
+        </p>
+
+    </footer>
+
+    <!-- ================= JAVASCRIPT ================= -->
+
+    <script src="/fsw-shared.js"></script>
+    <script>
+        if (!fswIsLoggedIn()) { window.location.replace('/login'); }
+        else if (sessionStorage.getItem('fsw_pin_ok') !== '1') { window.location.replace('/pin'); }
+    </script>
+    <script>
+
+        // Balance Setup & Eye Icon Toggle Logic
+        const balanceDisplay = document.getElementById("accountBalance");
+
+        let actualBalance = 0;
+
+        let isBalanceVisible = true;
+
+        (async function () {
+            const user = await fswApplyDashboard();
+            if (user) {
+                actualBalance = user.balance;
+                try {
+                    const g = user.goals || {};
+                    const fills = document.querySelectorAll('.progress-bar-fill');
+                    const footers = document.querySelectorAll('.goal-footer');
+                    const headers = document.querySelectorAll('.goal-header span');
+                    if (fills[0]) fills[0].style.width = (g.emergencyPct || 75) + '%';
+                    if (fills[1]) fills[1].style.width = (g.investmentPct || 40) + '%';
+                    if (headers[0]) headers[0].textContent = (g.emergencyPct || 75) + '% Target';
+                    if (headers[1]) headers[1].textContent = (g.investmentPct || 40) + '% Target';
+                    if (footers[0]) footers[0].innerHTML = '<span>Saved: ' + fswFormatMoney(g.emergencySaved || 15000, user.currency) + '</span><span>Goal: ' + fswFormatMoney(g.emergencyTarget || 20000, user.currency) + '</span>';
+                    if (footers[1]) footers[1].innerHTML = '<span>Saved: ' + fswFormatMoney(g.investmentSaved || 20000, user.currency) + '</span><span>Goal: ' + fswFormatMoney(g.investmentTarget || 50000, user.currency) + '</span>';
+                } catch (e) { }
+            }
+        })();
+
+        fswInitChatWidget({
+            icon: 'customerIcon', popup: 'customerPopup', messages: 'chatMessages',
+            input: 'chatInput', send: 'sendMessage', close: 'closeChat', openDisplay: 'flex'
+        });
+
+        const toggleBtn = document.getElementById("toggleBalance");
+
+        const eyeIcon = document.getElementById("eyeIcon");
+
+        if (toggleBtn && balanceDisplay) {
+
+            toggleBtn.addEventListener("click", function () {
+
+                if (isBalanceVisible) {
+
+                    balanceDisplay.textContent = "••••••";
+
+                    eyeIcon.classList.remove("fa-eye");
+
+                    eyeIcon.classList.add("fa-eye-slash");
+
+                    isBalanceVisible = false;
+
+                } else {
+
+                    balanceDisplay.textContent = actualBalance.toLocaleString();
+
+                    eyeIcon.classList.remove("fa-eye-slash");
+
+                    eyeIcon.classList.add("fa-eye");
+
+                    isBalanceVisible = true;
+
+                }
+
+            });
+
+        }
+
+        // Live clock — reflects this device's own local time, ticks every second
+        function updateLiveTime() {
+            const el = document.getElementById('liveTime');
+            if (el) {
+                el.textContent = new Date().toLocaleTimeString(undefined, {
+                    hour: '2-digit', minute: '2-digit', second: '2-digit'
+                });
+            }
+        }
+        updateLiveTime();
+        setInterval(updateLiveTime, 1000);
+
+        // Hidden sidebar nav — open/close toggle
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const openSidebarBtn = document.getElementById('openSidebar');
+        const closeSidebarBtn = document.getElementById('closeSidebar');
+
+        function openSidebar() {
+            sidebar.classList.add('showSidebar');
+            sidebarOverlay.classList.add('show');
+        }
+        function closeSidebar() {
+            sidebar.classList.remove('showSidebar');
+            sidebarOverlay.classList.remove('show');
+        }
+        if (openSidebarBtn) openSidebarBtn.addEventListener('click', openSidebar);
+        if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', closeSidebar);
+        if (sidebarOverlay) sidebarOverlay.addEventListener('click', closeSidebar);
+
+        document.getElementById('logout')?.addEventListener('click', function (e) {
+            e.preventDefault();
+            try { sessionStorage.removeItem('fsw_pin_ok'); } catch (e) { }
+            fswLogout();
+        });
+    </script>
+
+    <!-- Google Translate Script Initialization -->
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'en',
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+                autoDisplay: false
+            }, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript"
+        src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+    <script src="/script.js"></script>
+
+</body>
+
+</html>

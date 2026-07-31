@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication PIN | First Smart Wave Banking</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary-color: #0d233a;
+            --secondary-color: #0066cc;
+            --error-color: #e74c3c;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0d233a 0%, #1a3a5c 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .pin-container {
+            width: 100%;
+            max-width: 440px;
+        }
+
+        .pin-card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+        }
+
+        .pin-logo {
+            background-color: var(--primary-color);
+            color: #ffffff;
+            padding: 25px 20px;
+            text-align: center;
+        }
+
+        .logo-icon {
+            background: var(--secondary-color);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px auto;
+            font-weight: bold;
+            font-size: 1.4rem;
+            color: #ffffff;
+        }
+
+        .pin-logo h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .pin-logo p {
+            color: #a0b2c6;
+            font-size: 0.85rem;
+        }
+
+        .pin-security {
+            padding: 20px 25px 10px 25px;
+            text-align: center;
+        }
+
+        .pin-security i {
+            font-size: 2rem;
+            color: var(--secondary-color);
+            margin-bottom: 10px;
+        }
+
+        .pin-security h3 {
+            font-size: 1.1rem;
+            margin-bottom: 6px;
+        }
+
+        .pin-security p {
+            font-size: 0.85rem;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        #pinForm {
+            padding: 15px 25px 25px 25px;
+        }
+
+        .pin-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .pin-wrapper input {
+            width: 100%;
+            padding: 14px;
+            border: 1.5px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 1.4rem;
+            letter-spacing: 12px;
+            text-align: center;
+            outline: none;
+        }
+
+        .pin-wrapper input:focus {
+            border-color: var(--secondary-color);
+        }
+
+        .pin-wrapper button {
+            position: absolute;
+            right: 12px;
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+
+        .error-message {
+            background-color: #fceae9;
+            color: var(--error-color);
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: 1px solid #f5c6cb;
+        }
+
+        .pin-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .cancel-btn,
+        .continue-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+        }
+
+        .cancel-btn {
+            background-color: #f1f3f5;
+            color: #333;
+        }
+
+        .continue-btn {
+            background-color: var(--secondary-color);
+            color: #ffffff;
+        }
+
+        .continue-btn:hover {
+            background-color: #0052a3;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="pin-container">
+        <div class="pin-card">
+            <div class="pin-logo">
+                <div class="logo-icon">FSW</div>
+                <h2>First Smart Wave Banking</h2>
+                <p>Authentication Verification</p>
+            </div>
+
+            <div class="pin-security">
+                <i class="fas fa-user-lock"></i>
+                <h3>Authentication Required</h3>
+                <p>Please enter your 4-digit Authentication PIN to access your dashboard.</p>
+            </div>
+
+            <form id="pinForm">
+                <div id="errorBanner" class="error-message">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span id="errorText">Invalid PIN code.</span>
+                </div>
+
+                <div class="pin-input-box">
+                    <div class="pin-wrapper">
+                        <input type="password" id="pinInput" maxlength="4" placeholder="••••" required
+                            autocomplete="off">
+                        <button type="button" id="togglePin"><i class="fas fa-eye"></i></button>
+                    </div>
+                </div>
+
+                <div class="pin-buttons">
+                    <button type="button" class="cancel-btn" onclick="window.location.href='/login'">Cancel</button>
+                    <button type="submit" class="continue-btn">Continue</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/fsw-shared.js"></script>
+    <script>
+        if (!fswIsLoggedIn()) { window.location.replace('/login'); }
+        const pinInput = document.getElementById("pinInput");
+        const togglePin = document.getElementById("togglePin");
+        const pinForm = document.getElementById("pinForm");
+        const errorBanner = document.getElementById("errorBanner");
+        const errorText = document.getElementById("errorText");
+
+        if (togglePin) {
+            togglePin.addEventListener("click", () => {
+                const type = pinInput.getAttribute("type") === "password" ? "text" : "password";
+                pinInput.setAttribute("type", type);
+                togglePin.innerHTML = type === "password" ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+            });
+        }
+        pinInput.addEventListener("input", () => {
+            pinInput.value = pinInput.value.replace(/[^0-9]/g, "");
+            errorBanner.style.display = 'none';
+        });
+        pinForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const enteredPin = pinInput.value;
+            if (enteredPin.length !== 4) {
+                errorText.innerText = "Enter a 4-digit PIN.";
+                errorBanner.style.display = 'flex';
+                return;
+            }
+            const submitBtn = pinForm.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            try {
+                const userId = fswSessionGet(FSW_SESSION_KEYS.userId);
+                if (!userId) throw new Error('Session expired. Please login again.');
+                const res = await fetch(FSW_API_BASE + '/auth/verify-pin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId, pin: enteredPin }),
+                });
+                const data = await res.json();
+                if (res.ok && data.valid === true) {
+                    sessionStorage.setItem('fsw_pin_ok', '1');
+                    window.location.href = '/dashboard';
+                    return;
+                }
+                throw new Error('Invalid Authentication PIN.');
+            } catch (err) {
+                errorText.innerText = err.message === 'Failed to fetch'
+                    ? "Can't reach the backend — start the server (node server.js)."
+                    : err.message;
+                errorBanner.style.display = 'flex';
+                pinInput.value = "";
+                pinInput.focus();
+            } finally {
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+
+</html>

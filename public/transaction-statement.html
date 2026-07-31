@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction Statement | First Smart Wave Banking</title>
+
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #f4f7fc;
+            font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dashboard-header {
+            background: #071a52;
+            color: #fff;
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .dashboard-header h2 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .dashboard-header a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 22px;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .statement-container {
+            width: 90%;
+            max-width: 900px;
+            margin: 30px auto;
+            flex: 1;
+        }
+
+        .statement-card {
+            background: #fff;
+            border-radius: 18px;
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, .1);
+        }
+
+        .statement-card h2 {
+            color: #071a52;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+
+        .security-box {
+            margin: 25px 0;
+            background: #fff8e6;
+            border-left: 6px solid #f7b500;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .security-box h3 {
+            color: #b36b00;
+            margin-top: 0;
+            font-size: 18px;
+        }
+
+        .security-box p {
+            color: #555;
+            line-height: 1.6;
+            font-size: 15px;
+            margin-bottom: 10px;
+        }
+
+        .security-box p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* --- Responsive Table Wrapper --- */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-top: 25px;
+        }
+
+        .blocked-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 500px;
+            /* Ensures table doesn't crush columns on mobile */
+        }
+
+        .blocked-table th {
+            background: #071a52;
+            color: #fff;
+            padding: 14px 12px;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .blocked-table td {
+            padding: 14px 12px;
+            text-align: center;
+            background: #f5f5f5;
+            color: #888;
+            border-bottom: 1px solid #ddd;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .status {
+            color: red;
+            font-weight: bold;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 35px;
+            flex-wrap: wrap;
+        }
+
+        .buttons a,
+        .buttons button {
+            flex: 1;
+            min-width: 200px;
+            text-align: center;
+            text-decoration: none;
+            padding: 14px;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            font-size: 15px;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: opacity 0.2s;
+        }
+
+        .buttons a:hover,
+        .buttons button:hover {
+            opacity: 0.9;
+        }
+
+        .support-btn {
+            background: #0b63ce;
+        }
+
+        .back-btn {
+            background: #071a52;
+        }
+
+        .dashboard-footer {
+            margin-top: 40px;
+            background: #071a52;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 14px;
+        }
+
+        /* --- Customer Chat Popup --- */
+        #customerPopup {
+            position: fixed;
+            right: 25px;
+            bottom: 25px;
+            width: 360px;
+            max-width: 100%;
+            background: #fff;
+            border-radius: 15px;
+            overflow: hidden;
+            display: none;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, .2);
+            z-index: 3000;
+        }
+
+        .popup-header {
+            background: #071a52;
+            color: #fff;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .popup-header h3 {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .popup-header button {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .popup-body {
+            height: 300px;
+            max-height: 50vh;
+            overflow-y: auto;
+            padding: 15px;
+            background: #f5f7fb;
+        }
+
+        .message {
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            max-width: 85%;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .support {
+            background: #071a52;
+            color: #fff;
+            border-top-left-radius: 2px;
+        }
+
+        .user {
+            background: #0b63ce;
+            color: #fff;
+            margin-left: auto;
+            border-top-right-radius: 2px;
+        }
+
+        .popup-footer {
+            display: flex;
+            gap: 10px;
+            padding: 12px;
+            background: #fff;
+            border-top: 1px solid #eee;
+        }
+
+        .popup-footer input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .popup-footer button {
+            width: 45px;
+            border: none;
+            background: #0b63ce;
+            color: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* --- Media Queries for Mobile Responsiveness --- */
+        @media (max-width: 768px) {
+            .statement-container {
+                width: 95%;
+                margin: 20px auto;
+            }
+
+            .statement-card {
+                padding: 20px;
+            }
+
+            .statement-card h2 {
+                font-size: 20px;
+            }
+
+            .security-box {
+                padding: 15px;
+            }
+
+            .buttons {
+                flex-direction: column;
+            }
+
+            .buttons a,
+            .buttons button {
+                width: 100%;
+            }
+
+            #customerPopup {
+                right: 0;
+                bottom: 0;
+                width: 100%;
+                border-radius: 15px 15px 0 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="dashboard-header">
+        <a href="/dashboard" title="Back to Dashboard">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <h2>Transaction Statement</h2>
+    </header>
+
+    <div class="statement-container">
+        <div class="statement-card">
+
+            <h2><i class="fas fa-file-invoice"></i> Transaction Statement</h2>
+
+            <p>Your transaction history is currently unavailable.</p>
+
+            <div class="security-box">
+                <h3>
+                    <i class="fas fa-shield-alt"></i>
+                    Security Verification Required
+                </h3>
+                <p>
+                    For your protection, transaction statements cannot be displayed because this account was recently
+                    accessed from a different region.
+                </p>
+                <p>
+                    Our fraud prevention system has temporarily restricted access while your login location is being
+                    verified.
+                </p>
+                <p>
+                    <strong>Status:</strong> Pending Verification
+                </p>
+            </div>
+
+            <!-- Table wrapped in scrollable container -->
+            <div class="table-responsive">
+                <table class="blocked-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Reference</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><i class="fas fa-lock"></i> Protected</td>
+                            <td>********</td>
+                            <td>********</td>
+                            <td>*****</td>
+                            <td class="status">Blocked</td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-lock"></i> Protected</td>
+                            <td>********</td>
+                            <td>********</td>
+                            <td>*****</td>
+                            <td class="status">Blocked</td>
+                        </tr>
+                        <tr>
+                            <td><i class="fas fa-lock"></i> Protected</td>
+                            <td>********</td>
+                            <td>********</td>
+                            <td>*****</td>
+                            <td class="status">Blocked</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="buttons">
+                <button class="support-btn" id="customerService">
+                    <i class="fas fa-headset"></i>
+                    Contact Customer Service
+                </button>
+                <a href="/dashboard" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Dashboard
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Customer Chat Popup -->
+    <!-- Customer Service Chat -->
+
+    <div id="customerPopup">
+
+        <div class="popup-header">
+
+            <h3>
+                <i class="fas fa-headset"></i>
+                Customer Service
+            </h3>
+
+            <button id="closeChat">
+                <i class="fas fa-times"></i>
+            </button>
+
+        </div>
+
+
+        <div class="popup-body" id="chatMessages">
+
+            <div class="message support">
+                Hello 👋
+                <br>
+                Welcome to First Smart Wave Banking.
+            </div>
+
+            <div class="message support">
+                How may we help you today?
+            </div>
+
+        </div>
+
+
+
+        <div class="popup-footer">
+
+
+            <input type="text" id="chatInput" placeholder="Type your message...">
+
+
+            <label class="image-btn">
+
+                <i class="fas fa-image"></i>
+
+                <input type="file" accept="image/*" hidden onchange="sendCustomerImage(event)">
+
+            </label>
+
+
+
+            <button id="sendMessage">
+
+                <i class="fas fa-paper-plane"></i>
+
+            </button>
+
+
+        </div>
+
+    </div>
+    <footer class="dashboard-footer">
+        <p>© First Smart Wave Banking. All Rights Reserved.</p>
+    </footer>
+    <script src="/fsw-shared.js"></script>
+    <script>if (!fswRequireAuth()) { }</script>
+    <script>
+        fswInitChatWidget({
+            icon: 'customerService', popup: 'customerPopup', messages: 'chatMessages',
+            input: 'chatInput', send: 'sendMessage', close: 'closeChat'
+        });
+    </script>
+
+
+    <script src="/script.js"></script>
+
+</body>
+
+</html>

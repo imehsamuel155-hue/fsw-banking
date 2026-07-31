@@ -1,0 +1,1330 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Board | First Smart Wave Banking</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        html,
+        body {
+            width: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            background: #f4f7fc;
+            color: #1a202c;
+        }
+
+        img {
+            max-width: 100%;
+        }
+
+        .dashboard-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: #071a52;
+            color: #fff;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, .15);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .left-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .left-header h2 {
+            font-size: 18px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .back-btn {
+            color: #fff;
+            font-size: 20px;
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+
+        .back-btn:hover {
+            color: #f7b500;
+        }
+
+        .badge-admin {
+            background: #f7b500;
+            color: #071a52;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 9px;
+            border-radius: 999px;
+            letter-spacing: .04em;
+            flex-shrink: 0;
+        }
+
+        .wrap {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 20px 16px 80px;
+        }
+
+        .panel {
+            background: #fff;
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 2px 10px rgba(7, 26, 82, .06);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        @media (min-width: 600px) {
+            .panel {
+                padding: 22px;
+            }
+        }
+
+        .panel h3 {
+            font-size: 15px;
+            margin-bottom: 14px;
+            color: #071a52;
+            word-break: break-word;
+        }
+
+        .field {
+            margin-bottom: 14px;
+            min-width: 0;
+        }
+
+        .field label {
+            display: block;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #4a5568;
+            margin-bottom: 5px;
+        }
+
+        .field input,
+        .field select,
+        .field textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #dbe1ea;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .field input:focus,
+        .field select:focus {
+            outline: none;
+            border-color: #0b63ce;
+        }
+
+        .field-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        @media (max-width: 560px) {
+            .field-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 16px;
+            border-radius: 8px;
+            border: none;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            word-break: break-word;
+        }
+
+        .btn-primary {
+            background: #0b63ce;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #094ea3;
+        }
+
+        .btn-gold {
+            background: #f7b500;
+            color: #071a52;
+        }
+
+        .btn-gold:hover {
+            background: #d4af37;
+        }
+
+        .btn-ghost {
+            background: #eef2f8;
+            color: #071a52;
+        }
+
+        .btn-danger {
+            background: #fbe4e0;
+            color: #a6432b;
+        }
+
+        .btn-danger:hover {
+            background: #a6432b;
+            color: #fff;
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12.5px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 18px;
+            border-bottom: 1px solid #e6ebf3;
+            flex-wrap: wrap;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 10px 14px;
+            font-size: 13.5px;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            white-space: nowrap;
+        }
+
+        .tab-btn.active {
+            color: #071a52;
+            border-color: #f7b500;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        .photo-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+
+        .photo-row img {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #eee;
+            border: 2px solid #eef2f8;
+            flex-shrink: 0;
+        }
+
+        .bank-card {
+            border-radius: 16px;
+            padding: 20px;
+            color: #fff;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 16px;
+            min-height: 160px;
+            word-break: break-word;
+        }
+
+        .bank-card.savings-card {
+            background: linear-gradient(135deg, #071a52, #0b63ce);
+        }
+
+        .bank-card.current-card {
+            background: linear-gradient(135deg, #14532d, #16a34a);
+        }
+
+        .card-top-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 16px;
+            font-weight: 700;
+            font-size: 13.5px;
+        }
+
+        .card-number-preview {
+            letter-spacing: 2px;
+            font-size: 17px;
+            margin: 12px 0;
+            overflow-wrap: break-word;
+        }
+
+        .card-bottom-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: space-between;
+            font-size: 12.5px;
+        }
+
+        .card-bottom-row small {
+            display: block;
+            color: #ddd;
+            font-size: 10.5px;
+        }
+
+        .card-edit-fields {
+            background: #f9fafc;
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 24px;
+        }
+
+        .chat-window {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 14px;
+            height: 300px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 14px;
+            border: 1px solid #e6ebf3;
+        }
+
+        .chat-msg {
+            max-width: 80%;
+            padding: 9px 12px;
+            border-radius: 10px;
+            font-size: 13.5px;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+
+        .chat-msg.customer {
+            align-self: flex-start;
+            background: #e2e8f0;
+            color: #1a202c;
+        }
+
+        .chat-msg.admin {
+            align-self: flex-end;
+            background: #0b63ce;
+            color: #fff;
+        }
+
+        .chat-msg img {
+            max-width: 140px;
+            border-radius: 8px;
+            margin-top: 6px;
+            display: block;
+        }
+
+        .chat-msg .meta {
+            font-size: 10px;
+            opacity: .65;
+            margin-top: 4px;
+        }
+
+        .chat-empty {
+            color: #8a95a8;
+            text-align: center;
+            padding: 40px 10px;
+            font-size: 13px;
+        }
+
+        .chat-input-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+
+        .chat-input-row input[type="text"] {
+            flex: 1 1 160px;
+            min-width: 0;
+            padding: 10px 12px;
+            border: 1px solid #dbe1ea;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .chat-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+
+        .autoreply-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: #4a5568;
+        }
+
+        .switch {
+            position: relative;
+            width: 42px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            inset: 0;
+            background: #ccc;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .slider::before {
+            content: '';
+            position: absolute;
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background: #fff;
+            border-radius: 50%;
+            transition: .2s;
+        }
+
+        .switch input:checked+.slider {
+            background: #1f6f5c;
+        }
+
+        .switch input:checked+.slider::before {
+            transform: translateX(18px);
+        }
+
+        .canned-replies {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .canned-chip {
+            background: #eef2f8;
+            border: 1px solid #dbe1ea;
+            border-radius: 999px;
+            padding: 6px 12px;
+            font-size: 12px;
+            cursor: pointer;
+            color: #071a52;
+            max-width: 100%;
+            word-break: break-word;
+        }
+
+        .canned-chip:hover {
+            background: #dde6f3;
+        }
+
+        .empty-state {
+            color: #8a95a8;
+            text-align: center;
+            padding: 50px 10px;
+            font-size: 14px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 18px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: #071a52;
+            color: #fff;
+            padding: 12px 18px;
+            border-radius: 8px;
+            font-size: 13.5px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .2s, transform .2s;
+            z-index: 200;
+            max-width: 90vw;
+            text-align: center;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .login-wrap {
+            min-height: 70vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 16px;
+        }
+
+        .login-card {
+            max-width: 360px;
+            width: 100%;
+            background: #fff;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(7, 26, 82, .08);
+        }
+
+        .error-text {
+            color: #c0392b;
+            font-size: 13px;
+            margin-top: 8px;
+            display: none;
+        }
+
+        .error-text.show {
+            display: block;
+        }
+
+        .demo-note {
+            background: #eef2f8;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 12px;
+            color: #071a52;
+            margin-top: 14px;
+            line-height: 1.5;
+        }
+
+        .note-banner {
+            background: #fff8e6;
+            border: 1px solid #f2d98b;
+            color: #7a5b00;
+            font-size: 12.5px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-bottom: 18px;
+        }
+
+        .pin-boxes {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 18px 0;
+        }
+
+        .pin-boxes input {
+            width: 46px;
+            height: 54px;
+            text-align: center;
+            font-size: 22px;
+            border: 1px solid #dbe1ea;
+            border-radius: 8px;
+            letter-spacing: 0;
+        }
+
+        .pin-boxes input:focus {
+            outline: none;
+            border-color: #0b63ce;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header class="dashboard-header">
+        <div class="left-header">
+            <a href="/" class="back-btn" title="Back to site"><i class="fas fa-arrow-left"></i></a>
+            <h2>First Smart Wave Banking</h2>
+            <span class="badge-admin">ADMIN</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; position:relative;">
+            <button class="btn btn-ghost btn-sm" id="notifBell" style="display:none; position:relative;"
+                title="Site visits">
+                <i class="fas fa-bell"></i>
+                <span id="notifCount"
+                    style="display:none; position:absolute; top:-6px; right:-6px; background:#a6432b; color:#fff; font-size:10px; font-weight:700; border-radius:999px; padding:2px 5px; line-height:1;"></span>
+            </button>
+            <div id="notifDropdown"
+                style="display:none; position:absolute; top:44px; right:0; width:280px; max-width:80vw; background:#fff; border-radius:10px; box-shadow:0 10px 30px rgba(7,26,82,.2); z-index:500; overflow:hidden;">
+                <div
+                    style="padding:12px 16px; border-bottom:1px solid #e6ebf3; font-weight:600; font-size:13.5px; color:#071a52; display:flex; justify-content:space-between; align-items:center;">
+                    <span>Recent visits</span>
+                    <button id="clearNotifsBtn"
+                        style="background:none; border:none; color:#0b63ce; font-size:12px; cursor:pointer;">Mark all
+                        read</button>
+                </div>
+                <div id="notifList" style="max-height:280px; overflow-y:auto;"></div>
+            </div>
+            <button class="btn btn-ghost btn-sm" id="logoutBtn" style="display:none;">Log out</button>
+        </div>
+    </header>
+
+    <div class="toast" id="visitToast"></div>
+
+    <!-- STEP 1: username + password -->
+    <div class="wrap login-wrap" id="loginView">
+        <div class="login-card">
+            <h3 style="margin-bottom:4px;">Admin sign in</h3>
+            <p style="color:#666; font-size:13px; margin-bottom:18px;">Staff access only</p>
+            <form id="adminLoginForm">
+                <div class="field"><label>Username</label><input type="text" id="adminUser" required autocomplete="off">
+                </div>
+                <div class="field"><label>Password</label><input type="password" id="adminPass" required></div>
+                <p class="error-text" id="loginError">Incorrect username or password.</p>
+                <button type="submit" class="btn btn-primary btn-block">Continue</button>
+            </form>
+
+        </div>
+    </div>
+
+    <!-- STEP 2: 4-digit PIN -->
+    <div class="wrap login-wrap" id="pinView" style="display:none;">
+        <div class="login-card" style="text-align:center;">
+            <h3 style="margin-bottom:4px;">Enter your PIN</h3>
+            <p style="color:#666; font-size:13px;">One last step to confirm it's you.</p>
+            <form id="adminPinForm">
+                <div class="pin-boxes">
+                    <input type="password" inputmode="numeric" maxlength="1" class="pin-digit">
+                    <input type="password" inputmode="numeric" maxlength="1" class="pin-digit">
+                    <input type="password" inputmode="numeric" maxlength="1" class="pin-digit">
+                    <input type="password" inputmode="numeric" maxlength="1" class="pin-digit">
+                </div>
+                <p class="error-text" id="pinError">Incorrect PIN.</p>
+                <button type="submit" class="btn btn-gold btn-block">Unlock admin board</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin board -->
+    <div class="wrap" id="boardView" style="display:none;">
+
+
+
+        <div class="panel">
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="profile">Profile &amp; account</button>
+                <button class="tab-btn" data-tab="cards">Bank cards</button>
+                <button class="tab-btn" data-tab="chat">Customer service chat</button>
+                <button class="tab-btn" data-tab="security">Security</button>
+                <button class="tab-btn" data-tab="goals">Savings & Goals</button>
+                <button class="tab-btn" data-tab="activity">Login activity</button>
+            </div>
+
+            <div class="tab-panel active" id="tab-profile">
+                <div class="photo-row">
+                    <img id="photoPreview" alt="">
+                    <div>
+                        <input type="file" accept="image/*" id="photoInput">
+                        <div style="font-size:12px; color:#8a95a8; margin-top:4px;">This photo appears on
+                            view-profile.html.</div>
+                    </div>
+                </div>
+
+                <div class="field-row">
+                    <div class="field"><label>Full name (dashboard + profile)</label><input type="text" id="f_name">
+                    </div>
+                    <div class="field"><label>Account number (dashboard + profile)</label><input type="text"
+                            id="f_accountNumber"></div>
+                </div>
+                <div class="field-row">
+                    <div class="field"><label>Email</label><input type="email" id="f_email"></div>
+                    <div class="field"><label>Phone</label><input type="text" id="f_phone"></div>
+                </div>
+                <div class="field-row">
+                    <div class="field"><label>Gender</label>
+                        <select id="f_gender">
+                            <option>Male</option>
+                            <option>Female</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+                    <div class="field"><label>Date of birth</label><input type="text" id="f_dob"></div>
+                </div>
+                <div class="field-row">
+                    <div class="field"><label>Nationality</label><input type="text" id="f_nationality"></div>
+                    <div class="field"><label>Residential address</label><input type="text" id="f_address"></div>
+                </div>
+                <div class="field-row">
+                    <div class="field"><label>Account balance</label><input type="number" step="0.01" id="f_balance">
+                    </div>
+                    <div class="field">
+                        <label>Currency (type any code or symbol)</label>
+                        <input type="text" id="f_currency" list="currencySuggestions"
+                            placeholder="e.g. USD, GBP, NGN, ₦, kr...">
+                        <datalist id="currencySuggestions"></datalist>
+                    </div>
+                </div>
+                <div class="field-row">
+                    <div class="field"><label>Account status</label>
+                        <select id="f_status">
+                            <option>Active</option>
+                            <option>Suspended</option>
+                            <option>Closed</option>
+                        </select>
+                    </div>
+                    <div class="field"><label>KYC status</label>
+                        <select id="f_kyc">
+                            <option>Verified</option>
+                            <option>Pending</option>
+                            <option>Rejected</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="field-row">
+                    <div class="field"><label>Account type</label><input type="text" id="f_accountType"></div>
+                    <div class="field"><label>Branch</label><input type="text" id="f_branch"></div>
+                </div>
+                <div class="field"><label>Date opened</label><input type="text" id="f_dateOpened"></div>
+
+                <button class="btn btn-gold btn-block" id="saveProfileBtn">Save changes</button>
+            </div>
+
+            <div class="tab-panel" id="tab-cards"></div>
+
+            <div class="tab-panel" id="tab-chat">
+                <div class="chat-toolbar">
+                    <label class="autoreply-toggle">
+                        <span class="switch"><input type="checkbox" id="autoReplyToggle"><span
+                                class="slider"></span></span>
+                        Auto-reply
+                    </label>
+                    <button class="btn btn-danger btn-sm" id="clearChatBtn">Clear chat</button>
+                </div>
+                <div class="chat-window" id="chatWindow"></div>
+                <div class="canned-replies" id="cannedReplies"></div>
+                <div class="chat-input-row">
+                    <input type="text" id="adminChatInput" placeholder="Type a reply...">
+                    <label class="btn btn-ghost btn-sm" style="cursor:pointer;">
+                        <i class="fas fa-image"></i>
+                        <input type="file" accept="image/*" hidden id="adminImageInput">
+                    </label>
+                    <button class="btn btn-primary" id="adminChatSend">Send</button>
+                </div>
+            </div>
+
+            <div class="tab-panel" id="tab-goals">
+                <h3 style="margin-bottom:12px;color:#071a52;">Savings & Goals</h3>
+                <p style="font-size:13px;color:#666;margin-bottom:14px;">These appear on the customer dashboard.</p>
+                <h4 style="color:#071a52;margin:10px 0;">Emergency Reserve</h4>
+                <div class="field-row">
+                    <div class="field"><label>Saved amount</label><input type="number" id="g_em_saved" step="0.01">
+                    </div>
+                    <div class="field"><label>Target amount</label><input type="number" id="g_em_target" step="0.01">
+                    </div>
+                </div>
+                <div class="field"><label>Percent target</label><input type="number" id="g_em_pct" min="0" max="100">
+                </div>
+                <h4 style="color:#071a52;margin:16px 0 10px;">Investment Vault</h4>
+                <div class="field-row">
+                    <div class="field"><label>Saved amount</label><input type="number" id="g_inv_saved" step="0.01">
+                    </div>
+                    <div class="field"><label>Target amount</label><input type="number" id="g_inv_target" step="0.01">
+                    </div>
+                </div>
+                <div class="field"><label>Percent target</label><input type="number" id="g_inv_pct" min="0" max="100">
+                </div>
+                <button class="btn btn-gold btn-block" id="saveGoalsBtn" style="margin-top:12px;">Save goals</button>
+            </div>
+
+            <div class="tab-panel" id="tab-security">
+                <h3 style="margin-bottom:12px;color:#071a52;">Credentials & PIN</h3>
+                <p style="font-size:13px;color:#666;margin-bottom:16px;">Change admin login, admin PIN, and customer
+                    login (login page).</p>
+                <div class="field-row">
+                    <div class="field"><label>Admin username</label><input type="text" id="sec_adminUser"></div>
+                    <div class="field"><label>Admin password</label><input type="text" id="sec_adminPass"></div>
+                </div>
+                <div class="field-row">
+                    <div class="field"><label>Admin PIN (4 digits)</label><input type="text" id="sec_adminPin"
+                            maxlength="4" inputmode="numeric"></div>
+                    <div class="field"></div>
+                </div>
+                <hr style="border:none;border-top:1px solid #e6ebf3;margin:18px 0;">
+                <h3 style="margin-bottom:12px;color:#071a52;">Customer login (login page)</h3>
+                <div class="field-row">
+                    <div class="field"><label>Customer username</label><input type="text" id="sec_custUser"></div>
+                    <div class="field"><label>Customer password</label><input type="text" id="sec_custPass"></div>
+                </div>
+                <div class="field-row">
+                    <div class="field"><label>Customer PIN (login PIN)</label><input type="text" id="sec_custPin"
+                            maxlength="4" inputmode="numeric"></div>
+                    <div class="field"><label>TIC code (transfers)</label><input type="text" id="sec_tic" maxlength="8">
+                    </div>
+                </div>
+                <button class="btn btn-gold btn-block" id="saveSecurityBtn" style="margin-top:12px;">Save security
+                    settings</button>
+            </div>
+            <div class="tab-panel" id="tab-activity">
+                <h3 style="margin-bottom:12px;color:#071a52;">Recent login attempts</h3>
+                <p style="font-size:13px;color:#666;margin-bottom:14px;">Time, date, username, success/fail, location.
+                </p>
+                <div id="loginLogList" style="max-height:480px;overflow-y:auto;"></div>
+                <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+                    <button class="btn btn-ghost btn-sm" id="refreshLogsBtn">Refresh</button>
+                    <button class="btn btn-danger btn-sm" id="clearLogsBtn">Delete all login logs</button>
+                </div>
+            </div>
+
+
+
+        </div>
+    </div>
+
+
+    <div class="toast" id="toast"></div>
+
+    <script src="/fsw-shared.js"></script>
+    <script>
+        const ADMIN_SESSION_KEY = 'youradminimeh';
+        const ADMIN_PIN = '4422'; // verified server-side
+
+
+
+        // Safe wrapper: if sessionStorage is blocked (e.g. file:// pages in some browsers),
+        // this falls back to an in-memory flag so the rest of the page still works this session.
+        let adminSessionMemory = false;
+        function adminSessionSet(val) { try { sessionStorage.setItem(ADMIN_SESSION_KEY, val); } catch (e) { adminSessionMemory = val === 'true'; } }
+        function adminSessionGet() { try { return sessionStorage.getItem(ADMIN_SESSION_KEY); } catch (e) { return adminSessionMemory ? 'true' : null; } }
+        function adminSessionClear() { try { sessionStorage.removeItem(ADMIN_SESSION_KEY); } catch (e) { adminSessionMemory = false; } }
+
+        const CANNED_REPLIES = [
+            "Thanks for reaching out — how can we help today?",
+            "Your request has been received and is being reviewed.",
+            "Could you share your account number so we can look into this?",
+            "This has been resolved. Let us know if anything else comes up!",
+            "Apologies for the delay — a team member will be with you shortly.",
+        ];
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg; t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2200);
+        }
+
+        /* ---------- Step 1: username + password ---------- */
+        const loginView = document.getElementById('loginView');
+        const pinView = document.getElementById('pinView');
+        const boardView = document.getElementById('boardView');
+        const logoutBtn = document.getElementById('logoutBtn');
+        let chatPollInterval = null;
+
+        document.getElementById('adminLoginForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            document.getElementById('loginError').classList.remove('show');
+            const u = document.getElementById('adminUser').value.trim();
+            const p = document.getElementById('adminPass').value;
+
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.disabled = true; submitBtn.textContent = 'Checking...';
+            const ok = await fswAdminLogin(u, p); // real call to POST /api/auth/admin-login
+            submitBtn.disabled = false; submitBtn.textContent = 'Continue';
+
+            if (ok) {
+                loginView.style.display = 'none';
+                pinView.style.display = 'flex';
+                document.querySelectorAll('.pin-digit')[0].focus();
+            } else {
+                document.getElementById('loginError').textContent =
+                    'Incorrect username or password — or the backend isn\'t running (check the console).';
+                document.getElementById('loginError').classList.add('show');
+            }
+        });
+
+        /* ---------- Step 2: 4-digit PIN ---------- */
+        const pinInputs = document.querySelectorAll('.pin-digit');
+        pinInputs.forEach((input, i) => {
+            input.addEventListener('input', () => {
+                input.value = input.value.replace(/[^0-9]/g, '');
+                if (input.value && pinInputs[i + 1]) pinInputs[i + 1].focus();
+            });
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !input.value && pinInputs[i - 1]) pinInputs[i - 1].focus();
+            });
+        });
+        document.getElementById('adminPinForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const entered = Array.from(pinInputs).map(i => i.value).join('');
+            const ok = await fswAdminVerifyPin(entered);
+            if (ok) {
+                adminSessionSet('true');
+                enterBoard();
+            } else {
+                document.getElementById('pinError').classList.add('show');
+                pinInputs.forEach(i => i.value = '');
+                pinInputs[0].focus();
+            }
+        });
+
+        logoutBtn.addEventListener('click', function () {
+            adminSessionClear();
+            fswAdminLogout();
+            loginView.style.display = 'flex';
+            pinView.style.display = 'none';
+            boardView.style.display = 'none';
+            logoutBtn.style.display = 'none';
+            document.getElementById('notifBell').style.display = 'none';
+            document.getElementById('notifDropdown').style.display = 'none';
+            document.getElementById('adminLoginForm').reset();
+            pinInputs.forEach(i => i.value = '');
+            if (chatPollInterval) clearInterval(chatPollInterval);
+            if (visitPollInterval) clearInterval(visitPollInterval);
+        });
+        if (adminSessionGet() === 'true') enterBoard();
+
+        async function enterBoard() {
+            loginView.style.display = 'none';
+            pinView.style.display = 'none';
+            boardView.style.display = 'block';
+            if (loginView) loginView.style.display = 'none';
+            if (pinView) pinView.style.display = 'none';
+            logoutBtn.style.display = 'inline-flex';
+            document.getElementById('notifBell').style.display = 'inline-flex';
+            await loadProfileTab(); // sets currentAdminUserId, which the rest depend on
+            loadCardsTab();
+            loadChatTab();
+            initVisitNotifications();
+            loadSecurityTab();
+            loadActivityTab();
+            loadGoalsTab();
+        }
+
+        /* ---------- Tabs ---------- */
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+            });
+        });
+
+        /* ---------- Profile & account tab ---------- */
+        let currentAdminUserId = null; // the Mongo _id of the account being edited (the demo account for now)
+
+        async function loadProfileTab() {
+            const user = await fswFetchUser(currentAdminUserId);
+            currentAdminUserId = user._id;
+
+            document.getElementById('photoPreview').src = user.profileImage || 'https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(user.name);
+            document.getElementById('f_name').value = user.name;
+            document.getElementById('f_accountNumber').value = user.accountNumber;
+            document.getElementById('f_email').value = user.email;
+            document.getElementById('f_phone').value = user.phone;
+            document.getElementById('f_gender').value = user.gender;
+            document.getElementById('f_dob').value = user.dob;
+            document.getElementById('f_nationality').value = user.nationality;
+            document.getElementById('f_address').value = user.address;
+            document.getElementById('f_balance').value = user.balance;
+            document.getElementById('f_status').value = user.status;
+            document.getElementById('f_kyc').value = user.kycStatus;
+            document.getElementById('f_accountType').value = user.accountType;
+            document.getElementById('f_branch').value = user.branch;
+            document.getElementById('f_dateOpened').value = user.dateOpened;
+            document.getElementById('f_currency').value = user.currency;
+
+            document.getElementById('currencySuggestions').innerHTML = Object.keys(FSW_CURRENCIES).map(code =>
+                `<option value="${code}">`
+            ).join('');
+            return user;
+        }
+
+        document.getElementById('photoInput').addEventListener('change', async function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async function (ev) {
+                document.getElementById('photoPreview').src = ev.target.result;
+                try {
+                    await fswUpdateUser(currentAdminUserId, { profileImage: ev.target.result });
+                    showToast('Profile picture updated.');
+                } catch (err) { showToast('Could not save photo: ' + err.message); }
+            };
+            reader.readAsDataURL(file);
+        });
+
+        document.getElementById('saveProfileBtn').addEventListener('click', async function () {
+            const updates = {
+                name: document.getElementById('f_name').value.trim(),
+                accountNumber: document.getElementById('f_accountNumber').value.trim(),
+                email: document.getElementById('f_email').value.trim(),
+                phone: document.getElementById('f_phone').value.trim(),
+                gender: document.getElementById('f_gender').value,
+                dob: document.getElementById('f_dob').value.trim(),
+                nationality: document.getElementById('f_nationality').value.trim(),
+                address: document.getElementById('f_address').value.trim(),
+                balance: parseFloat(document.getElementById('f_balance').value) || 0,
+                currency: document.getElementById('f_currency').value,
+                status: document.getElementById('f_status').value,
+                kycStatus: document.getElementById('f_kyc').value,
+                accountType: document.getElementById('f_accountType').value.trim(),
+                branch: document.getElementById('f_branch').value.trim(),
+                dateOpened: document.getElementById('f_dateOpened').value.trim(),
+            };
+            try {
+                await fswUpdateUser(currentAdminUserId, updates);
+                showToast('Saved to MongoDB — live on the next page load.');
+            } catch (err) {
+                showToast('Save failed: ' + err.message);
+            }
+        });
+
+        /* ---------- Bank cards tab ---------- */
+        async function loadCardsTab() {
+            const user = await fswFetchUser(currentAdminUserId);
+            let cards = user.cards && user.cards.length ? user.cards : [
+                { type: 'Savings', number: '**** **** **** 4587', holder: user.name || 'Card Holder', expiry: '09/31' },
+                { type: 'Current', number: '**** **** **** 7812', holder: user.name || 'Card Holder', expiry: '11/31' },
+            ];
+            if (!user.cards || !user.cards.length) {
+                try { await fswUpdateUser(currentAdminUserId, { cards }); } catch (e) { }
+            }
+            const tab = document.getElementById('tab-cards');
+            tab.innerHTML = cards.map((card, i) => `
+    <div class="bank-card ${card.type === 'Savings' ? 'savings-card' : 'current-card'}">
+      <div class="card-top-row"><span>First Smart Wave Banking</span><i class="fas fa-credit-card"></i></div>
+      <div class="card-number-preview" id="cardPreview_${i}">${card.number}</div>
+      <div class="card-bottom-row">
+        <div><small>Card Holder</small><span id="holderPreview_${i}">${card.holder}</span></div>
+        <div><small>Expiry</small><span id="expiryPreview_${i}">${card.expiry}</span></div>
+        <div><small>Type</small><span>${card.type}</span></div>
+      </div>
+    </div>
+    <div class="card-edit-fields">
+      <div class="field-row">
+        <div class="field"><label>Card holder name</label><input type="text" id="card_holder_${i}" value="${card.holder}"></div>
+        <div class="field"><label>Card number</label><input type="text" id="card_number_${i}" value="${card.number}"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Expiry date</label><input type="text" id="card_expiry_${i}" value="${card.expiry}"></div>
+        <div class="field" style="display:flex; align-items:flex-end;">
+          <button class="btn btn-primary btn-block" data-save-card="${i}">Save this card</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+            tab.querySelectorAll('[data-save-card]').forEach(btn => {
+                btn.addEventListener('click', async function () {
+                    const i = parseInt(btn.getAttribute('data-save-card'), 10);
+                    const freshUser = await fswFetchUser(currentAdminUserId);
+                    const cards = freshUser.cards;
+                    cards[i] = {
+                        ...cards[i],
+                        holder: document.getElementById('card_holder_' + i).value.trim(),
+                        number: document.getElementById('card_number_' + i).value.trim(),
+                        expiry: document.getElementById('card_expiry_' + i).value.trim(),
+                    };
+                    try {
+                        await fswUpdateUser(currentAdminUserId, { cards });
+                        document.getElementById('cardPreview_' + i).textContent = cards[i].number;
+                        document.getElementById('holderPreview_' + i).textContent = cards[i].holder;
+                        document.getElementById('expiryPreview_' + i).textContent = cards[i].expiry;
+                        showToast('Card updated in MongoDB — live on the next page load.');
+                    } catch (err) {
+                        showToast('Save failed: ' + err.message);
+                    }
+                });
+            });
+        }
+
+        /* ---------- Chat tab ---------- */
+        async function renderChat() {
+            const win = document.getElementById('chatWindow');
+            let msgs = [];
+            try { msgs = await fswGetChat(currentAdminUserId); } catch (err) {
+                win.innerHTML = '<p class="chat-empty">Could not load chat: ' + err.message + '</p>';
+                return;
+            }
+            if (msgs.length === 0) {
+                win.innerHTML = '<p class="chat-empty">No messages yet. Conversations started from any customer service icon on the site will appear here.</p>';
+                return;
+            }
+            win.innerHTML = msgs.map(m => {
+                const time = new Date(m.createdAt || m.time).toLocaleString(undefined, { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' });
+                const body = m.image
+                    ? (m.text ? m.text + '<br>' : '') + `<img src="${m.image}" alt="" class="fsw-chat-img" style="cursor:pointer;">`
+                    : m.text;
+                return `<div class="chat-msg ${m.sender}">${body}<div class="meta">${m.sender === 'admin' ? 'You' : 'Customer'} &middot; ${time}</div></div>`;
+            }).join('');
+            win.scrollTop = win.scrollHeight;
+            return msgs.length;
+        }
+
+        async function loadChatTab() {
+            await renderChat();
+            const user = await fswFetchUser(currentAdminUserId);
+            document.getElementById('autoReplyToggle').checked = user.autoReplyOn !== false;
+
+            const cannedWrap = document.getElementById('cannedReplies');
+            cannedWrap.innerHTML = CANNED_REPLIES.map(r => `<button class="canned-chip" type="button">${r}</button>`).join('');
+            cannedWrap.querySelectorAll('.canned-chip').forEach((chip, i) => {
+                chip.addEventListener('click', async () => {
+                    try { await fswSendAdminReply(currentAdminUserId, CANNED_REPLIES[i]); renderChat(); }
+                    catch (err) { showToast('Could not send: ' + err.message); }
+                });
+            });
+
+            let lastCount = (await fswGetChat(currentAdminUserId)).length;
+            if (chatPollInterval) clearInterval(chatPollInterval);
+            chatPollInterval = setInterval(async () => {
+                try {
+                    const msgs = await fswGetChat(currentAdminUserId);
+                    if (msgs.length !== lastCount) { lastCount = msgs.length; renderChat(); }
+                } catch (e) { /* silent — will retry next tick */ }
+            }, 2500);
+        }
+
+        document.getElementById('autoReplyToggle').addEventListener('change', async function () {
+            try {
+                await fswUpdateUser(currentAdminUserId, { autoReplyOn: this.checked });
+                showToast(this.checked ? 'Auto-reply turned on.' : 'Auto-reply turned off.');
+            } catch (err) {
+                showToast('Could not update: ' + err.message);
+                this.checked = !this.checked;
+            }
+        });
+
+        document.getElementById('adminChatSend').addEventListener('click', sendAdminReply);
+        document.getElementById('adminChatInput').addEventListener('keydown', e => { if (e.key === 'Enter') sendAdminReply(); });
+        async function sendAdminReply() {
+            const input = document.getElementById('adminChatInput');
+            const text = input.value.trim();
+            if (!text) return;
+            input.value = '';
+            try { await fswSendAdminReply(currentAdminUserId, text); renderChat(); }
+            catch (err) { showToast('Could not send: ' + err.message); }
+        }
+
+        document.getElementById('adminImageInput').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async function (ev) {
+                try { await fswSendAdminReply(currentAdminUserId, '', ev.target.result); renderChat(); }
+                catch (err) { showToast('Could not send image: ' + err.message); }
+            };
+            reader.readAsDataURL(file);
+        });
+
+        document.getElementById('clearChatBtn').addEventListener('click', async function () {
+            if (!confirm('Clear the entire conversation? This cannot be undone.')) return;
+            try { await fswClearChat(currentAdminUserId); renderChat(); showToast('Chat cleared.'); }
+            catch (err) { showToast('Could not clear chat: ' + err.message); }
+        });
+
+        /* ---------- Visitor notifications ---------- */
+        let visitPollInterval = null;
+        let lastKnownVisitCount = 0;
+
+        function showVisitToast(msg) {
+            const t = document.getElementById('visitToast');
+            t.textContent = msg; t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        const VISITS_SEEN_KEY = 'fsw_admin_visits_seen_count';
+        function getSeenCount() { return parseInt(fswSessionGet(VISITS_SEEN_KEY) || '0', 10); }
+        function setSeenCount(n) { fswSessionSet(VISITS_SEEN_KEY, String(n)); }
+
+        function renderNotifDropdown(visits) {
+            const list = document.getElementById('notifList');
+            const recent = visits.slice(0, 30); // backend already returns newest-first
+            if (recent.length === 0) {
+                list.innerHTML = '<p class="chat-empty" style="padding:24px 16px;">No visits recorded yet.</p>';
+                return;
+            }
+            list.innerHTML = recent.map(v => {
+                const time = new Date(v.createdAt).toLocaleString(undefined, { hour: '2-digit', minute: '2-digit', month: 'short', day: 'numeric' });
+                return `<div style="padding:10px 16px; border-bottom:1px solid #f0f2f6; font-size:13px;">
+      <div style="font-weight:600; color:#071a52;">${v.page}</div>
+      <div style="color:#8a95a8; font-size:11.5px;">${time} · ${v.country || 'Unknown'}${v.ip ? ' · ' + v.ip : ''}</div>
+    </div>`;
+            }).join('');
+        }
+
+        function updateNotifBadge(count) {
+            const badge = document.getElementById('notifCount');
+            if (count > 0) {
+                badge.textContent = count > 99 ? '99+' : count;
+                badge.style.display = 'inline-block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        async function initVisitNotifications() {
+            let visits = [];
+            try { visits = await fswFetchVisits(); } catch (e) { console.error('[FSW]', e.message); return; }
+            lastKnownVisitCount = visits.length;
+            updateNotifBadge(Math.max(0, visits.length - getSeenCount()));
+            renderNotifDropdown(visits);
+
+            if (visitPollInterval) clearInterval(visitPollInterval);
+            visitPollInterval = setInterval(async () => {
+                let freshVisits = [];
+                try { freshVisits = await fswFetchVisits(); } catch (e) { return; }
+                if (freshVisits.length > lastKnownVisitCount) {
+                    const newCount = freshVisits.length - lastKnownVisitCount;
+                    lastKnownVisitCount = freshVisits.length;
+                    freshVisits.slice(0, newCount).forEach(v => showVisitToast('👀 New visitor on ' + v.page));
+                    updateNotifBadge(Math.max(0, freshVisits.length - getSeenCount()));
+                    renderNotifDropdown(freshVisits);
+                }
+            }, 3000);
+        }
+
+        document.getElementById('notifBell').addEventListener('click', async function () {
+            const dropdown = document.getElementById('notifDropdown');
+            const isOpen = dropdown.style.display === 'block';
+            dropdown.style.display = isOpen ? 'none' : 'block';
+            if (!isOpen) {
+                try { renderNotifDropdown(await fswFetchVisits()); } catch (e) { }
+            }
+        });
+        document.getElementById('clearNotifsBtn').addEventListener('click', function () {
+            setSeenCount(lastKnownVisitCount);
+            updateNotifBadge(0);
+        });
+        document.addEventListener('click', function (e) {
+            const bell = document.getElementById('notifBell');
+            const dropdown = document.getElementById('notifDropdown');
+            if (dropdown.style.display === 'block' && !bell.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
+
+
+        async function loadSecurityTab() {
+            try {
+                const s = await fswFetchSettings();
+                document.getElementById('sec_adminUser').value = s.adminUsername || '';
+                document.getElementById('sec_adminPass').value = s.adminPassword || '';
+                document.getElementById('sec_adminPin').value = s.adminPin || '';
+                document.getElementById('sec_custUser').value = s.customerUsername || '';
+                document.getElementById('sec_custPass').value = s.customerPassword || '';
+                if (document.getElementById('sec_custPin')) document.getElementById('sec_custPin').value = s.customerPin || '5566';
+                if (document.getElementById('sec_tic')) document.getElementById('sec_tic').value = s.ticCode || '7766';
+            } catch (e) { console.error(e); }
+        }
+        document.getElementById('saveSecurityBtn')?.addEventListener('click', async function () {
+            try {
+                await fswUpdateSettings({
+                    adminUsername: document.getElementById('sec_adminUser').value.trim(),
+                    adminPassword: document.getElementById('sec_adminPass').value,
+                    adminPin: document.getElementById('sec_adminPin').value.trim(),
+                    customerUsername: document.getElementById('sec_custUser').value.trim(),
+                    customerPassword: document.getElementById('sec_custPass').value,
+                    customerPin: document.getElementById('sec_custPin') ? document.getElementById('sec_custPin').value.trim() : undefined,
+                    ticCode: document.getElementById('sec_tic') ? document.getElementById('sec_tic').value.trim() : undefined,
+                });
+                showToast('Security settings saved.');
+            } catch (err) { showToast('Save failed: ' + err.message); }
+        });
+        async function loadActivityTab() {
+            const list = document.getElementById('loginLogList');
+            if (!list) return;
+            try {
+                const logs = await fswFetchLoginLogs();
+                if (!logs.length) { list.innerHTML = '<p class="empty-state">No login activity yet.</p>'; return; }
+                list.innerHTML = logs.map(l => {
+                    const d = new Date(l.createdAt);
+                    const when = d.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'medium' });
+                    const badge = l.success
+                        ? '<span style="background:#d4edda;color:#155724;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;">SUCCESS</span>'
+                        : '<span style="background:#f8d7da;color:#721c24;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;">FAILED</span>';
+                    return `<div style="padding:12px 14px;border-bottom:1px solid #eef2f7;font-size:13px;">
+                          <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center;">
+                            <strong style="color:#071a52;">${(l.type || '').toUpperCase()} · ${l.username || '—'}</strong>
+                            <span>${badge} <button class="btn btn-danger btn-sm" data-del-log="${l._id}" style="margin-left:6px;">Delete</button></span>
+                          </div>
+                          <div style="color:#666;margin-top:4px;">${when}</div>
+                          <div style="color:#8a95a8;font-size:12px;margin-top:2px;">📍 ${l.country || 'Unknown'} · IP ${l.ip || 'n/a'}</div>
+                        </div>`;
+                }).join('');
+                list.querySelectorAll('[data-del-log]').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        try { await fswDeleteLoginLog(btn.getAttribute('data-del-log')); loadActivityTab(); showToast('Log deleted.'); }
+                        catch (e) { showToast(e.message); }
+                    });
+                });
+            } catch (e) { list.innerHTML = '<p class="empty-state">' + e.message + '</p>'; }
+        }
+        document.getElementById('refreshLogsBtn')?.addEventListener('click', loadActivityTab);
+
+        async function loadGoalsTab() {
+            try {
+                const user = await fswFetchUser(currentAdminUserId);
+                const g = user.goals || {};
+                document.getElementById('g_em_saved').value = g.emergencySaved ?? 15000;
+                document.getElementById('g_em_target').value = g.emergencyTarget ?? 20000;
+                document.getElementById('g_em_pct').value = g.emergencyPct ?? 75;
+                document.getElementById('g_inv_saved').value = g.investmentSaved ?? 20000;
+                document.getElementById('g_inv_target').value = g.investmentTarget ?? 50000;
+                document.getElementById('g_inv_pct').value = g.investmentPct ?? 40;
+            } catch (e) { console.error(e); }
+        }
+        document.getElementById('saveGoalsBtn')?.addEventListener('click', async function () {
+            const goals = {
+                emergencySaved: parseFloat(document.getElementById('g_em_saved').value) || 0,
+                emergencyTarget: parseFloat(document.getElementById('g_em_target').value) || 0,
+                emergencyPct: parseFloat(document.getElementById('g_em_pct').value) || 0,
+                investmentSaved: parseFloat(document.getElementById('g_inv_saved').value) || 0,
+                investmentTarget: parseFloat(document.getElementById('g_inv_target').value) || 0,
+                investmentPct: parseFloat(document.getElementById('g_inv_pct').value) || 0,
+            };
+            try {
+                await fswUpdateUser(currentAdminUserId, { goals });
+                showToast('Goals saved — live on dashboard.');
+            } catch (err) { showToast('Save failed: ' + err.message); }
+        });
+        document.getElementById('clearLogsBtn')?.addEventListener('click', async function () {
+            if (!confirm('Delete all login logs permanently?')) return;
+            try { await fswDeleteLoginLogs(); loadActivityTab(); showToast('All login logs deleted.'); }
+            catch (e) { showToast(e.message); }
+        });
+
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,39 @@
+FIRST SMART WAVE BANKING (clean rebuild)
+========================================
+ 
+This project uses ONLY the frontend files you just resent + a new Node/Express/Mongo backend.
+ 
+RUN:
+  cd FSW-NEW
+  npm install
+  (start MongoDB)
+  node server.js
+  Open http://localhost:5000
+ 
+PUBLIC URLS:
+  /           index
+  /login      username + password
+  /signup     always "Server busy, try again later."
+  /admin      admin board
+ 
+APP URLS (must be logged in or redirected to /):
+  /dashboard  /pin  /profile  /cards
+  /local-transfer  /international-transfer
+  /tic-code  /receipt  /deposit  /deposit-history
+  /settings  /statement
+ 
+Direct *.html for protected pages is blocked → home.
+ 
+LOGINS:
+  Customer:  customer / pass1234
+  Admin:     admin / admin123
+  Admin PIN: 4422
+ 
+Change all credentials inside Admin → Security tab.
+ 
+CREDENTIALS STORED IN:
+  models/SiteSettings.js  (defaults)
+  MongoDB collection sitesettings (after first run)
+  Editable from Admin → Security
+ 
+

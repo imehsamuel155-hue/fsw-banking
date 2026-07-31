@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Transaction Receipt | First Smart Wave Banking</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        /* --- Global Reset & Page Styling --- */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body.receipt-page {
+            background-color: #f4f6f8;
+            color: #1a202c;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* --- Container & Card --- */
+        .receipt-container {
+            width: 100%;
+            max-width: 520px;
+        }
+
+        .receipt-card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            padding: 32px 28px;
+        }
+
+        /* --- Header Section --- */
+        .receipt-header {
+            text-align: center;
+            padding-bottom: 24px;
+            border-bottom: 2px dashed #edf2f7;
+        }
+
+        .receipt-header i {
+            font-size: 48px;
+            color: #38a169;
+            /* Success Green */
+            margin-bottom: 12px;
+        }
+
+        .receipt-header h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 4px;
+        }
+
+        .receipt-header p {
+            font-size: 14px;
+            color: #718096;
+        }
+
+        /* --- Body & Data Rows --- */
+        .receipt-body {
+            padding: 20px 0;
+        }
+
+        .receipt-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            font-size: 14px;
+        }
+
+        .receipt-row:not(:last-child) {
+            border-bottom: 1px solid #f7fafc;
+        }
+
+        .receipt-row span {
+            color: #718096;
+            font-weight: 500;
+        }
+
+        .receipt-row strong {
+            color: #1a202c;
+            font-weight: 600;
+            text-align: right;
+            word-break: break-word;
+        }
+
+        /* Status Badge */
+        .status-success {
+            background-color: #c6f6d5;
+            color: #22543d;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            display: inline-block;
+        }
+
+        /* --- Buttons Section --- */
+        .receipt-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .receipt-buttons button {
+            flex: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+        }
+
+        /* Print Button (Primary) */
+        .receipt-buttons button:first-child {
+            background-color: #1a56db;
+            color: #ffffff;
+        }
+
+        .receipt-buttons button:first-child:hover {
+            background-color: #1e40af;
+        }
+
+        /* Dashboard Button (Secondary) */
+        .receipt-buttons button:last-child {
+            background-color: #edf2f7;
+            color: #4a5568;
+        }
+
+        .receipt-buttons button:last-child:hover {
+            background-color: #e2e8f0;
+        }
+
+        /* --- Print Styles --- */
+        @media print {
+            body.receipt-page {
+                background-color: #ffffff;
+                padding: 0;
+            }
+
+            .receipt-card {
+                box-shadow: none;
+                border: none;
+                padding: 0;
+            }
+
+            .receipt-buttons {
+                display: none;
+                /* Hide buttons when printing */
+            }
+        }
+    </style>
+</head>
+
+
+
+<body class="receipt-page">
+
+
+
+    <div class="receipt-container">
+
+
+        <div class="receipt-card">
+
+
+
+            <div class="receipt-header">
+
+
+                <i class="fas fa-circle-check"></i>
+
+
+                <h2>
+                    Transaction Receipt
+                </h2>
+
+
+                <p>
+                    Transfer Completed Successfully
+                </p>
+
+
+
+            </div>
+
+
+
+
+            <div class="receipt-body">
+
+
+
+                <div class="receipt-row">
+
+                    <span>
+                        Transaction ID
+                    </span>
+
+                    <strong id="transactionId"></strong>
+
+                </div>
+
+
+
+                <div class="receipt-row">
+
+                    <span>
+                        Transfer Type
+                    </span>
+
+                    <strong id="transferType"></strong>
+
+                </div>
+
+
+
+
+                <div class="receipt-row">
+
+                    <span>
+                        Recipient Name
+                    </span>
+
+                    <strong id="recipientName"></strong>
+
+                </div>
+
+
+
+
+                <div class="receipt-row">
+
+                    <span>
+                        Bank Name
+                    </span>
+
+                    <strong id="recipientBank"></strong>
+
+                </div>
+
+
+
+
+                <div class="receipt-row">
+
+                    <span>
+                        Account Number
+                    </span>
+
+                    <strong id="accountNumber"></strong>
+
+                </div>
+
+
+
+
+                <div class="receipt-row">
+
+                    <span>
+                        SWIFT Code
+                    </span>
+
+                    <strong id="swiftCode"></strong>
+
+                </div>
+
+
+
+
+                <div class="receipt-row">
+
+                    <span>
+                        Country
+                    </span>
+
+                    <strong id="country"></strong>
+
+                </div>
+
+
+
+
+                <div class="receipt-row">
+
+                    <span>
+                        Currency
+                    </span>
+
+                    <strong id="currency"></strong>
+
+                </div>
+
+
+
+
+                <div class="receipt-row">
+
+                    <span>
+                        Amount
+                    </span>
+
+                    <strong id="amount"></strong>
+
+                </div>
+
+
+
+
+                <div class="receipt-row">
+
+                    <span>
+                        Purpose
+                    </span>
+
+                    <strong id="purpose"></strong>
+
+                </div>
+
+
+
+
+                <div class="receipt-row">
+
+                    <span>
+                        Description
+                    </span>
+
+                    <strong id="description"></strong>
+
+                </div>
+
+
+
+
+                <div class="receipt-row">
+
+                    <span>
+                        Date
+                    </span>
+
+                    <strong id="date"></strong>
+
+                </div>
+
+
+
+
+                <div class="receipt-row">
+
+                    <span>
+                        Time
+                    </span>
+
+                    <strong id="time"></strong>
+
+                </div>
+
+
+
+
+                <div class="receipt-row">
+
+                    <span>
+                        Status
+                    </span>
+
+                    <strong class="status-success">
+
+                        Successful
+
+                    </strong>
+
+                </div>
+
+
+
+            </div>
+
+
+
+
+
+            <div class="receipt-buttons">
+
+
+                <button onclick="window.print()">
+
+                    <i class="fas fa-print"></i>
+
+                    Print Receipt
+
+                </button>
+
+
+
+
+                <button onclick="window.location.href='/dashboard'">
+
+                    <i class="fas fa-house"></i>
+
+                    Return Dashboard
+
+                </button>
+
+
+
+            </div>
+
+
+
+        </div>
+
+
+    </div>
+
+
+
+
+
+
+    <script src="/fsw-shared.js"></script>
+    <script>if (!fswRequireAuth()) { }</script>
+    <script>
+
+        (async function () {
+            const transferId = sessionStorage.getItem('fsw_receipt_transfer_id');
+            if (!transferId) return;
+
+            let receipt;
+            try {
+                const res = await fetch(`${FSW_API_BASE}/transfers/single/${transferId}`);
+                if (!res.ok) throw new Error('Could not load receipt');
+                receipt = await res.json();
+            } catch (err) {
+                console.error('[FSW]', err.message);
+                return;
+            }
+
+            document.getElementById("transactionId").textContent = receipt.reference;
+            document.getElementById("transferType").textContent =
+                receipt.type === 'international' ? 'International Transfer' : 'Local Transfer';
+            document.getElementById("recipientName").textContent = receipt.recipientName;
+            document.getElementById("recipientBank").textContent = receipt.recipientBank;
+            document.getElementById("accountNumber").textContent =
+                receipt.type === 'international' ? receipt.iban : receipt.recipientAccountNumber;
+
+            const swiftEl = document.getElementById("swiftCode");
+            if (swiftEl) swiftEl.textContent = receipt.swift || '—';
+            document.getElementById("country").textContent = receipt.country || '—';
+            document.getElementById("currency").textContent = receipt.currency;
+            document.getElementById("amount").textContent =
+                fswCurrencySymbol(receipt.currency) + Number(receipt.amount).toLocaleString();
+            document.getElementById("purpose").textContent = receipt.purpose || 'Not specified';
+            document.getElementById("description").textContent = receipt.purpose || "No Description";
+
+            const created = new Date(receipt.createdAt);
+            document.getElementById("date").textContent = created.toLocaleDateString();
+            document.getElementById("time").textContent = created.toLocaleTimeString();
+        })();
+
+    </script>
+    <script src="/script.js"></script>
+
+
+
+
+</body>
+
+</html>
