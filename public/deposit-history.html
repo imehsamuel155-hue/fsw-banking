@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deposit History | First Smart Wave Banking</title>
+    <title>Deposit History | Sheyrove Financial Trust Banking</title>
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
@@ -231,48 +231,18 @@
     <script src="/fsw-shared.js"></script>
     <script>if (!fswRequireAuth()) { }</script>
     <script>
-        document.addEventListener("DOMContentLoaded", async function () {
+        document.addEventListener("DOMContentLoaded", function () {
             const tableBody = document.getElementById("depositHistoryTable");
-            let history = [];
-            try {
-                const userId = await fswGetCurrentUserId();
-                const res = await fetch(`${FSW_API_BASE}/deposits/${userId}`);
-                if (!res.ok) throw new Error('Could not load deposit history');
-                history = await res.json();
-            } catch (err) {
-                tableBody.innerHTML = `<tr><td colspan="5" class="empty">${err.message}</td></tr>`;
-                return;
-            }
-
-            if (history.length === 0) {
+            if (tableBody) {
                 tableBody.innerHTML = `
                     <tr>
-                        <td colspan="5" class="empty">
-                            <i class="fas fa-receipt"></i>
-                            No deposit history found.
+                        <td colspan="5" class="empty" style="padding:40px;text-align:center;color:#a6432b;">
+                            <i class="fas fa-lock" style="font-size:28px;display:block;margin-bottom:12px;"></i>
+                            <strong>Blocked</strong><br>
+                            Deposit history is restricted to protect user privacy.
                         </td>
                     </tr>`;
-                return;
             }
-
-            tableBody.innerHTML = history.map(item => {
-                const statusClass = (item.status || 'pending').toLowerCase();
-                const formattedAmount = `${fswCurrencySymbol(item.currency || 'USD')} ${Number(item.amount || 0).toLocaleString()}`;
-                const date = item.createdAt ? new Date(item.createdAt).toLocaleDateString() : 'N/A';
-
-                return `
-                    <tr>
-                        <td><strong>${item._id ? item._id.slice(-8).toUpperCase() : 'N/A'}</strong></td>
-                        <td>${item.method || 'Deposit'}</td>
-                        <td>${formattedAmount}</td>
-                        <td>${date}</td>
-                        <td>
-                            <span class="status-badge ${statusClass}">
-                                ${item.status || 'Pending'}
-                            </span>
-                        </td>
-                    </tr>`;
-            }).join('');
         });
     </script>
     <script src="/script.js"></script>

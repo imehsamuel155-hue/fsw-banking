@@ -202,7 +202,7 @@
             const submitBtn = this.querySelector('button[type="submit"]');
             const errorBanner = document.getElementById('errorBanner');
             const errorText = document.getElementById('errorText');
-            submitBtn.disabled = true;
+            fswBtnStart(submitBtn, 'Signing in...');
             errorBanner.style.display = 'none';
             try {
                 const res = await fetch(FSW_API_BASE + '/auth/login', {
@@ -213,14 +213,14 @@
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.error || 'Login failed');
                 fswSetLoggedInUser(data.userId, data.token);
+                // keep button loading until next page opens
                 window.location.href = '/pin';
             } catch (err) {
                 errorText.textContent = err.message === 'Failed to fetch'
                     ? "Can't reach the backend — start the server (node server.js)."
                     : err.message;
                 errorBanner.style.display = 'flex';
-            } finally {
-                submitBtn.disabled = false;
+                fswBtnStop(submitBtn);
             }
         });
     </script>

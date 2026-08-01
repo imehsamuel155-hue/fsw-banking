@@ -28,7 +28,7 @@
             max-width: 100%;
         }
     </style>
-    <title>My Bank Cards | First Smart Wave Banking</title>
+    <title>My Bank Cards | Sheyrove Financial Trust Banking</title>
     <!-- FontAwesome CDN for Icons (Back Arrow, Chip, Wifi, Credit Card) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -513,10 +513,10 @@
     <script>if (!fswRequireAuth()) { }</script>
     <script>
         fswApplyCards();
-        fswInitChatWidget({
-            icon: 'customerService', popup: 'customerPopup', messages: 'chatMessages',
-            input: 'chatInput', send: 'sendMessage', close: 'closeChat', openDisplay: 'flex'
-        });
+        (function () {
+            const el = document.getElementById('customerService') || document.getElementById('customerIcon');
+            if (el) { el.style.cursor = 'pointer'; el.onclick = function () { location.href = '/support'; }; }
+        })();
     </script>
     <script src="/script.js"></script>
 </body>

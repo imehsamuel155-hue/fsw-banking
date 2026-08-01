@@ -1,0 +1,72 @@
+{
+    "hosting": {
+        "public": "public",
+        "ignore": [
+            "firebase.json",
+            "**/.*",
+            "**/node_modules/**"
+        ],
+        "rewrites": [
+            {
+                "source": "/login",
+                "destination": "/login.html"
+            },
+            {
+                "source": "/signup",
+                "destination": "/signup.html"
+            },
+            {
+                "source": "/admin",
+                "destination": "/admin.html"
+            },
+            {
+                "source": "/dashboard",
+                "destination": "/dashboard.html"
+            },
+            {
+                "source": "/pin",
+                "destination": "/pin.html"
+            },
+            {
+                "source": "/profile",
+                "destination": "/view-profile.html"
+            },
+            {
+                "source": "/cards",
+                "destination": "/bank-cards.html"
+            },
+            {
+                "source": "/local-transfer",
+                "destination": "/local-transfer.html"
+            },
+            {
+                "source": "/international-transfer",
+                "destination": "/international-transfer.html"
+            },
+            {
+                "source": "/tic-code",
+                "destination": "/tic-code.html"
+            },
+            {
+                "source": "/receipt",
+                "destination": "/transaction-receipt.html"
+            },
+            {
+                "source": "/deposit",
+                "destination": "/deposit.html"
+            },
+            {
+                "source": "/deposit-history",
+                "destination": "/deposit-history.html"
+            },
+            {
+                "source": "/settings",
+                "destination": "/account-settings.html"
+            },
+            {
+                "source": "/statement",
+                "destination": "/transaction-statement.html"
+            }
+        ]
+    }
+}

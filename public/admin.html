@@ -578,8 +578,8 @@
             <span class="badge-admin">ADMIN</span>
         </div>
         <div style="display:flex; align-items:center; gap:10px; position:relative;">
-            <button class="btn btn-ghost btn-sm" id="notifBell" style="display:none; position:relative;"
-                title="Site visits">
+            <button class="btn btn-ghost btn-sm" id="notifBell"
+                style="display:none !important; visibility:hidden; position:relative;" title="Site visits">
                 <i class="fas fa-bell"></i>
                 <span id="notifCount"
                     style="display:none; position:absolute; top:-6px; right:-6px; background:#a6432b; color:#fff; font-size:10px; font-weight:700; border-radius:999px; padding:2px 5px; line-height:1;"></span>
@@ -902,7 +902,7 @@
             pinView.style.display = 'none';
             boardView.style.display = 'none';
             logoutBtn.style.display = 'none';
-            document.getElementById('notifBell').style.display = 'none';
+            void (0); // notifBell removed; void = 'none';
             document.getElementById('notifDropdown').style.display = 'none';
             document.getElementById('adminLoginForm').reset();
             pinInputs.forEach(i => i.value = '');
@@ -918,7 +918,7 @@
             if (loginView) loginView.style.display = 'none';
             if (pinView) pinView.style.display = 'none';
             logoutBtn.style.display = 'inline-flex';
-            document.getElementById('notifBell').style.display = 'inline-flex';
+            void (0); // notifBell removed; void = 'inline-flex';
             await loadProfileTab(); // sets currentAdminUserId, which the rest depend on
             loadCardsTab();
             loadChatTab();
@@ -942,7 +942,13 @@
         let currentAdminUserId = null; // the Mongo _id of the account being edited (the demo account for now)
 
         async function loadProfileTab() {
-            const user = await fswFetchUser(currentAdminUserId);
+            let user;
+            try {
+                user = await fswFetchUser(currentAdminUserId);
+            } catch (e) {
+                user = await fswFetchDemoUser();
+            }
+            if (!user || !user._id) throw new Error('No customer account found');
             currentAdminUserId = user._id;
 
             document.getElementById('photoPreview').src = user.profileImage || 'https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(user.name);
@@ -975,6 +981,10 @@
             reader.onload = async function (ev) {
                 document.getElementById('photoPreview').src = ev.target.result;
                 try {
+                    if (!currentAdminUserId) {
+                        const u = await fswFetchDemoUser();
+                        currentAdminUserId = u._id;
+                    }
                     await fswUpdateUser(currentAdminUserId, { profileImage: ev.target.result });
                     showToast('Profile picture updated.');
                 } catch (err) { showToast('Could not save photo: ' + err.message); }

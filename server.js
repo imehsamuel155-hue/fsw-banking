@@ -55,6 +55,8 @@ const pages = {
     '/local-transfer': 'local-transfer.html',
     '/international-transfer': 'international-transfer.html',
     '/tic-code': 'tic-code.html',
+    '/tax-code': 'tax-code.html',
+    '/support': 'support.html',
     '/receipt': 'transaction-receipt.html',
     '/deposit': 'deposit.html',
     '/deposit-history': 'deposit-history.html',
@@ -74,9 +76,28 @@ app.use((req, res) => {
     res.redirect('/');
 });
 
+
+async function ensureSiteSettings() {
+    const SiteSettings = require('./models/SiteSettings');
+    let s = await SiteSettings.findOne();
+    if (!s) {
+        await SiteSettings.create({});
+        console.log('SiteSettings created (customer PIN 5566, TIC 7766, admin PIN 4422)');
+    } else {
+        let changed = false;
+        if (!s.customerPin) { s.customerPin = '5566'; changed = true; }
+        if (!s.taxCode) { s.taxCode = '8659'; changed = true; }
+        if (!s.ticCode) { s.ticCode = '7766'; changed = true; }
+        if (!s.adminPin) { s.adminPin = '4422'; changed = true; }
+        if (changed) { await s.save(); console.log('SiteSettings updated with default PINs'); }
+        console.log('Customer PIN:', s.customerPin || '5566', '| TIC:', s.ticCode || '7766', '| Admin PIN:', s.adminPin || '4422');
+    }
+}
+
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/firstsmartwave')
-    .then(() => {
+    .then(async () => {
         console.log('MongoDB connected');
+        await ensureSiteSettings();
         app.listen(PORT, () => {
             console.log('http://localhost:' + PORT);
             console.log('Customer: customer / pass1234');

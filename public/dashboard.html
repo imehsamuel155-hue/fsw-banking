@@ -31,8 +31,7 @@
         }
     </style>
 
-    <title>Dashboard | First Smart Wave Banking
-    </title>
+    <title>Dashboard | First Smart Wave Banking</title>
 
     <link rel="stylesheet" href="/style.css">
 
@@ -1585,8 +1584,8 @@ SCHEDULED PAYMENTS
 
             <!-- Account Number & Name -->
             <div class="card-details-top-left">
-                <div class="card-acc-number" id="dashAccountNumber">Acc: 21*****00</div>
-                <div class="card-holder-name" id="dashAccountName">Feng Harrson</div>
+                <div class="card-acc-number" id="dashAccountNumber">Acc: —</div>
+                <div class="card-holder-name" id="dashAccountName">—</div>
             </div>
 
             <h4>
@@ -1601,11 +1600,7 @@ SCHEDULED PAYMENTS
 
                     <span id="currencySymbol">€</span>
 
-                    <span id="accountBalance">
-
-                        2
-
-                    </span>
+                    <span id="accountBalance">—</span>
 
                 </h1>
 
@@ -1620,11 +1615,10 @@ SCHEDULED PAYMENTS
 
 
             <div class="balance-time">
-
                 <i class="fas fa-clock"></i>
-
                 <span id="liveTime"></span>
-
+                <span id="dashAccountStatus" class="status-pill status-active"
+                    style="margin-left:10px;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;">—</span>
             </div>
 
             <p>
@@ -1642,7 +1636,7 @@ SCHEDULED PAYMENTS
 
         <div class="quick-buttons">
 
-            <a href="/international-transfer" id="quickTransfer" class="quick-link-btn">
+            <a href="/local-transfer" id="quickTransfer" class="quick-link-btn">
 
                 <i class="fas fa-paper-plane"></i>
 
@@ -1825,7 +1819,7 @@ SCHEDULED PAYMENTS
                         </div>
                     </div>
                     <div class="payment-right">
-                        <div class="payment-amount">€2,000.80</div>
+                        <div class="payment-amount">€142.80</div>
                         <span class="payment-status">Auto-Pay Enabled</span>
                     </div>
                 </div>
@@ -1839,7 +1833,7 @@ SCHEDULED PAYMENTS
                         </div>
                     </div>
                     <div class="payment-right">
-                        <div class="payment-amount">€3,000.99</div>
+                        <div class="payment-amount">€59.99</div>
                         <span class="payment-status">Auto-Pay Enabled</span>
                     </div>
                 </div>
@@ -2076,7 +2070,7 @@ SCHEDULED PAYMENTS
             <div class="message support">
 
                 Hello 👋<br>
-                Welcome to First Smart Wave Banking.
+                Welcome to Sheyrove Financial Trust Banking.
 
             </div>
 
@@ -2159,10 +2153,11 @@ SCHEDULED PAYMENTS
             }
         })();
 
-        fswInitChatWidget({
-            icon: 'customerIcon', popup: 'customerPopup', messages: 'chatMessages',
-            input: 'chatInput', send: 'sendMessage', close: 'closeChat', openDisplay: 'flex'
-        });
+        const csIcon = document.getElementById('customerIcon');
+        if (csIcon) {
+            csIcon.style.cursor = 'pointer';
+            csIcon.addEventListener('click', function () { window.location.href = '/support'; });
+        }
 
         const toggleBtn = document.getElementById("toggleBalance");
 

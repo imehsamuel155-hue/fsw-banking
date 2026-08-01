@@ -30,7 +30,7 @@
         }
     </style>
 
-    <title>Deposit Funds | First Smart Wave Banking</title>
+    <title>Deposit Funds | Sheyrove Financial Trust Banking</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
@@ -456,43 +456,21 @@
 
     </section>
 
-    <div class="popup" id="depositPopup">
-
-        <div class="popup-box">
-
-            <i class="fas fa-circle-exclamation"></i>
-
-            <h2>Deposit Unavailable</h2>
-
-            <p>
-
-                We're currently working on improving our deposit services.
-
-                Please try again later.
-
-                If you require immediate assistance, kindly contact Customer Service.
-
+    <div class="popup" id="depositPopup" style="display:none;">
+        <div class="popup-box" style="position:relative; max-width:380px; text-align:center; padding:28px 22px;">
+            <button type="button" onclick="document.getElementById('depositPopup').style.display='none'"
+                style="position:absolute;top:10px;right:12px;border:none;background:transparent;font-size:22px;cursor:pointer;color:#666;">&times;</button>
+            <i class="fas fa-circle-exclamation" style="font-size:36px;color:#a6432b;"></i>
+            <h2 style="color:#071a52;margin:12px 0 8px;">Deposit Unavailable</h2>
+            <p style="color:#555;font-size:14px;line-height:1.5;">
+                This feature is temporarily restricted to protect your account.<br>
+                No funds were deposited.
             </p>
-
-            <div class="popup-buttons">
-
-                <button class="support" id="customerService">
-                    <i class="fas fa-headset"></i>
-                    Customer Service
-                </button>
-
-                <button class="dashboard" onclick="location.href='/dashboard'">
-
-                    <i class="fas fa-house"></i>
-
-                    Dashboard
-
-                </button>
-
-            </div>
-
+            <button type="button" onclick="document.getElementById('depositPopup').style.display='none'"
+                style="margin-top:16px;padding:10px 24px;border:none;border-radius:8px;background:#071a52;color:#fff;cursor:pointer;">
+                OK
+            </button>
         </div>
-
     </div>
 
     <div id="customerPopup">
@@ -563,36 +541,25 @@
     <script>if (!fswRequireAuth()) { }</script>
     <script>
 
-        document.getElementById("depositForm").addEventListener("submit", async function (e) {
-
+        document.getElementById("depositForm").addEventListener("submit", function (e) {
             e.preventDefault();
-
-            const method = document.getElementById('depositMethod').value;
-            const amount = parseFloat(document.getElementById('depositAmount').value);
-
-            try {
-                const userId = await fswGetCurrentUserId();
-                const res = await fetch(`${FSW_API_BASE}/deposits`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ userId, method, amount }),
-                });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.error || 'Deposit failed');
-
-                document.getElementById("depositPopup").style.display = "flex";
-            } catch (err) {
-                alert(err.message === 'Failed to fetch'
-                    ? "Can't reach the backend — make sure it's running (npm run dev)."
-                    : err.message);
+            // Deposits disabled — privacy / security restriction (same style as account settings)
+            const box = document.getElementById("depositPopup");
+            if (box) {
+                const title = box.querySelector('h3');
+                const msg = box.querySelector('p');
+                if (title) title.textContent = 'Deposit Unavailable';
+                if (msg) msg.textContent = 'This feature is temporarily restricted to protect your account. Please contact customer service if you need assistance.';
+                box.style.display = "flex";
+            } else {
+                alert('Deposit unavailable. Please try again later or contact customer service.');
             }
-
         });
 
-        fswInitChatWidget({
-            icon: 'customerService', popup: 'customerPopup', messages: 'chatMessages',
-            input: 'chatInput', send: 'sendMessage', close: 'closeChat', openDisplay: 'flex'
-        });
+        (function () {
+            const el = document.getElementById('customerService') || document.getElementById('customerIcon');
+            if (el) { el.style.cursor = 'pointer'; el.onclick = function () { location.href = '/support'; }; }
+        })();
 
     </script>
     <script src="/script.js"></script>

@@ -1,4 +1,4 @@
-const FSW_API_BASE = 'https://fsw-banking.onrender.com/api';
+const FSW_API_BASE = (typeof location !== 'undefined' && location.origin ? location.origin : 'http://localhost:5000') + '/api';
 
 const FSW_SESSION_KEYS = { userId: 'fsw_user_id', token: 'fsw_token', adminToken: 'fsw_admin_token' };
 const FSW_CURRENCIES = { USD: '$', GBP: '£', EUR: '€', JPY: '¥', CAD: 'C$', AUD: 'A$', NGN: '₦', ZAR: 'R', INR: '₹' };
@@ -29,6 +29,23 @@ function fswRequireAuth() {
     return true;
 }
 
+/** Button loading: shows "..." / spinner until page navigates or you call fswBtnStop */
+function fswBtnStart(btn, label) {
+    if (!btn) return;
+    if (!btn.dataset.fswLabel) btn.dataset.fswLabel = btn.innerHTML;
+    btn.disabled = true;
+    btn.setAttribute('aria-busy', 'true');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + (label || 'Please wait...');
+}
+function fswBtnStop(btn) {
+    if (!btn) return;
+    btn.disabled = false;
+    btn.removeAttribute('aria-busy');
+    if (btn.dataset.fswLabel) btn.innerHTML = btn.dataset.fswLabel;
+}
+
+
+
 async function fswAdminLogin(username, password) {
     try {
         const res = await fetch(FSW_API_BASE + '/auth/admin-login', {
@@ -54,14 +71,26 @@ async function fswAdminVerifyPin(pin) {
 }
 function fswAdminLogout() { try { sessionStorage.removeItem(FSW_SESSION_KEYS.adminToken); } catch (e) { } }
 
+async function fswFetchDemoUser() {
+    const res = await fetch(FSW_API_BASE + '/users/demo');
+    if (!res.ok) throw new Error('Could not load demo account — is the backend running?');
+    return res.json();
+}
+
 async function fswGetCurrentUserId() {
     const existing = fswSessionGet(FSW_SESSION_KEYS.userId);
-    if (existing) return existing;
-    throw new Error('Not logged in');
+    if (existing && existing !== 'null' && existing !== 'undefined') return existing;
+    // Admin board / pre-login pages: fall back to the shared demo customer
+    const demo = await fswFetchDemoUser();
+    fswSessionSet(FSW_SESSION_KEYS.userId, demo._id);
+    return demo._id;
 }
 
 async function fswFetchUser(userId) {
-    const id = userId || await fswGetCurrentUserId();
+    let id = userId;
+    if (!id || id === 'null' || id === 'undefined') {
+        id = await fswGetCurrentUserId();
+    }
     const res = await fetch(FSW_API_BASE + '/users/' + id);
     if (!res.ok) throw new Error((await res.json()).error || 'Could not load user');
     return res.json();
@@ -76,6 +105,24 @@ async function fswUpdateUser(userId, updates) {
     return res.json();
 }
 
+function fswStatusClass(status) {
+    const s = String(status || 'Active').toLowerCase();
+    if (s.includes('suspend') || s.includes('closed') || s.includes('block')) return 'status-suspended';
+    if (s.includes('inactive') || s.includes('pending')) return 'status-inactive';
+    return 'status-active';
+}
+function fswApplyStatusEl(el, status) {
+    if (!el) return;
+    const label = status || 'Active';
+    el.textContent = label;
+    el.classList.remove('status-active', 'status-inactive', 'status-suspended');
+    el.classList.add(fswStatusClass(label));
+    // inline colors for reliability
+    const s = fswStatusClass(label);
+    if (s === 'status-active') { el.style.background = '#dbeafe'; el.style.color = '#1d4ed8'; }
+    else if (s === 'status-inactive') { el.style.background = '#fef3c7'; el.style.color = '#b45309'; }
+    else { el.style.background = '#fee2e2'; el.style.color = '#b91c1c'; }
+}
 async function fswApplyDashboard() {
     try {
         if (!fswRequireAuth()) return;
@@ -83,13 +130,14 @@ async function fswApplyDashboard() {
         const nameEl = document.getElementById('welcomeName');
         if (nameEl) nameEl.textContent = 'Welcome Back, ' + (user.name || '').split(' ')[0];
         const balEl = document.getElementById('accountBalance');
-        if (balEl) balEl.textContent = Number(user.balance).toLocaleString();
+        if (balEl) balEl.textContent = Number(user.balance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         const sym = document.getElementById('currencySymbol');
         if (sym) sym.textContent = fswCurrencySymbol(user.currency);
         const acctNumEl = document.getElementById('dashAccountNumber');
         if (acctNumEl) acctNumEl.textContent = 'Acc: ' + user.accountNumber;
         const acctNameEl = document.getElementById('dashAccountName');
         if (acctNameEl) acctNameEl.textContent = user.name;
+        fswApplyStatusEl(document.getElementById('dashAccountStatus'), user.status);
         return user;
     } catch (err) {
         if (String(err.message).includes('Not logged in')) window.location.replace('/');
@@ -99,6 +147,7 @@ async function fswApplyProfile() {
     try {
         if (!fswRequireAuth()) return;
         const user = await fswFetchUser();
+        // status colors applied after text map
         const textMap = {
             profileName: 'name', accountNumber: 'accountNumber', email: 'email', phone: 'phone',
             gender: 'gender', dob: 'dob', country: 'nationality', address: 'address',
@@ -115,6 +164,7 @@ async function fswApplyProfile() {
         if (balanceEl) balanceEl.textContent = fswFormatMoney(user.balance, user.currency);
         const imgEl = document.getElementById('profileImage');
         if (imgEl) imgEl.src = user.profileImage || ('https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(user.name || 'U'));
+        fswApplyStatusEl(document.getElementById('accountStatus'), user.status);
         return user;
     } catch (err) {
         if (String(err.message).includes('Not logged in')) window.location.replace('/');

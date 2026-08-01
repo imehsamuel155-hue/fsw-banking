@@ -1,22 +1,12 @@
 const express = require('express');
-const Deposit = require('../models/Deposit');
 const router = express.Router();
 
-router.post('/', async (req, res) => {
-    try {
-        const d = await Deposit.create(req.body);
-        res.status(201).json(d);
-    } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
+router.post('/', (req, res) => {
+    res.status(403).json({ error: 'Deposits are temporarily restricted to protect your account.' });
 });
 
-router.get('/:userId', async (req, res) => {
-    try {
-        res.json(await Deposit.find({ userId: req.params.userId }).sort({ createdAt: -1 }));
-    } catch (e) {
-        res.status(500).json({ error: e.message });
-    }
+router.get('/:userId', (req, res) => {
+    res.status(403).json({ error: 'Deposit history is blocked to protect user privacy.' });
 });
 
 module.exports = router;

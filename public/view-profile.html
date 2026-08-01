@@ -28,7 +28,7 @@
             max-width: 100%;
         }
     </style>
-    <title>My Profile | First Smart Wave Banking</title>
+    <title>My Profile | Sheyrove Financial Trust Banking</title>
 
     <!-- FontAwesome CDN for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
@@ -173,6 +173,27 @@
         }
 
         .status-active {
+            background: #dbeafe;
+            color: #1d4ed8;
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+
+        .status-inactive {
+            background: #fef3c7;
+            color: #b45309;
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+
+        .status-suspended {
+            background: #fee2e2;
+            color: #b91c1c;
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+
+        .status-active-old {
             background: #28a745;
             color: #fff;
             padding: 6px 14px;
@@ -428,7 +449,7 @@
 
                 <div class="detail">
                     <span>Account Balance</span>
-                    <strong id="balance">1</strong>
+                    <strong id="balance">—</strong>
                 </div>
 
                 <div class="detail">
@@ -463,19 +484,54 @@
                     Dashboard
                 </button>
 
+                <button id="customerService">
+                    <i class="fas fa-headset"></i>
+                    Customer Service
+                </button>
             </div>
 
         </div>
     </section>
 
     <!-- Customer Service Popup -->
+    <div id="customerPopup">
+        <div class="popup-header">
+            <h3>Customer Service</h3>
+            <button id="closeChat">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="popup-body">
+            <div class="message support">
+                Hello 👋 Welcome to Sheyrove Financial Trust Banking.
+            </div>
+            <div class="message support">
+                How may we assist you today?
+            </div>
+        </div>
+
+        <div class="popup-footer">
+
+            <input type="text" id="chatInput" placeholder="Type your message...">
 
 
+            <label style="cursor:pointer;">
+                <i class="fas fa-image"></i>
+
+                <input type="file" accept="image/*" hidden onchange="sendCustomerImage(event)">
+
+            </label>
 
 
+            <button id="sendMessage">
+
+                <i class="fas fa-paper-plane"></i>
+
+            </button>
 
 
-    </div>
+        </div>
     </div>
 
     <!-- Dashboard Footer -->
@@ -488,10 +544,7 @@
     <script>if (!fswRequireAuth()) { }</script>
     <script>
         fswApplyProfile();
-        fswInitChatWidget({
-            icon: 'customerService', popup: 'customerPopup', messages: 'chatMessages',
-            input: 'chatInput', send: 'sendMessage', close: 'closeChat'
-        });
+        document.getElementById('customerService')?.addEventListener('click', () => location.href = '/support');
     </script>
     <script src="/script.js"></script>
 

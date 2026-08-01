@@ -192,7 +192,7 @@
             <div class="pin-security">
                 <i class="fas fa-user-lock"></i>
                 <h3>Authentication Required</h3>
-                <p>Please enter your 4-digit Authentication PIN to access your dashboard.</p>
+                <p>Please enter your 4-digit Authentication PIN to access your account.</p>
             </div>
 
             <form id="pinForm">
@@ -239,14 +239,14 @@
         });
         pinForm.addEventListener("submit", async (e) => {
             e.preventDefault();
-            const enteredPin = pinInput.value;
+            const enteredPin = pinInput.value.trim();
             if (enteredPin.length !== 4) {
                 errorText.innerText = "Enter a 4-digit PIN.";
                 errorBanner.style.display = 'flex';
                 return;
             }
             const submitBtn = pinForm.querySelector('button[type="submit"]');
-            submitBtn.disabled = true;
+            fswBtnStart(submitBtn, 'Verifying...');
             try {
                 const userId = fswSessionGet(FSW_SESSION_KEYS.userId);
                 if (!userId) throw new Error('Session expired. Please login again.');
@@ -258,7 +258,7 @@
                 const data = await res.json();
                 if (res.ok && data.valid === true) {
                     sessionStorage.setItem('fsw_pin_ok', '1');
-                    window.location.href = '/dashboard';
+                    window.location.href = '/dashboard'; // loading stays
                     return;
                 }
                 throw new Error('Invalid Authentication PIN.');
@@ -269,8 +269,7 @@
                 errorBanner.style.display = 'flex';
                 pinInput.value = "";
                 pinInput.focus();
-            } finally {
-                submitBtn.disabled = false;
+                fswBtnStop(submitBtn);
             }
         });
     </script>
