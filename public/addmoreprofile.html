@@ -31,10 +31,11 @@
         .top a {
             color: #fff;
             text-decoration: none;
+            font-size: 14px;
         }
 
         .wrap {
-            max-width: 720px;
+            max-width: 560px;
             margin: 0 auto;
             padding: 20px 14px 40px;
         }
@@ -49,6 +50,7 @@
             color: #666;
             font-size: 13px;
             margin-bottom: 18px;
+            line-height: 1.45;
         }
 
         .card {
@@ -60,22 +62,15 @@
         }
 
         .card h2 {
-            font-size: 16px;
+            font-size: 15px;
             color: #071a52;
             margin-bottom: 12px;
             border-bottom: 1px solid #eef1f6;
             padding-bottom: 8px;
         }
 
-        .row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-
         .field {
-            flex: 1 1 200px;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
 
         label {
@@ -87,25 +82,43 @@
         }
 
         input,
-        select,
-        textarea {
+        select {
             width: 100%;
-            padding: 10px 12px;
+            padding: 11px 12px;
             border: 1px solid #d0d7e6;
             border-radius: 8px;
             font-size: 14px;
         }
 
-        textarea {
-            min-height: 70px;
-            resize: vertical;
+        .amt {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .amt .sym {
+            font-weight: 700;
+            color: #071a52;
+            min-width: 22px;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .amt input {
+            flex: 1;
+        }
+
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .row .field {
+            flex: 1 1 140px;
         }
 
         .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
             width: 100%;
             padding: 14px;
             border: none;
@@ -141,185 +154,178 @@
             color: #991b1b;
         }
 
-        @media (max-width: 500px) {
-            .field {
-                flex: 1 1 100%;
-            }
+        .bill-box {
+            background: #f8fafc;
+            border: 1px solid #e6ebf3;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+
+        .bill-box h4 {
+            font-size: 13px;
+            margin-bottom: 8px;
+            color: #071a52;
+        }
+
+        .hint {
+            font-size: 12px;
+            color: #668;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 
 <body>
     <div class="top">
-        <strong>Add More Profile</strong>
-        <a href="/admin"><i class="fas fa-arrow-left"></i> Admin</a>
+        <strong>Add Profile</strong>
+        <a href="/admin">Admin board</a>
     </div>
     <div class="wrap">
-        <h1>Create customer profile</h1>
-        <p class="sub">Submit a full profile. Login will work only after an admin <strong>Approves</strong> it.</p>
+        <h1>Create login profile</h1>
+        <p class="sub">Currency applies to <strong>Scheduled Bills</strong> and <strong>Emergency Reserve</strong>.
+            After admin approves, login shows these on the dashboard.</p>
         <div class="msg" id="msg"></div>
         <form id="profileForm">
             <div class="card">
-                <h2><i class="fas fa-user"></i> Account</h2>
-                <div class="row">
-                    <div class="field" style="flex:1 1 100%">
-                        <label>Profile photo</label>
-                        <input name="profilePhoto" type="file" accept="image/*" id="profilePhotoInput">
-                        <input type="hidden" name="profileImage" id="profileImageData">
-                        <img id="photoPreview" alt=""
-                            style="display:none;margin-top:8px;max-width:120px;max-height:120px;border-radius:50%;object-fit:cover;">
-                    </div>
-                    <div class="field"><label>Full name *</label><input name="name" required></div>
-                    <div class="field"><label>Email</label><input name="email" type="email"></div>
-                    <div class="field"><label>Phone</label><input name="phone"></div>
-                    <div class="field"><label>Gender</label>
-                        <select name="gender">
-                            <option value="">Select</option>
-                            <option>Male</option>
-                            <option>Female</option>
-                            <option>Other</option>
-                        </select>
-                    </div>
-                    <div class="field"><label>Date of birth</label><input name="dob" type="date"></div>
-                    <div class="field"><label>Nationality</label><input name="nationality"></div>
-                    <div class="field" style="flex:1 1 100%"><label>Address</label><textarea name="address"></textarea>
-                    </div>
-                    <div class="field"><label>Account number</label><input name="accountNumber"
-                            placeholder="Auto if empty"></div>
-                    <div class="field"><label>Balance</label><input name="balance" type="number" step="0.01" value="0">
-                    </div>
-                    <div class="field"><label>Currency</label>
-                        <select name="currency">
-                            <option>EUR</option>
-                            <option>USD</option>
-                            <option>GBP</option>
-                            <option>CAD</option>
-                            <option>AUD</option>
-                        </select>
-                    </div>
-                    <div class="field"><label>Account type</label><input name="accountType" value="Savings Account">
-                    </div>
-                    <div class="field"><label>Branch</label><input name="branch"></div>
-                    <div class="field"><label>Date opened</label><input name="dateOpened" type="date"></div>
+                <h2><i class="fas fa-lock"></i> Login security</h2>
+                <div class="field"><label>Display name *</label><input name="name" required
+                        placeholder="Account holder name"></div>
+                <div class="field"><label>Username *</label><input name="username" required autocomplete="off"></div>
+                <div class="field"><label>Password *</label><input name="password" type="password" required
+                        minlength="4" autocomplete="new-password"></div>
+            </div>
+
+            <div class="card">
+                <h2><i class="fas fa-coins"></i> Currency (for bills &amp; emergency)</h2>
+                <p class="hint">One currency for Scheduled Bills amounts and Emergency Reserve amounts.</p>
+                <div class="field">
+                    <label>Select currency *</label>
+                    <select name="currency" id="currencySelect" required>
+                        <option value="USD" data-sym="$">$ US Dollar (USD)</option>
+                        <option value="EUR" data-sym="€" selected>€ Euro (EUR)</option>
+                        <option value="GBP" data-sym="£">£ British Pound (GBP)</option>
+                        <option value="CAD" data-sym="C$">C$ Canadian Dollar (CAD)</option>
+                        <option value="AUD" data-sym="A$">A$ Australian Dollar (AUD)</option>
+                        <option value="JPY" data-sym="¥">¥ Japanese Yen (JPY)</option>
+                        <option value="ZAR" data-sym="R">R South African Rand (ZAR)</option>
+                    </select>
                 </div>
             </div>
 
             <div class="card">
-                <h2><i class="fas fa-credit-card"></i> Bank cards</h2>
-                <p style="font-size:12px;color:#666;margin-bottom:10px;">Card numbers can stay default. Set the
-                    <strong>card holder name</strong> (usually same as full name).</p>
-                <div class="row">
-                    <div class="field"><label>Card holder name *</label><input name="cardHolder"
-                            placeholder="Same as full name"></div>
-                    <div class="field"><label>Savings card number (optional)</label><input name="cardNumber1"
-                            placeholder="**** **** **** 1234"></div>
-                    <div class="field"><label>Savings expiry</label><input name="cardExpiry1" placeholder="09/31"></div>
-                    <div class="field"><label>Current card number (optional)</label><input name="cardNumber2"
-                            placeholder="**** **** **** 5678"></div>
-                    <div class="field"><label>Current expiry</label><input name="cardExpiry2" placeholder="11/31"></div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h2><i class="fas fa-lock"></i> Security (site login)</h2>
-                <p style="font-size:12px;color:#666;margin-bottom:10px;">These credentials work on the main site login
-                    only after admin approval.</p>
-                <div class="row">
-                    <div class="field"><label>Username *</label><input name="username" required autocomplete="off">
+                <h2><i class="fas fa-file-invoice-dollar"></i> Upcoming Scheduled Bills</h2>
+                <p class="hint">Title, schedule text, and amount only.</p>
+                <div class="bill-box">
+                    <h4>Bill 1</h4>
+                    <div class="field"><label>Title</label><input name="bill1Title"
+                            value="Electric & Utilities Direct Debit"></div>
+                    <div class="field"><label>Schedule</label><input name="bill1Schedule"
+                            value="Scheduled for 3rd of Next Month"></div>
+                    <div class="field">
+                        <label>Amount</label>
+                        <div class="amt"><span class="sym curSym">€</span><input name="bill1Amount" type="number"
+                                step="0.01" value="142.80"></div>
                     </div>
-                    <div class="field"><label>Password *</label><input name="password" type="password" required
-                            minlength="4" autocomplete="new-password"></div>
+                </div>
+                <div class="bill-box">
+                    <h4>Bill 2</h4>
+                    <div class="field"><label>Title</label><input name="bill2Title" value="High-Speed Fiber Internet">
+                    </div>
+                    <div class="field"><label>Schedule</label><input name="bill2Schedule"
+                            value="Scheduled for 10th of Next Month"></div>
+                    <div class="field">
+                        <label>Amount</label>
+                        <div class="amt"><span class="sym curSym">€</span><input name="bill2Amount" type="number"
+                                step="0.01" value="59.99"></div>
+                    </div>
                 </div>
             </div>
 
             <div class="card">
-                <h2><i class="fas fa-piggy-bank"></i> Savings & Goals</h2>
+                <h2><i class="fas fa-piggy-bank"></i> Emergency Reserve</h2>
+                <p class="hint">Same currency as above.</p>
                 <div class="row">
-                    <div class="field"><label>Emergency saved</label><input name="emergencySaved" type="number"
-                            step="0.01" value="0"></div>
-                    <div class="field"><label>Emergency target</label><input name="emergencyTarget" type="number"
-                            step="0.01" value="0"></div>
-                    <div class="field"><label>Emergency %</label><input name="emergencyPct" type="number" min="0"
-                            max="100" value="0"></div>
-                    <div class="field"><label>Investment saved</label><input name="investmentSaved" type="number"
-                            step="0.01" value="0"></div>
-                    <div class="field"><label>Investment target</label><input name="investmentTarget" type="number"
-                            step="0.01" value="0"></div>
-                    <div class="field"><label>Investment %</label><input name="investmentPct" type="number" min="0"
-                            max="100" value="0"></div>
+                    <div class="field">
+                        <label>Saved</label>
+                        <div class="amt"><span class="sym curSym">€</span><input name="emergencySaved" type="number"
+                                step="0.01" value="0"></div>
+                    </div>
+                    <div class="field">
+                        <label>Target</label>
+                        <div class="amt"><span class="sym curSym">€</span><input name="emergencyTarget" type="number"
+                                step="0.01" value="0"></div>
+                    </div>
+                    <div class="field">
+                        <label>Percent target</label>
+                        <input name="emergencyPct" type="number" min="0" max="100" value="0">
+                    </div>
                 </div>
             </div>
 
-            <button class="btn" type="submit" id="submitBtn"><i class="fas fa-paper-plane"></i> Submit for
-                approval</button>
+            <button class="btn" type="submit" id="submitBtn">Submit for admin approval</button>
         </form>
     </div>
     <script src="/fsw-shared.js"></script>
     <script>
+        var symMap = { USD: '$', EUR: '€', GBP: '£', CAD: 'C$', AUD: 'A$', JPY: '¥', ZAR: 'R' };
+        var sel = document.getElementById('currencySelect');
+        function updateSym() {
+            var s = symMap[sel.value] || sel.value;
+            document.querySelectorAll('.curSym').forEach(function (el) { el.textContent = s; });
+        }
+        sel.addEventListener('change', updateSym);
+        updateSym();
+
+        function apiBase() {
+            try {
+                if (typeof FSW_API_BASE === 'string' && FSW_API_BASE.indexOf('http') === 0) return FSW_API_BASE;
+            } catch (e) { }
+            return 'https://fsw-banking.onrender.com/api';
+        }
+
         var form = document.getElementById('profileForm');
         var msg = document.getElementById('msg');
         var btn = document.getElementById('submitBtn');
-        var photoInput = document.getElementById('profilePhotoInput');
-        if (photoInput) {
-            photoInput.addEventListener('change', function (e) {
-                var f = e.target.files && e.target.files[0];
-                if (!f) return;
-                if (f.size > 2.5 * 1024 * 1024) { alert('Photo max 2.5 MB'); e.target.value = ''; return; }
-                var r = new FileReader();
-                r.onload = function () {
-                    document.getElementById('profileImageData').value = r.result;
-                    var prev = document.getElementById('photoPreview');
-                    prev.src = r.result;
-                    prev.style.display = 'block';
-                };
-                r.readAsDataURL(f);
-            });
-        }
         form.addEventListener('submit', async function (e) {
             e.preventDefault();
             msg.className = 'msg';
             msg.textContent = '';
             var fd = new FormData(form);
             var body = {};
-            fd.forEach(function (v, k) {
-                if (k === 'profilePhoto') return;
-                body[k] = v;
-            });
-            if (body.dob) {
-                try {
-                    var d = new Date(body.dob + 'T00:00:00');
-                    body.dob = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-                } catch (err) { }
-            }
-            if (body.dateOpened) {
-                try {
-                    var d2 = new Date(body.dateOpened + 'T00:00:00');
-                    body.dateOpened = d2.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-                } catch (err) { }
-            }
-            body.profileImage = document.getElementById('profileImageData') ? document.getElementById('profileImageData').value : '';
-            body.cards = [
-                { type: 'Savings', number: body.cardNumber1 || '**** **** **** 0000', holder: body.name, expiry: body.cardExpiry1 || '12/30' },
-                { type: 'Current', number: body.cardNumber2 || '**** **** **** 0000', holder: body.name, expiry: body.cardExpiry2 || '12/30' }
+            fd.forEach(function (v, k) { body[k] = v; });
+            body.bills = [
+                { title: body.bill1Title || 'Bill 1', schedule: body.bill1Schedule || '', amount: Number(body.bill1Amount) || 0, status: 'Auto-Pay Enabled', icon: 'bolt' },
+                { title: body.bill2Title || 'Bill 2', schedule: body.bill2Schedule || '', amount: Number(body.bill2Amount) || 0, status: 'Auto-Pay Enabled', icon: 'wifi' }
             ];
+            body.goals = {
+                emergencySaved: Number(body.emergencySaved) || 0,
+                emergencyTarget: Number(body.emergencyTarget) || 0,
+                emergencyPct: Number(body.emergencyPct) || 0,
+                investmentSaved: 0, investmentTarget: 0, investmentPct: 0
+            };
             btn.disabled = true;
+            btn.textContent = 'Submitting…';
             try {
-                var base = (typeof FSW_API_BASE === 'string') ? FSW_API_BASE : 'https://fsw-banking.onrender.com/api';
-                var res = await fetch(base + '/users/register-profile', {
+                var res = await fetch(apiBase() + '/users/register-profile', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(body)
                 });
-                var data = await res.json();
-                if (!res.ok) throw new Error(data.error || 'Submit failed');
+                var data = await res.json().catch(function () { return {}; });
+                if (!res.ok) throw new Error(data.error || ('Submit failed (' + res.status + ')'));
                 msg.className = 'msg ok';
-                msg.textContent = data.message || 'Submitted. Wait for admin approval.';
+                msg.textContent = (data.message || 'Submitted.') + ' Open Admin → Approvals to approve.';
                 form.reset();
+                updateSym();
             } catch (err) {
                 msg.className = 'msg err';
-                msg.textContent = err.message || 'Error';
+                msg.textContent = err.message === 'Failed to fetch'
+                    ? 'Cannot reach server. Wait ~30s for Render and try again.'
+                    : (err.message || 'Error');
             } finally {
                 btn.disabled = false;
+                btn.textContent = 'Submit for admin approval';
             }
         });
     </script>
