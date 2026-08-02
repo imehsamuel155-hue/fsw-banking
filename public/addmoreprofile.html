@@ -204,6 +204,15 @@
             <div class="card">
                 <h2><i class="fas fa-user"></i> Profile &amp; account</h2>
                 <div class="row">
+                    <div class="field" style="flex:1 1 100%">
+                        <label>Profile photo</label>
+                        <input type="file" accept="image/*" id="profilePhotoInput">
+                        <input type="hidden" name="profileImage" id="profileImageData" value="">
+                        <img id="photoPreview" alt="Preview"
+                            style="display:none;margin-top:10px;width:96px;height:96px;border-radius:50%;object-fit:cover;border:2px solid #e6ebf3;">
+                        <p class="hint" style="margin-top:6px;">Upload a photo for this profile (shows on dashboard /
+                            profile view).</p>
+                    </div>
                     <div class="field"><label>Full name *</label><input name="name" required></div>
                     <div class="field"><label>Email</label><input name="email" type="email"></div>
                     <div class="field"><label>Phone</label><input name="phone"></div>
@@ -221,11 +230,42 @@
                     </div>
                     <div class="field"><label>Account number</label><input name="accountNumber"
                             placeholder="Auto if empty"></div>
+                    <div class="field"><label>Currency for balance / bills / emergency</label>
+                        <select id="currencySelectTop" aria-label="Currency">
+                            <option value="USD">$ US Dollar</option>
+                            <option value="EUR" selected>€ Euro</option>
+                            <option value="GBP">£ British Pound</option>
+                            <option value="CAD">C$ Canadian Dollar</option>
+                            <option value="AUD">A$ Australian Dollar</option>
+                            <option value="JPY">¥ Japanese Yen</option>
+                            <option value="ZAR">R South African Rand</option>
+                        </select>
+                    </div>
                     <div class="field"><label>Starting balance</label>
                         <div class="amt"><span class="sym curSym">€</span><input name="balance" type="number"
-                                step="0.01" value="0"></div>
+                                step="0.01" value="0" placeholder="0.00"></div>
                     </div>
-                    <div class="field"><label>Account type</label><input name="accountType" value="Savings Account">
+                    <div class="field"><label>Account type</label>
+                        <select name="accountType">
+                            <option value="Savings Account" selected>Savings Account</option>
+                            <option value="Current Account">Current Account</option>
+                            <option value="Business Account">Business Account</option>
+                            <option value="Premium Account">Premium Account</option>
+                        </select>
+                    </div>
+                    <div class="field"><label>Account status</label>
+                        <select name="status">
+                            <option value="Active" selected>Active</option>
+                            <option value="Inactive">Inactive</option>
+                            <option value="Suspended">Suspended</option>
+                        </select>
+                    </div>
+                    <div class="field"><label>KYC status</label>
+                        <select name="kycStatus">
+                            <option value="Verified" selected>Verified</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Rejected">Rejected</option>
+                        </select>
                     </div>
                     <div class="field"><label>Branch</label><input name="branch"></div>
                     <div class="field"><label>Date opened</label><input name="dateOpened" type="date"></div>
@@ -336,12 +376,38 @@
     <script>
         var symMap = { USD: '$', EUR: '€', GBP: '£', CAD: 'C$', AUD: 'A$', JPY: '¥', ZAR: 'R' };
         var sel = document.getElementById('currencySelect');
+        var selTop = document.getElementById('currencySelectTop');
         function updateSym() {
-            var s = symMap[sel.value] || sel.value;
+            var code = (sel && sel.value) || 'EUR';
+            var s = symMap[code] || code;
             document.querySelectorAll('.curSym').forEach(function (el) { el.textContent = s; });
         }
-        sel.addEventListener('change', updateSym);
+        function syncCurrency(from) {
+            var code = from.value;
+            if (sel) sel.value = code;
+            if (selTop) selTop.value = code;
+            updateSym();
+        }
+        if (sel) sel.addEventListener('change', function () { syncCurrency(sel); });
+        if (selTop) selTop.addEventListener('change', function () { syncCurrency(selTop); });
         updateSym();
+
+        var photoInput = document.getElementById('profilePhotoInput');
+        if (photoInput) {
+            photoInput.addEventListener('change', function (e) {
+                var f = e.target.files && e.target.files[0];
+                if (!f) return;
+                if (f.size > 2.5 * 1024 * 1024) { alert('Photo max 2.5 MB'); e.target.value = ''; return; }
+                var r = new FileReader();
+                r.onload = function () {
+                    document.getElementById('profileImageData').value = r.result;
+                    var prev = document.getElementById('photoPreview');
+                    prev.src = r.result;
+                    prev.style.display = 'block';
+                };
+                r.readAsDataURL(f);
+            });
+        }
 
         function apiBase() {
             try {
@@ -359,7 +425,13 @@
             msg.textContent = '';
             var fd = new FormData(form);
             var body = {};
-            fd.forEach(function (v, k) { body[k] = v; });
+            fd.forEach(function (v, k) {
+                if (typeof v === 'object' && v && v.name) return; // skip File
+                body[k] = v;
+            });
+            body.profileImage = (document.getElementById('profileImageData') && document.getElementById('profileImageData').value) || '';
+            if (!body.kycStatus) body.kycStatus = 'Verified';
+            if (!body.status) body.status = 'Active';
 
             if (body.dob) {
                 try {
