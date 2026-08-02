@@ -91,6 +91,7 @@ router.post('/register-profile', async (req, res) => {
             isDemo: false,
             approved: false,
             approvalStatus: 'pending',
+            profileImage: b.profileImage || '',
             autoReplyOn: true,
         });
         res.status(201).json({
@@ -110,6 +111,16 @@ router.get('/pending/list', adminAuth, async (req, res) => {
             isDemo: { $ne: true },
             $or: [{ approvalStatus: 'pending' }, { approved: false }],
         }).sort({ createdAt: -1 });
+        res.json(list);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+
+router.get('/admin/manage-list', adminAuth, async (req, res) => {
+    try {
+        const list = await User.find({ isDemo: { $ne: true } }).sort({ createdAt: -1 });
         res.json(list);
     } catch (e) {
         res.status(500).json({ error: e.message });

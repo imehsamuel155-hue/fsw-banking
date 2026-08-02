@@ -651,7 +651,7 @@
 
         <div class="panel">
 
-            <div id="accountSwitcher"
+            <div id="accountSwitcher" style="display:none"
                 style="margin:0 0 12px;padding:12px;background:#f0f6ff;border-radius:10px;border:1px solid #d6e4ff;">
                 <label style="font-size:12px;font-weight:600;color:#071a52;display:block;margin-bottom:6px;">Editing
                     account (each login is separate)</label>
@@ -661,16 +661,15 @@
                     selected customer only.</p>
             </div>
             <div class="tabs">
-                <button class="tab-btn active" data-tab="profile">Profile &amp; account</button>
-                <button class="tab-btn" data-tab="cards">Bank cards</button>
-                <button class="tab-btn" data-tab="chat">Customer service chat</button>
+                <button class="tab-btn active" data-tab="approvals">Approvals</button>
+                <button class="tab-btn" data-tab="goals">Savings &amp; Goals</button>
                 <button class="tab-btn" data-tab="security">Security</button>
-                <button class="tab-btn" data-tab="goals">Savings & Goals</button>
-                <button class="tab-btn" data-tab="approvals">Approvals</button>
                 <button class="tab-btn" data-tab="activity">Login activity</button>
+                <a href="/admin-chat" class="tab-btn" style="text-decoration:none;">Full chat</a>
+                <a href="/addmoreprofile" class="tab-btn" style="text-decoration:none;">Add profile</a>
             </div>
 
-            <div class="tab-panel active" id="tab-profile">
+            <div class="tab-panel" id="tab-profile" style="display:none !important">
                 <div class="photo-row">
                     <img id="photoPreview" alt="">
                     <div>
@@ -739,9 +738,9 @@
                 <button class="btn btn-gold btn-block" id="saveProfileBtn">Save changes</button>
             </div>
 
-            <div class="tab-panel" id="tab-cards"></div>
+            <div class="tab-panel" id="tab-cards" style="display:none !important"></div>
 
-            <div class="tab-panel" id="tab-chat">
+            <div class="tab-panel" id="tab-chat" style="display:none !important">
                 <div
                     style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
                     <h3 style="margin:0;color:#071a52;">Customer service chat</h3>
@@ -822,11 +821,11 @@
                     settings</button>
             </div>
 
-            <div class="tab-panel" id="tab-approvals">
-                <h3 style="margin-bottom:8px;color:#071a52;">Pending profiles</h3>
+            <div class="tab-panel active" id="tab-approvals">
+                <h3 style="margin-bottom:8px;color:#071a52;">Account approvals</h3>
                 <p style="font-size:13px;color:#666;margin-bottom:12px;">
-                    Profiles from <a href="/addmoreprofile">/addmoreprofile</a>. Approve to allow site login, or
-                    permanently delete.
+                    Accounts from <a href="/addmoreprofile" target="_blank">/addmoreprofile</a>.
+                    Pending cannot log in until approved. You can permanently delete any non-demo account.
                 </p>
                 <div id="approvalsList">
                     <p class="chat-empty">Loading…</p>
@@ -1005,13 +1004,13 @@
             if (!list) return;
             list.innerHTML = '<p class="chat-empty">Loading…</p>';
             try {
-                const res = await fetch(FSW_API_BASE + '/users/pending/list', {
+                const res = await fetch(FSW_API_BASE + '/users/admin/manage-list', {
                     headers: { Authorization: 'Bearer ' + fswGetAdminToken() }
                 });
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.error || 'Failed');
                 if (!data.length) {
-                    list.innerHTML = '<p class="chat-empty">No pending profiles.</p>';
+                    list.innerHTML = '<p class="chat-empty">No accounts yet. Create one at /addmoreprofile.</p>';
                     return;
                 }
                 list.innerHTML = data.map(u => `
@@ -1021,8 +1020,8 @@
                           Acc: ${u.accountNumber || '—'} · Balance: ${u.balance} ${u.currency || ''} · Status: ${u.approvalStatus || 'pending'}
                         </div>
                         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
-                          <button class="btn btn-primary btn-sm" data-approve="${u._id}">Approve</button>
-                          <button class="btn btn-ghost btn-sm" style="color:#a6432b;border-color:#f5c6cb;" data-del="${u._id}">Permanent delete</button>
+                          ${(!u.approved && !u.isDemo) ? '<button class="btn btn-primary btn-sm" data-approve="' + u._id + '">Approve</button>' : '<span style="font-size:12px;color:#166534;font-weight:600;">Approved</span>'}
+                          ${!u.isDemo ? '<button class="btn btn-ghost btn-sm" style="color:#a6432b;border-color:#f5c6cb;" data-del="' + u._id + '">Permanent delete</button>' : '<span style="font-size:12px;color:#888;">Demo</span>'}
                         </div>
                       </div>`).join('');
                 list.querySelectorAll('[data-approve]').forEach(btn => {
@@ -1067,14 +1066,21 @@
             }
         });
 
-        document.querySelectorAll('.tab-btn').forEach(btn => {
+        document.querySelectorAll('.tab-btn[data-tab]').forEach(btn => {
             btn.addEventListener('click', () => {
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-btn[data-tab]').forEach(b => b.classList.remove('active'));
                 document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
                 btn.classList.add('active');
-                document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+                const panel = document.getElementById('tab-' + btn.dataset.tab);
+                if (panel) panel.classList.add('active');
+                if (btn.dataset.tab === 'approvals') loadApprovalsTab();
+                if (btn.dataset.tab === 'goals') { try { loadGoalsTab(); } catch (e) { } }
+                if (btn.dataset.tab === 'activity') { try { loadActivityTab(); } catch (e) { } }
+                if (btn.dataset.tab === 'security') { try { loadSecurityTab(); } catch (e) { } }
             });
         });
+        // load approvals on board open
+        setTimeout(() => { try { loadApprovalsTab(); } catch (e) { } }, 400);
 
         /* ---------- Profile & account tab ---------- */
         let currentAdminUserId = null; // the Mongo _id of the account being edited (the demo account for now)

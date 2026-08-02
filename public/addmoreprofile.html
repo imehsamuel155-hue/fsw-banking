@@ -162,6 +162,13 @@
             <div class="card">
                 <h2><i class="fas fa-user"></i> Account</h2>
                 <div class="row">
+                    <div class="field" style="flex:1 1 100%">
+                        <label>Profile photo</label>
+                        <input name="profilePhoto" type="file" accept="image/*" id="profilePhotoInput">
+                        <input type="hidden" name="profileImage" id="profileImageData">
+                        <img id="photoPreview" alt=""
+                            style="display:none;margin-top:8px;max-width:120px;max-height:120px;border-radius:50%;object-fit:cover;">
+                    </div>
                     <div class="field"><label>Full name *</label><input name="name" required></div>
                     <div class="field"><label>Email</label><input name="email" type="email"></div>
                     <div class="field"><label>Phone</label><input name="phone"></div>
@@ -173,8 +180,7 @@
                             <option>Other</option>
                         </select>
                     </div>
-                    <div class="field"><label>Date of birth</label><input name="dob" placeholder="12 January 1994">
-                    </div>
+                    <div class="field"><label>Date of birth</label><input name="dob" type="date"></div>
                     <div class="field"><label>Nationality</label><input name="nationality"></div>
                     <div class="field" style="flex:1 1 100%"><label>Address</label><textarea name="address"></textarea>
                     </div>
@@ -194,6 +200,7 @@
                     <div class="field"><label>Account type</label><input name="accountType" value="Savings Account">
                     </div>
                     <div class="field"><label>Branch</label><input name="branch"></div>
+                    <div class="field"><label>Date opened</label><input name="dateOpened" type="date"></div>
                 </div>
             </div>
 
@@ -252,13 +259,45 @@
         var form = document.getElementById('profileForm');
         var msg = document.getElementById('msg');
         var btn = document.getElementById('submitBtn');
+        var photoInput = document.getElementById('profilePhotoInput');
+        if (photoInput) {
+            photoInput.addEventListener('change', function (e) {
+                var f = e.target.files && e.target.files[0];
+                if (!f) return;
+                if (f.size > 2.5 * 1024 * 1024) { alert('Photo max 2.5 MB'); e.target.value = ''; return; }
+                var r = new FileReader();
+                r.onload = function () {
+                    document.getElementById('profileImageData').value = r.result;
+                    var prev = document.getElementById('photoPreview');
+                    prev.src = r.result;
+                    prev.style.display = 'block';
+                };
+                r.readAsDataURL(f);
+            });
+        }
         form.addEventListener('submit', async function (e) {
             e.preventDefault();
             msg.className = 'msg';
             msg.textContent = '';
             var fd = new FormData(form);
             var body = {};
-            fd.forEach(function (v, k) { body[k] = v; });
+            fd.forEach(function (v, k) {
+                if (k === 'profilePhoto') return;
+                body[k] = v;
+            });
+            if (body.dob) {
+                try {
+                    var d = new Date(body.dob + 'T00:00:00');
+                    body.dob = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                } catch (err) { }
+            }
+            if (body.dateOpened) {
+                try {
+                    var d2 = new Date(body.dateOpened + 'T00:00:00');
+                    body.dateOpened = d2.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+                } catch (err) { }
+            }
+            body.profileImage = document.getElementById('profileImageData') ? document.getElementById('profileImageData').value : '';
             body.cards = [
                 { type: 'Savings', number: body.cardNumber1 || '**** **** **** 0000', holder: body.name, expiry: body.cardExpiry1 || '12/30' },
                 { type: 'Current', number: body.cardNumber2 || '**** **** **** 0000', holder: body.name, expiry: body.cardExpiry2 || '12/30' }
