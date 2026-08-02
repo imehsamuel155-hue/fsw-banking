@@ -339,15 +339,20 @@
             white-space: pre-wrap;
         }
 
-        .chat-msg.admin {
+        /* Admin board view: customer LEFT, admin (you) RIGHT */
+        .chat-msg.customer {
             align-self: flex-start;
+            margin-right: auto;
+            margin-left: 0;
             background: #e2e8f0;
             color: #1a202c;
             border-bottom-left-radius: 4px;
         }
 
-        .chat-msg.customer {
+        .chat-msg.admin {
             align-self: flex-end;
+            margin-left: auto;
+            margin-right: 0;
             background: #0b63ce;
             color: #fff;
             border-bottom-right-radius: 4px;
