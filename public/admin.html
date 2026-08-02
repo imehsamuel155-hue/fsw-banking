@@ -319,7 +319,7 @@
             background: #f8fafc;
             border-radius: 10px;
             padding: 14px;
-            height: 300px;
+            height: min(420px, 50vh);
             overflow-y: auto;
             display: flex;
             flex-direction: column;
@@ -333,20 +333,24 @@
             padding: 9px 12px;
             border-radius: 10px;
             font-size: 13.5px;
-            line-height: 1.4;
+            line-height: 1.45;
             word-break: break-word;
-        }
-
-        .chat-msg.customer {
-            align-self: flex-start;
-            background: #e2e8f0;
-            color: #1a202c;
+            overflow-wrap: anywhere;
+            white-space: pre-wrap;
         }
 
         .chat-msg.admin {
+            align-self: flex-start;
+            background: #e2e8f0;
+            color: #1a202c;
+            border-bottom-left-radius: 4px;
+        }
+
+        .chat-msg.customer {
             align-self: flex-end;
             background: #0b63ce;
             color: #fff;
+            border-bottom-right-radius: 4px;
         }
 
         .chat-msg img {
@@ -1094,7 +1098,7 @@
                 const body = m.image
                     ? (m.text ? m.text + '<br>' : '') + `<img src="${m.image}" alt="" class="fsw-chat-img" style="cursor:pointer;">`
                     : m.text;
-                return `<div class="chat-msg ${m.sender}">${body}<div class="meta">${m.sender === 'admin' ? 'You' : 'Customer'} &middot; ${time}</div></div>`;
+                return `<div class="chat-msg ${m.sender}">${body}<div class="meta">${m.sender === 'admin' ? 'Support (You)' : 'Customer'} &middot; ${time}</div></div>`;
             }).join('');
             win.scrollTop = win.scrollHeight;
             return msgs.length;
