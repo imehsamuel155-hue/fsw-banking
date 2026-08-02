@@ -650,12 +650,23 @@
 
 
         <div class="panel">
+
+            <div id="accountSwitcher"
+                style="margin:0 0 12px;padding:12px;background:#f0f6ff;border-radius:10px;border:1px solid #d6e4ff;">
+                <label style="font-size:12px;font-weight:600;color:#071a52;display:block;margin-bottom:6px;">Editing
+                    account (each login is separate)</label>
+                <select id="adminUserSelect"
+                    style="width:100%;padding:10px;border-radius:8px;border:1px solid #c5d4f0;font-size:14px;"></select>
+                <p style="font-size:11px;color:#666;margin-top:6px;">Profile, cards, goals &amp; chat apply to the
+                    selected customer only.</p>
+            </div>
             <div class="tabs">
                 <button class="tab-btn active" data-tab="profile">Profile &amp; account</button>
                 <button class="tab-btn" data-tab="cards">Bank cards</button>
                 <button class="tab-btn" data-tab="chat">Customer service chat</button>
                 <button class="tab-btn" data-tab="security">Security</button>
                 <button class="tab-btn" data-tab="goals">Savings & Goals</button>
+                <button class="tab-btn" data-tab="approvals">Approvals</button>
                 <button class="tab-btn" data-tab="activity">Login activity</button>
             </div>
 
@@ -731,6 +742,13 @@
             <div class="tab-panel" id="tab-cards"></div>
 
             <div class="tab-panel" id="tab-chat">
+                <div
+                    style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+                    <h3 style="margin:0;color:#071a52;">Customer service chat</h3>
+                    <a href="/admin-chat" class="btn btn-primary btn-sm" style="text-decoration:none;">Open full-page
+                        chat</a>
+                </div>
+
                 <div class="chat-toolbar">
                     <label class="autoreply-toggle">
                         <span class="switch"><input type="checkbox" id="autoReplyToggle"><span
@@ -803,6 +821,18 @@
                 <button class="btn btn-gold btn-block" id="saveSecurityBtn" style="margin-top:12px;">Save security
                     settings</button>
             </div>
+
+            <div class="tab-panel" id="tab-approvals">
+                <h3 style="margin-bottom:8px;color:#071a52;">Pending profiles</h3>
+                <p style="font-size:13px;color:#666;margin-bottom:12px;">
+                    Profiles from <a href="/addmoreprofile">/addmoreprofile</a>. Approve to allow site login, or
+                    permanently delete.
+                </p>
+                <div id="approvalsList">
+                    <p class="chat-empty">Loading…</p>
+                </div>
+            </div>
+
             <div class="tab-panel" id="tab-activity">
                 <h3 style="margin-bottom:12px;color:#071a52;">Recent login attempts</h3>
                 <p style="font-size:13px;color:#666;margin-bottom:14px;">Time, date, username, success/fail, location.
@@ -920,6 +950,34 @@
         });
         if (adminSessionGet() === 'true') enterBoard();
 
+
+        async function loadAdminUserList() {
+            const sel = document.getElementById('adminUserSelect');
+            if (!sel) return;
+            try {
+                const res = await fetch(FSW_API_BASE + '/users/admin/all-customers', {
+                    headers: { Authorization: 'Bearer ' + fswGetAdminToken() }
+                });
+                const list = await res.json();
+                if (!res.ok) throw new Error(list.error || 'Failed');
+                sel.innerHTML = list.map(u => {
+                    const label = (u.name || 'User') + (u.username ? ' @' + u.username : '') +
+                        (u.isDemo ? ' (demo)' : '') +
+                        (u.approved === false ? ' [pending]' : '');
+                    const selAttr = (currentAdminUserId && String(currentAdminUserId) === String(u._id)) ? ' selected' : '';
+                    return '<option value="' + u._id + '"' + selAttr + '>' + label + '</option>';
+                }).join('');
+                if (!currentAdminUserId && list[0]) currentAdminUserId = list[0]._id;
+                sel.onchange = async function () {
+                    currentAdminUserId = this.value;
+                    await loadProfileTab();
+                    try { await loadCardsTab(); } catch (e) { }
+                    try { await loadGoalsTab && loadGoalsTab(); } catch (e) { }
+                    showToast('Switched account');
+                };
+            } catch (e) { console.warn(e); }
+        }
+
         async function enterBoard() {
             loginView.style.display = 'none';
             pinView.style.display = 'none';
@@ -928,7 +986,9 @@
             if (pinView) pinView.style.display = 'none';
             logoutBtn.style.display = 'inline-flex';
             void (0); // notifBell removed; void = 'inline-flex';
+            await loadAdminUserList();
             await loadProfileTab(); // sets currentAdminUserId, which the rest depend on
+            await loadAdminUserList();
             loadCardsTab();
             loadChatTab();
             initVisitNotifications();
@@ -938,6 +998,75 @@
         }
 
         /* ---------- Tabs ---------- */
+
+        /* Approvals tab */
+        async function loadApprovalsTab() {
+            const list = document.getElementById('approvalsList');
+            if (!list) return;
+            list.innerHTML = '<p class="chat-empty">Loading…</p>';
+            try {
+                const res = await fetch(FSW_API_BASE + '/users/pending/list', {
+                    headers: { Authorization: 'Bearer ' + fswGetAdminToken() }
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'Failed');
+                if (!data.length) {
+                    list.innerHTML = '<p class="chat-empty">No pending profiles.</p>';
+                    return;
+                }
+                list.innerHTML = data.map(u => `
+                      <div style="background:#f8fafc;border:1px solid #e6ebf3;border-radius:10px;padding:14px;margin-bottom:12px;">
+                        <div style="font-weight:600;color:#071a52;">${u.name || '—'} <small style="font-weight:400;color:#666;">(@${u.username || '—'})</small></div>
+                        <div style="font-size:12.5px;color:#555;margin:6px 0;">
+                          Acc: ${u.accountNumber || '—'} · Balance: ${u.balance} ${u.currency || ''} · Status: ${u.approvalStatus || 'pending'}
+                        </div>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+                          <button class="btn btn-primary btn-sm" data-approve="${u._id}">Approve</button>
+                          <button class="btn btn-ghost btn-sm" style="color:#a6432b;border-color:#f5c6cb;" data-del="${u._id}">Permanent delete</button>
+                        </div>
+                      </div>`).join('');
+                list.querySelectorAll('[data-approve]').forEach(btn => {
+                    btn.onclick = async () => {
+                        if (!confirm('Approve this account for site login?')) return;
+                        const r = await fetch(FSW_API_BASE + '/users/' + btn.dataset.approve + '/approve', {
+                            method: 'POST', headers: { Authorization: 'Bearer ' + fswGetAdminToken() }
+                        });
+                        const d = await r.json();
+                        if (!r.ok) return showToast(d.error || 'Failed');
+                        showToast('Approved — they can log in on the site.');
+                        loadApprovalsTab();
+                    };
+                });
+                list.querySelectorAll('[data-del]').forEach(btn => {
+                    btn.onclick = async () => {
+                        if (!confirm('Permanently delete this profile?')) return;
+                        const r = await fetch(FSW_API_BASE + '/users/' + btn.dataset.del, {
+                            method: 'DELETE', headers: { Authorization: 'Bearer ' + fswGetAdminToken() }
+                        });
+                        const d = await r.json();
+                        if (!r.ok) return showToast(d.error || 'Failed');
+                        showToast('Deleted permanently.');
+                        loadApprovalsTab();
+                    };
+                });
+            } catch (e) {
+                list.innerHTML = '<p class="chat-empty">' + e.message + '</p>';
+            }
+        }
+
+        // Photo lightbox
+        const lb = document.getElementById('adminLightbox');
+        const lbImg = document.getElementById('adminLbImg');
+        document.getElementById('adminLbClose')?.addEventListener('click', () => { if (lb) lb.style.display = 'none'; });
+        lb?.addEventListener('click', (e) => { if (e.target === lb) lb.style.display = 'none'; });
+        document.addEventListener('click', (e) => {
+            const img = e.target.closest && e.target.closest('.fsw-chat-img, .chat-msg img');
+            if (img && img.src && lb && lbImg) {
+                lbImg.src = img.src;
+                lb.style.display = 'flex';
+            }
+        });
+
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -1344,6 +1473,13 @@
 
     </script>
 
+
+    <div id="adminLightbox"
+        style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;align-items:center;justify-content:center;padding:20px;">
+        <button type="button" id="adminLbClose"
+            style="position:absolute;top:16px;right:16px;width:44px;height:44px;border:none;border-radius:50%;background:#fff;font-size:22px;cursor:pointer;">&times;</button>
+        <img id="adminLbImg" src="" alt="" style="max-width:100%;max-height:90vh;border-radius:8px;">
+    </div>
 </body>
 
 </html>

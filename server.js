@@ -57,6 +57,8 @@ const pages = {
     '/tic-code': 'tic-code.html',
     '/tax-code': 'tax-code.html',
     '/support': 'support.html',
+    '/addmoreprofile': 'addmoreprofile.html',
+    '/admin-chat': 'admin-chat.html',
     '/receipt': 'transaction-receipt.html',
     '/deposit': 'deposit.html',
     '/deposit-history': 'deposit-history.html',

@@ -20,6 +20,8 @@ const userSchema = new mongoose.Schema({
     dateOpened: { type: String, default: '18 March 2026' },
     profileImage: { type: String, default: '' },
     isDemo: { type: Boolean, default: false },
+    approved: { type: Boolean, default: false },
+    approvalStatus: { type: String, default: 'pending' }, // pending | approved | rejected
     autoReplyOn: { type: Boolean, default: true },
     goals: {
         emergencySaved: { type: Number, default: 15000 },

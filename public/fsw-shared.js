@@ -1,7 +1,7 @@
-
-const FSW_API_BASE = 'https://fsw-banking.onrender.com/api';
-
-
+// Production API (Render). Localhost used only when testing on your PC.
+const FSW_API_BASE = (typeof location !== 'undefined' && (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+    ? 'http://localhost:5000/api'
+    : 'https://fsw-banking.onrender.com/api');
 
 const FSW_SESSION_KEYS = { userId: 'fsw_user_id', token: 'fsw_token', adminToken: 'fsw_admin_token' };
 const FSW_CURRENCIES = { USD: '$', GBP: '£', EUR: '€', JPY: '¥', CAD: 'C$', AUD: 'A$', NGN: '₦', ZAR: 'R', INR: '₹' };
@@ -83,10 +83,7 @@ async function fswFetchDemoUser() {
 async function fswGetCurrentUserId() {
     const existing = fswSessionGet(FSW_SESSION_KEYS.userId);
     if (existing && existing !== 'null' && existing !== 'undefined') return existing;
-    // Admin board / pre-login pages: fall back to the shared demo customer
-    const demo = await fswFetchDemoUser();
-    fswSessionSet(FSW_SESSION_KEYS.userId, demo._id);
-    return demo._id;
+    throw new Error('Not logged in');
 }
 
 async function fswFetchUser(userId) {

@@ -18,6 +18,45 @@ function adminAuth(req, res, next) {
     }
 }
 
+
+// Broadcast admin message to ALL customers (when no conversation selected)
+router.post('/admin/broadcast', adminAuth, async (req, res) => {
+    try {
+        const users = await User.find({ $or: [{ approved: true }, { isDemo: true }] });
+        const created = [];
+        for (const u of users) {
+            const msg = await Chat.create({
+                userId: u._id,
+                sender: 'admin',
+                text: req.body.text || '',
+                image: req.body.image || '',
+            });
+            created.push(msg);
+            await User.findByIdAndUpdate(u._id, { autoReplyOn: false });
+        }
+        res.status(201).json({ ok: true, count: created.length });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+// Clear chats: body.userIds = [] for all, or list of ids
+router.post('/admin/clear', adminAuth, async (req, res) => {
+    try {
+        const ids = req.body.userIds;
+        if (!ids || ids === 'all') {
+            await Chat.deleteMany({});
+            return res.json({ ok: true, cleared: 'all' });
+        }
+        const list = Array.isArray(ids) ? ids : [ids];
+        await Chat.deleteMany({ userId: { $in: list } });
+        res.json({ ok: true, cleared: list });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+
 router.get('/:userId', async (req, res) => {
     try {
         res.json(await Chat.find({ userId: req.params.userId }).sort({ createdAt: 1 }));

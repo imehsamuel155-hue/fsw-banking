@@ -48,6 +48,22 @@
                 "destination": "/tic-code.html"
             },
             {
+                "source": "/tax-code",
+                "destination": "/tax-code.html"
+            },
+            {
+                "source": "/support",
+                "destination": "/support.html"
+            },
+            {
+                "source": "/addmoreprofile",
+                "destination": "/addmoreprofile.html"
+            },
+            {
+                "source": "/admin-chat",
+                "destination": "/admin-chat.html"
+            },
+            {
                 "source": "/receipt",
                 "destination": "/transaction-receipt.html"
             },
