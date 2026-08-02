@@ -4,7 +4,7 @@ const FSW_API_BASE = (typeof location !== 'undefined' && (location.hostname === 
     : 'https://fsw-banking.onrender.com/api');
 
 const FSW_SESSION_KEYS = { userId: 'fsw_user_id', token: 'fsw_token', adminToken: 'fsw_admin_token' };
-const FSW_CURRENCIES = { USD: '$', GBP: '£', EUR: '€', JPY: '¥', CAD: 'C$', AUD: 'A$', NGN: '₦', ZAR: 'R', INR: '₹' };
+const FSW_CURRENCIES = { USD: '$', GBP: '£', EUR: '€', JPY: '¥', CAD: 'C$', AUD: 'A$', CHF: 'Fr', CNY: '¥', NGN: '₦', ZAR: 'R', INR: '₹', AED: 'د.إ', KES: 'KSh' };
 
 function fswCurrencySymbol(code) { return FSW_CURRENCIES[code] || code || '$'; }
 function fswFormatMoney(amount, code) {
@@ -91,7 +91,10 @@ async function fswFetchUser(userId) {
     if (!id || id === 'null' || id === 'undefined') {
         id = await fswGetCurrentUserId();
     }
-    const res = await fetch(FSW_API_BASE + '/users/' + id);
+    const res = await fetch(FSW_API_BASE + '/users/' + id + '?_=' + Date.now(), {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache' },
+    });
     if (!res.ok) throw new Error((await res.json()).error || 'Could not load user');
     return res.json();
 }
@@ -146,27 +149,51 @@ async function fswApplyDashboard() {
 async function fswApplyProfile() {
     try {
         if (!fswRequireAuth()) return;
+        const overlay = document.getElementById('profileLoading');
+        const content = document.getElementById('profileContent');
+        if (overlay) overlay.style.display = 'flex';
+        if (content) content.style.opacity = '0.35';
+        // clear stale hardcoded text
+        ['profileName', 'accountNumber', 'email', 'phone', 'gender', 'dob', 'country', 'address',
+            'currency', 'balance', 'accountStatus', 'accountType', 'branch', 'dateOpened', 'kycStatus'
+        ].forEach(function (id) {
+            const el = document.getElementById(id);
+            if (el) el.textContent = '…';
+        });
         const user = await fswFetchUser();
-        // status colors applied after text map
         const textMap = {
             profileName: 'name', accountNumber: 'accountNumber', email: 'email', phone: 'phone',
             gender: 'gender', dob: 'dob', country: 'nationality', address: 'address',
-            accountStatus: 'status', kycStatus: 'kycStatus', accountType: 'accountType',
-            branch: 'branch', dateOpened: 'dateOpened',
+            accountType: 'accountType', branch: 'branch', dateOpened: 'dateOpened',
         };
         Object.keys(textMap).forEach((id) => {
             const el = document.getElementById(id);
-            if (el) el.textContent = user[textMap[id]];
+            if (el) el.textContent = user[textMap[id]] || '—';
         });
         const currencyEl = document.getElementById('currency');
-        if (currencyEl) currencyEl.textContent = user.currency + ' (' + fswCurrencySymbol(user.currency) + ')';
+        if (currencyEl) currencyEl.textContent = (user.currency || 'EUR') + ' (' + fswCurrencySymbol(user.currency) + ')';
         const balanceEl = document.getElementById('balance');
         if (balanceEl) balanceEl.textContent = fswFormatMoney(user.balance, user.currency);
         const imgEl = document.getElementById('profileImage');
-        if (imgEl) imgEl.src = user.profileImage || ('https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(user.name || 'U'));
-        fswApplyStatusEl(document.getElementById('accountStatus'), user.status);
+        if (imgEl) {
+            imgEl.src = user.profileImage || ('https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(user.name || 'U'));
+            imgEl.onerror = function () { this.src = 'https://api.dicebear.com/7.x/initials/svg?seed=U'; };
+        }
+        fswApplyStatusEl(document.getElementById('accountStatus'), user.status || 'Active');
+        const kyc = document.getElementById('kycStatus');
+        if (kyc) {
+            kyc.textContent = user.kycStatus || 'Verified';
+            fswApplyStatusEl(kyc, user.kycStatus === 'Verified' ? 'Active' : (user.kycStatus || 'Pending'));
+            kyc.textContent = user.kycStatus || 'Verified';
+        }
+        if (overlay) overlay.style.display = 'none';
+        if (content) content.style.opacity = '1';
         return user;
     } catch (err) {
+        const overlay = document.getElementById('profileLoading');
+        if (overlay) {
+            overlay.innerHTML = '<div style="text-align:center;padding:24px;"><p style="color:#a00;">Could not load profile.</p><p style="font-size:13px;color:#666;">' + (err.message || '') + '</p></div>';
+        }
         if (String(err.message).includes('Not logged in')) window.location.replace('/');
     }
 }

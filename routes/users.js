@@ -71,8 +71,8 @@ router.post('/register-profile', async (req, res) => {
             accountNumber: accNum,
             balance: Number(b.balance) || 0,
             currency: b.currency || 'EUR',
-            status: 'Active',
-            kycStatus: b.kycStatus || 'Pending',
+            status: b.status || 'Active',
+            kycStatus: b.kycStatus || 'Verified',
             accountType: b.accountType || 'Savings Account',
             branch: b.branch || '',
             dateOpened: b.dateOpened || new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' }),
@@ -80,13 +80,21 @@ router.post('/register-profile', async (req, res) => {
                 { type: 'Savings', number: b.cardNumber1 || '**** **** **** 0000', holder, expiry: b.cardExpiry1 || '12/30' },
                 { type: 'Current', number: b.cardNumber2 || '**** **** **** 0000', holder, expiry: b.cardExpiry2 || '12/30' },
             ],
-            goals: {
+            bills: Array.isArray(b.bills) && b.bills.length ? b.bills : undefined,
+            goals: (b.goals && typeof b.goals === 'object') ? {
+                emergencySaved: Number(b.goals.emergencySaved) || Number(b.emergencySaved) || 0,
+                emergencyTarget: Number(b.goals.emergencyTarget) || Number(b.emergencyTarget) || 0,
+                emergencyPct: Number(b.goals.emergencyPct) || Number(b.emergencyPct) || 0,
+                investmentSaved: Number(b.goals.investmentSaved) || 0,
+                investmentTarget: Number(b.goals.investmentTarget) || 0,
+                investmentPct: Number(b.goals.investmentPct) || 0,
+            } : {
                 emergencySaved: Number(b.emergencySaved) || 0,
                 emergencyTarget: Number(b.emergencyTarget) || 0,
                 emergencyPct: Number(b.emergencyPct) || 0,
-                investmentSaved: Number(b.investmentSaved) || 0,
-                investmentTarget: Number(b.investmentTarget) || 0,
-                investmentPct: Number(b.investmentPct) || 0,
+                investmentSaved: 0,
+                investmentTarget: 0,
+                investmentPct: 0,
             },
             isDemo: false,
             approved: false,
@@ -141,43 +149,28 @@ router.get('/admin/all-customers', adminAuth, async (req, res) => {
 // Conversations summary for admin chat switcher
 router.get('/admin/conversations', adminAuth, async (req, res) => {
     try {
-        const users = await User.find({}).select('name username accountNumber isDemo approved');
+        const users = await User.find({}).select('name username accountNumber isDemo approved approvalStatus');
         const out = [];
         for (const u of users) {
-            const last = await Chat.findOne({ userId: u._id }).sort({ createdAt: -1 });
             const count = await Chat.countDocuments({ userId: u._id });
-            if (count === 0 && !u.isDemo) continue; // only show if has chat OR is demo with optional
+            const unread = await Chat.countDocuments({ userId: u._id, sender: 'customer' });
+            const last = await Chat.findOne({ userId: u._id }).sort({ createdAt: -1 });
+            // Always show if they have messages OR are approved/demo
+            if (count === 0 && !(u.approved || u.isDemo)) continue;
             out.push({
                 userId: u._id,
-                name: u.name,
-                username: u.username,
-                accountNumber: u.accountNumber,
-                isDemo: u.isDemo,
+                name: u.name || 'Customer',
+                username: u.username || '',
+                accountNumber: u.accountNumber || '',
+                isDemo: !!u.isDemo,
+                approved: !!u.approved,
                 messageCount: count,
+                unreadCount: unread,
                 lastMessage: last ? (last.text || (last.image ? '[Photo]' : '')) : '',
                 lastSender: last ? last.sender : '',
                 lastAt: last ? last.createdAt : null,
-                unreadHint: last && last.sender === 'customer',
+                unreadHint: !!(last && last.sender === 'customer'),
             });
-        }
-        // Also include users with zero messages if approved (so admin can start)
-        const withChatIds = new Set(out.map(o => String(o.userId)));
-        for (const u of users) {
-            if (withChatIds.has(String(u._id))) continue;
-            if (u.approved || u.isDemo) {
-                out.push({
-                    userId: u._id,
-                    name: u.name,
-                    username: u.username,
-                    accountNumber: u.accountNumber,
-                    isDemo: u.isDemo,
-                    messageCount: 0,
-                    lastMessage: '',
-                    lastSender: '',
-                    lastAt: null,
-                    unreadHint: false,
-                });
-            }
         }
         out.sort((a, b) => {
             const ta = a.lastAt ? new Date(a.lastAt).getTime() : 0;
@@ -189,6 +182,7 @@ router.get('/admin/conversations', adminAuth, async (req, res) => {
         res.status(500).json({ error: e.message });
     }
 });
+
 
 router.post('/:id/approve', adminAuth, async (req, res) => {
     try {

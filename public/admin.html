@@ -768,29 +768,7 @@
                 </div>
             </div>
 
-            <div class="tab-panel" id="tab-goals">
-                <h3 style="margin-bottom:12px;color:#071a52;">Savings & Goals</h3>
-                <p style="font-size:13px;color:#666;margin-bottom:14px;">These appear on the customer dashboard.</p>
-                <h4 style="color:#071a52;margin:10px 0;">Emergency Reserve</h4>
-                <div class="field-row">
-                    <div class="field"><label>Saved amount</label><input type="number" id="g_em_saved" step="0.01">
-                    </div>
-                    <div class="field"><label>Target amount</label><input type="number" id="g_em_target" step="0.01">
-                    </div>
-                </div>
-                <div class="field"><label>Percent target</label><input type="number" id="g_em_pct" min="0" max="100">
-                </div>
-                <h4 style="color:#071a52;margin:16px 0 10px;">Investment Vault</h4>
-                <div class="field-row">
-                    <div class="field"><label>Saved amount</label><input type="number" id="g_inv_saved" step="0.01">
-                    </div>
-                    <div class="field"><label>Target amount</label><input type="number" id="g_inv_target" step="0.01">
-                    </div>
-                </div>
-                <div class="field"><label>Percent target</label><input type="number" id="g_inv_pct" min="0" max="100">
-                </div>
-                <button class="btn btn-gold btn-block" id="saveGoalsBtn" style="margin-top:12px;">Save goals</button>
-            </div>
+
 
             <div class="tab-panel" id="tab-security">
                 <h3 style="margin-bottom:12px;color:#071a52;">Credentials & PIN</h3>
@@ -805,47 +783,37 @@
                             maxlength="4" inputmode="numeric"></div>
                     <div class="field"></div>
                 </div>
-                <hr style="border:none;border-top:1px solid #e6ebf3;margin:18px 0;">
-                <h3 style="margin-bottom:12px;color:#071a52;">Customer login (login page)</h3>
-                <div class="field-row">
-                    <div class="field"><label>Customer username</label><input type="text" id="sec_custUser"></div>
-                    <div class="field"><label>Customer password</label><input type="text" id="sec_custPass"></div>
-                </div>
-                <div class="field-row">
-                    <div class="field"><label>Customer PIN (login PIN)</label><input type="text" id="sec_custPin"
-                            maxlength="4" inputmode="numeric"></div>
-                    <div class="field"><label>TIC code (transfers)</label><input type="text" id="sec_tic" maxlength="8">
-                    </div>
-                </div>
-                <button class="btn btn-gold btn-block" id="saveSecurityBtn" style="margin-top:12px;">Save security
-                    settings</button>
+
             </div>
-
-            <div class="tab-panel active" id="tab-approvals">
-                <h3 style="margin-bottom:8px;color:#071a52;">Account approvals</h3>
-                <p style="font-size:13px;color:#666;margin-bottom:12px;">
-                    Accounts from <a href="/addmoreprofile" target="_blank">/addmoreprofile</a>.
-                    Pending cannot log in until approved. You can permanently delete any non-demo account.
-                </p>
-                <div id="approvalsList">
-                    <p class="chat-empty">Loading…</p>
-                </div>
-            </div>
-
-            <div class="tab-panel" id="tab-activity">
-                <h3 style="margin-bottom:12px;color:#071a52;">Recent login attempts</h3>
-                <p style="font-size:13px;color:#666;margin-bottom:14px;">Time, date, username, success/fail, location.
-                </p>
-                <div id="loginLogList" style="max-height:480px;overflow-y:auto;"></div>
-                <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
-                    <button class="btn btn-ghost btn-sm" id="refreshLogsBtn">Refresh</button>
-                    <button class="btn btn-danger btn-sm" id="clearLogsBtn">Delete all login logs</button>
-                </div>
-            </div>
-
-
-
+            <button class="btn btn-gold btn-block" id="saveSecurityBtn" style="margin-top:12px;">Save security
+                settings</button>
         </div>
+
+        <div class="tab-panel active" id="tab-approvals">
+            <h3 style="margin-bottom:8px;color:#071a52;">Account approvals</h3>
+            <p style="font-size:13px;color:#666;margin-bottom:12px;">
+                Accounts from <a href="/addmoreprofile" target="_blank">/addmoreprofile</a>.
+                Pending cannot log in until approved. You can permanently delete any non-demo account.
+            </p>
+            <div id="approvalsList">
+                <p class="chat-empty">Loading…</p>
+            </div>
+        </div>
+
+        <div class="tab-panel" id="tab-activity">
+            <h3 style="margin-bottom:12px;color:#071a52;">Recent login attempts</h3>
+            <p style="font-size:13px;color:#666;margin-bottom:14px;">Time, date, username, success/fail, location.
+            </p>
+            <div id="loginLogList" style="max-height:480px;overflow-y:auto;"></div>
+            <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+                <button class="btn btn-ghost btn-sm" id="refreshLogsBtn">Refresh</button>
+                <button class="btn btn-danger btn-sm" id="clearLogsBtn">Delete all login logs</button>
+            </div>
+        </div>
+
+
+
+    </div>
     </div>
 
 

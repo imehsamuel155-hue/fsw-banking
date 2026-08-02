@@ -1814,13 +1814,13 @@ SCHEDULED PAYMENTS
                     <div class="payment-left">
                         <div class="payment-icon"><i class="fas fa-bolt"></i></div>
                         <div class="payment-details">
-                            <h4>Electric &amp; Utilities Direct Debit</h4>
-                            <p>Scheduled for 3rd of Next Month</p>
+                            <h4 id="bill1Title">Electric &amp; Utilities Direct Debit</h4>
+                            <p id="bill1Schedule">Scheduled for 3rd of Next Month</p>
                         </div>
                     </div>
                     <div class="payment-right">
-                        <div class="payment-amount">€2000.80</div>
-                        <span class="payment-status">Auto-Pay Enabled</span>
+                        <div class="payment-amount" id="bill1Amount">€142.80</div>
+                        <span class="payment-status" id="bill1Status">Auto-Pay Enabled</span>
                     </div>
                 </div>
 
@@ -1828,13 +1828,13 @@ SCHEDULED PAYMENTS
                     <div class="payment-left">
                         <div class="payment-icon"><i class="fas fa-wifi"></i></div>
                         <div class="payment-details">
-                            <h4>High-Speed Fiber Internet</h4>
-                            <p>Scheduled for 10th of Next Month</p>
+                            <h4 id="bill2Title">High-Speed Fiber Internet</h4>
+                            <p id="bill2Schedule">Scheduled for 10th of Next Month</p>
                         </div>
                     </div>
                     <div class="payment-right">
-                        <div class="payment-amount">€3500.99</div>
-                        <span class="payment-status">Auto-Pay Enabled</span>
+                        <div class="payment-amount" id="bill2Amount">€59.99</div>
+                        <span class="payment-status" id="bill2Status">Auto-Pay Enabled</span>
                     </div>
                 </div>
             </div>
@@ -2143,12 +2143,31 @@ SCHEDULED PAYMENTS
                     const fills = document.querySelectorAll('.progress-bar-fill');
                     const footers = document.querySelectorAll('.goal-footer');
                     const headers = document.querySelectorAll('.goal-header span');
-                    if (fills[0]) fills[0].style.width = (g.emergencyPct || 75) + '%';
-                    if (fills[1]) fills[1].style.width = (g.investmentPct || 40) + '%';
-                    if (headers[0]) headers[0].textContent = (g.emergencyPct || 75) + '% Target';
-                    if (headers[1]) headers[1].textContent = (g.investmentPct || 40) + '% Target';
-                    if (footers[0]) footers[0].innerHTML = '<span>Saved: ' + fswFormatMoney(g.emergencySaved || 15000, user.currency) + '</span><span>Goal: ' + fswFormatMoney(g.emergencyTarget || 20000, user.currency) + '</span>';
-                    if (footers[1]) footers[1].innerHTML = '<span>Saved: ' + fswFormatMoney(g.investmentSaved || 20000, user.currency) + '</span><span>Goal: ' + fswFormatMoney(g.investmentTarget || 50000, user.currency) + '</span>';
+                    const emPct = (g.emergencyPct != null ? g.emergencyPct : 0);
+                    const invPct = (g.investmentPct != null ? g.investmentPct : 0);
+                    if (fills[0]) fills[0].style.width = emPct + '%';
+                    if (fills[1]) fills[1].style.width = invPct + '%';
+                    if (headers[0]) headers[0].textContent = emPct + '% Target';
+                    if (headers[1]) headers[1].textContent = invPct + '% Target';
+                    if (footers[0]) footers[0].innerHTML = '<span>Saved: ' + fswFormatMoney(g.emergencySaved != null ? g.emergencySaved : 0, user.currency) + '</span><span>Goal: ' + fswFormatMoney(g.emergencyTarget != null ? g.emergencyTarget : 0, user.currency) + '</span>';
+                    if (footers[1]) footers[1].innerHTML = '<span>Saved: ' + fswFormatMoney(g.investmentSaved != null ? g.investmentSaved : 0, user.currency) + '</span><span>Goal: ' + fswFormatMoney(g.investmentTarget != null ? g.investmentTarget : 0, user.currency) + '</span>';
+                    // Scheduled bills from profile
+                    try {
+                        const bills = user.bills || [];
+                        const b0 = bills[0], b1 = bills[1];
+                        if (b0) {
+                            const t1 = document.getElementById('bill1Title'); if (t1) t1.textContent = b0.title || '';
+                            const s1 = document.getElementById('bill1Schedule'); if (s1) s1.textContent = b0.schedule || '';
+                            const a1 = document.getElementById('bill1Amount'); if (a1) a1.textContent = fswFormatMoney(b0.amount || 0, user.currency);
+                            const st1 = document.getElementById('bill1Status'); if (st1) st1.textContent = b0.status || 'Auto-Pay Enabled';
+                        }
+                        if (b1) {
+                            const t2 = document.getElementById('bill2Title'); if (t2) t2.textContent = b1.title || '';
+                            const s2 = document.getElementById('bill2Schedule'); if (s2) s2.textContent = b1.schedule || '';
+                            const a2 = document.getElementById('bill2Amount'); if (a2) a2.textContent = fswFormatMoney(b1.amount || 0, user.currency);
+                            const st2 = document.getElementById('bill2Status'); if (st2) st2.textContent = b1.status || 'Auto-Pay Enabled';
+                        }
+                    } catch (be) { }
                 } catch (e) { }
             }
         })();

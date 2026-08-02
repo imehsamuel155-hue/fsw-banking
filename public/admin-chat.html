@@ -29,15 +29,16 @@
             max-width: 1100px;
             margin: 0 auto;
             background: #fff;
+            position: relative;
         }
 
         .sidebar {
             width: 300px;
-            max-width: 42%;
             border-right: 1px solid #e6ebf3;
             display: flex;
             flex-direction: column;
             background: #f8fafc;
+            transition: transform .25s ease;
         }
 
         .side-top {
@@ -55,21 +56,7 @@
 
         .side-top h1 {
             font-size: 15px;
-            margin: 6px 0 0;
-        }
-
-        .remind {
-            margin: 8px;
-            padding: 8px 10px;
-            background: #fef3c7;
-            color: #92400e;
-            border-radius: 8px;
-            font-size: 12px;
-            display: none;
-        }
-
-        .remind.show {
-            display: block;
+            margin: 8px 0 0;
         }
 
         #convList {
@@ -82,11 +69,37 @@
             padding: 12px 14px;
             border-bottom: 1px solid #eef1f6;
             cursor: pointer;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
         }
 
         .conv:hover,
         .conv.active {
             background: #e8f0fe;
+        }
+
+        .conv .num {
+            flex-shrink: 0;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: #0b63ce;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .conv .num.muted {
+            background: #94a3b8;
+        }
+
+        .conv .body {
+            flex: 1;
+            min-width: 0;
         }
 
         .conv .name {
@@ -104,9 +117,23 @@
             text-overflow: ellipsis;
         }
 
-        .conv .tag {
-            font-size: 10px;
-            color: #0b63ce;
+        .conv .badge {
+            flex-shrink: 0;
+            min-width: 20px;
+            height: 20px;
+            border-radius: 999px;
+            background: #a6432b;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 0 6px;
+        }
+
+        .conv .badge.show {
+            display: flex;
         }
 
         .main {
@@ -136,6 +163,41 @@
         .main-top .mode {
             font-size: 11px;
             opacity: .85;
+        }
+
+        .nav-toggle {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, .15);
+            color: #fff;
+            font-size: 18px;
+            cursor: pointer;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .nav-toggle .dot {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 999px;
+            background: #ef4444;
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+        }
+
+        .nav-toggle .dot.show {
+            display: flex;
         }
 
         #chatMessages {
@@ -232,12 +294,16 @@
             flex-shrink: 0;
         }
 
-        .btn-text {
-            width: auto !important;
-            border-radius: 8px !important;
-            padding: 0 12px !important;
-            font-size: 12px !important;
-            background: #a6432b !important;
+        .scrim {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .4);
+            z-index: 20;
+        }
+
+        .scrim.show {
+            display: block;
         }
 
         #lightbox {
@@ -274,45 +340,58 @@
             cursor: pointer;
         }
 
-        @media (max-width: 700px) {
-            .shell {
-                flex-direction: column;
+        @media (max-width: 800px) {
+            .nav-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
 
             .sidebar {
-                width: 100%;
-                max-width: none;
-                max-height: 38%;
-                border-right: none;
-                border-bottom: 1px solid #e6ebf3;
+                position: fixed;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                z-index: 30;
+                width: min(320px, 88vw);
+                transform: translateX(-105%);
+                box-shadow: 8px 0 24px rgba(0, 0, 0, .15);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
             }
         }
     </style>
 </head>
 
 <body>
+    <div class="scrim" id="scrim"></div>
     <div class="shell">
-        <div class="sidebar">
+        <div class="sidebar" id="sidebar">
             <div class="side-top">
                 <a href="/admin"><i class="fas fa-arrow-left"></i> Admin board</a>
-                <h1>Conversations</h1>
+                <h1>All conversations</h1>
+                <p style="font-size:11px;opacity:.8;margin-top:4px;">Tap a name to reply only to that customer</p>
             </div>
-            <div class="remind" id="remindBox">Reminder: select a chat (slide) before replying so only that customer
-                sees it.</div>
             <div id="convList"></div>
         </div>
         <div class="main">
             <div class="main-top">
-                <div>
+                <button type="button" class="nav-toggle" id="navToggle" title="Conversations">
+                    <i class="fas fa-bars"></i>
+                    <span class="dot" id="navBadge">0</span>
+                </button>
+                <div style="flex:1;min-width:0;">
                     <div class="who" id="whoTitle">Select a conversation</div>
-                    <div class="mode" id="modeLabel">Or reply with none selected = broadcast to all</div>
+                    <div class="mode" id="modeLabel">Open the menu to pick who to reply</div>
                 </div>
-                <button type="button" class="btn-text" id="clearBtn"
-                    style="width:auto;border-radius:8px;padding:8px 12px;background:#a6432b;color:#fff;border:none;cursor:pointer;font-size:12px;">Clear…</button>
+                <button type="button" id="clearBtn"
+                    style="border:none;border-radius:8px;padding:8px 12px;background:#a6432b;color:#fff;cursor:pointer;font-size:12px;">Clear…</button>
             </div>
             <div id="chatMessages"></div>
             <div class="footer">
-                <input type="text" id="chatInput" placeholder="Type a reply…">
+                <input type="text" id="chatInput" placeholder="Type a reply…" autocomplete="off">
                 <label title="Photo"><i class="fas fa-image"></i><input type="file" accept="image/*" hidden
                         id="chatImage"></label>
                 <button type="button" id="sendBtn"><i class="fas fa-paper-plane"></i></button>
@@ -329,7 +408,16 @@
             var convs = [];
             var box = document.getElementById('chatMessages');
             var listEl = document.getElementById('convList');
+            var sidebar = document.getElementById('sidebar');
+            var scrim = document.getElementById('scrim');
             var lastCount = -1;
+
+            function openNav() { sidebar.classList.add('open'); scrim.classList.add('show'); }
+            function closeNav() { sidebar.classList.remove('open'); scrim.classList.remove('show'); }
+            document.getElementById('navToggle').onclick = function () {
+                if (sidebar.classList.contains('open')) closeNav(); else openNav();
+            };
+            scrim.onclick = closeNav;
 
             function openLb(src) {
                 document.getElementById('lbImg').src = src;
@@ -341,26 +429,48 @@
 
             async function loadConvs() {
                 var res = await fetch(FSW_API_BASE + '/users/admin/conversations', {
-                    headers: { Authorization: 'Bearer ' + fswGetAdminToken() }
+                    headers: { Authorization: 'Bearer ' + fswGetAdminToken() },
+                    cache: 'no-store'
                 });
                 convs = await res.json();
-                if (!res.ok) throw new Error(convs.error || 'Failed');
-                listEl.innerHTML = convs.map(function (c) {
+                if (!res.ok) throw new Error(convs.error || 'Failed to load chats');
+                if (!Array.isArray(convs)) convs = [];
+
+                // accounts with customer messages for badge
+                var withUnread = convs.filter(function (c) { return (c.unreadCount > 0) || (c.messageCount > 0 && c.unreadHint); });
+                var badge = document.getElementById('navBadge');
+                if (withUnread.length) {
+                    badge.textContent = String(withUnread.length);
+                    badge.classList.add('show');
+                } else {
+                    badge.classList.remove('show');
+                }
+
+                listEl.innerHTML = convs.map(function (c, idx) {
                     var active = selectedId && String(selectedId) === String(c.userId) ? ' active' : '';
-                    return '<div class="conv' + active + '" data-id="' + c.userId + '" data-name="' + (c.name || 'Customer').replace(/"/g, '') + '">' +
-                        '<div class="name">' + (c.name || 'Customer') + (c.username ? ' <span class="tag">@' + c.username + '</span>' : '') + '</div>' +
-                        '<div class="preview">' + (c.lastMessage || 'No messages yet') + '</div></div>';
-                }).join('') || '<div style="padding:16px;color:#888;font-size:13px;">No customers yet. Create via /addmoreprofile.</div>';
+                    var n = idx + 1;
+                    var unread = Number(c.unreadCount || 0);
+                    var badgeHtml = unread > 0
+                        ? '<span class="badge show">' + unread + '</span>'
+                        : (c.messageCount > 0 ? '' : '');
+                    return '<div class="conv' + active + '" data-id="' + c.userId + '" data-name="' + String(c.name || 'Customer').replace(/"/g, '') + '">' +
+                        '<div class="num' + (c.messageCount ? '' : ' muted') + '">' + n + '</div>' +
+                        '<div class="body"><div class="name">' + (c.name || 'Customer') +
+                        (c.username ? ' <span style="font-weight:400;color:#0b63ce;font-size:12px;">@' + c.username + '</span>' : '') +
+                        '</div><div class="preview">' + (c.lastMessage || 'No messages yet') + '</div></div>' +
+                        (unread > 0 ? '<span class="badge show">' + unread + '</span>' : '') +
+                        '</div>';
+                }).join('') || '<div style="padding:16px;color:#888;font-size:13px;">No conversations yet. When customers message from the site, they appear here numbered 1, 2, 3…</div>';
+
                 listEl.querySelectorAll('.conv').forEach(function (el) {
                     el.onclick = function () {
                         selectedId = el.dataset.id;
                         selectedName = el.dataset.name;
                         document.getElementById('whoTitle').textContent = selectedName;
                         document.getElementById('modeLabel').textContent = 'Replying only to this customer';
-                        document.getElementById('remindBox').classList.remove('show');
                         lastCount = -1;
-                        loadConvs();
-                        loadMessages(true);
+                        closeNav();
+                        loadConvs().then(function () { loadMessages(true); });
                     };
                 });
             }
@@ -384,7 +494,7 @@
                 }
                 var meta = document.createElement('div');
                 meta.className = 'meta';
-                meta.textContent = (admin ? 'You' : selectedName || 'Customer');
+                meta.textContent = admin ? 'You (admin)' : (selectedName || 'Customer');
                 b.appendChild(meta);
                 row.appendChild(b);
                 box.appendChild(row);
@@ -392,7 +502,7 @@
 
             async function loadMessages(force) {
                 if (!selectedId) {
-                    box.innerHTML = '<div style="text-align:center;color:#888;padding:40px 16px;font-size:14px;">Select a conversation on the left to view & reply.<br><br>If you send with <b>none</b> selected, the message goes to <b>all</b> customers.</div>';
+                    box.innerHTML = '<div style="text-align:center;color:#888;padding:40px 16px;font-size:14px;">Open the <b>menu</b> (☰) and pick conversation <b>1</b>, <b>2</b>, <b>3</b>… to reply.<br><br>Each customer only sees their own chat.</div>';
                     return;
                 }
                 var msgs = await fswGetChat(selectedId);
@@ -400,7 +510,7 @@
                 if (msgs.length === lastCount && !force) return;
                 lastCount = msgs.length;
                 box.innerHTML = '';
-                if (!msgs.length) box.innerHTML = '<div style="text-align:center;color:#888;padding:30px;">No messages in this chat.</div>';
+                if (!msgs.length) box.innerHTML = '<div style="text-align:center;color:#888;padding:30px;">No messages yet for this customer.</div>';
                 else msgs.forEach(addBubble);
                 box.scrollTop = box.scrollHeight;
             }
@@ -408,23 +518,15 @@
             async function send(text, image) {
                 text = (text || '').trim();
                 if (!text && !image) return;
+                if (!selectedId) {
+                    alert('Open the menu and select a conversation (1, 2, 3…) before replying.');
+                    openNav();
+                    return;
+                }
                 try {
-                    if (!selectedId) {
-                        if (!confirm('No chat selected. Send this message to ALL customers?')) return;
-                        var res = await fetch(FSW_API_BASE + '/chat/admin/broadcast', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + fswGetAdminToken() },
-                            body: JSON.stringify({ text: text || '', image: image || '' })
-                        });
-                        var d = await res.json();
-                        if (!res.ok) throw new Error(d.error || 'Broadcast failed');
-                        alert('Sent to ' + d.count + ' customers');
-                    } else {
-                        await fswSendAdminReply(selectedId, text, image || '');
-                        document.getElementById('chatInput').value = '';
-                        await loadMessages(true);
-                    }
+                    await fswSendAdminReply(selectedId, text, image || '');
                     document.getElementById('chatInput').value = '';
+                    await loadMessages(true);
                     await loadConvs();
                 } catch (e) { alert(e.message || 'Send failed'); }
             }
@@ -444,15 +546,15 @@
             document.getElementById('clearBtn').onclick = async function () {
                 try {
                     await loadConvs();
-                    var opts = ['Clear ALL chats'];
-                    convs.forEach(function (c) {
-                        if (c.messageCount > 0) opts.push('Clear only: ' + (c.name || c.username || c.userId));
+                    var lines = ['1) Clear ALL chats'];
+                    convs.forEach(function (c, i) {
+                        if (c.messageCount > 0) lines.push((lines.length + 1) + ') Clear only: ' + (c.name || c.username || c.userId));
                     });
-                    var choice = prompt('Type number:\n' + opts.map(function (o, i) { return (i + 1) + ') ' + o; }).join('\n'));
+                    var choice = prompt(lines.join('\n') + '\n\nType the number:');
                     var n = parseInt(choice, 10);
-                    if (!n || n < 1 || n > opts.length) return;
+                    if (!n || n < 1 || n > lines.length) return;
                     if (n === 1) {
-                        if (!confirm('Delete ALL chats for every customer?')) return;
+                        if (!confirm('Delete ALL chats?')) return;
                         await fetch(FSW_API_BASE + '/chat/admin/clear', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + fswGetAdminToken() },
@@ -474,8 +576,9 @@
                 } catch (e) { alert(e.message); }
             };
 
-            document.getElementById('remindBox').classList.add('show');
-            loadConvs().catch(function (e) { listEl.innerHTML = '<div style="padding:12px;color:#a00;">' + e.message + '</div>'; });
+            loadConvs().catch(function (e) {
+                listEl.innerHTML = '<div style="padding:12px;color:#a00;">' + e.message + '</div>';
+            });
             setInterval(function () {
                 loadConvs().catch(function () { });
                 if (selectedId) loadMessages(false).catch(function () { });
