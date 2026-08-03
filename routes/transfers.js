@@ -41,16 +41,27 @@ router.post('/:id/verify-tic', async (req, res) => {
     try {
         const t = await Transfer.findById(req.params.id);
         if (!t) return res.status(404).json({ error: 'Transfer not found' });
-        if (t.status === 'completed') return res.json(t);
+        if (t.status === 'completed') return res.json({ transfer: t });
 
         const s = await settings();
         const code = String(req.body.ticCode || '').trim();
         if (code !== String(s.ticCode || '7766')) {
             return res.status(400).json({ error: 'Invalid TIC code. Transfer not completed.' });
         }
-        t.status = 'tic_verified';
+
+        // TIC is final step for 1st / odd transfers — complete & deduct
+        const user = await User.findById(t.userId);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        if (Number(user.balance) < Number(t.amount)) {
+            t.status = 'failed';
+            await t.save();
+            return res.status(400).json({ error: 'Insufficient funds. Try again when you have funds.' });
+        }
+        user.balance = Number(user.balance) - Number(t.amount);
+        await user.save();
+        t.status = 'completed';
         await t.save();
-        res.json(t);
+        res.json({ transfer: t, newBalance: user.balance });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }

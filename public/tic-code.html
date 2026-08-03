@@ -7,7 +7,7 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>TIC Code | First Smart Wave Banking</title>
+    <title>Transfer pin | First Smart Wave Banking</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
     <link rel="stylesheet" href="/style.css">
@@ -342,7 +342,7 @@
 
 
         <h1>
-            Transfer Initiate Enter (Transfer Pin)
+            Transfer Initiate Code (Transfer pin )
         </h1>
 
 
@@ -356,17 +356,16 @@
         </h2>
 
 
-
         <form id="ticForm">
 
 
             <label>
-                Input (Transfer Pin)
+                Input (Transfer pin )
             </label>
 
 
 
-            <input type="text" id="ticCode" placeholder="Enter Transfer Pin" required>
+            <input type="text" id="ticCode" placeholder="Enter Transfer pin " required>
 
 
 
@@ -498,10 +497,12 @@
                         body: JSON.stringify({ ticCode: enteredCode }),
                     });
                     const data = await res.json();
-                    if (!res.ok) throw new Error(data.error || 'Invalid TIC code');
+                    if (!res.ok) throw new Error(data.error || 'Invalid Transfer Pin');
 
-                    sessionStorage.setItem('fsw_pending_transfer_id', transferId);
-                    window.location.href = '/tax-code';
+                    sessionStorage.setItem('fsw_receipt_transfer_id', transferId);
+                    sessionStorage.removeItem('fsw_pending_transfer_id');
+                    if (typeof fswBumpCompletedTransfers === 'function') fswBumpCompletedTransfers();
+                    window.location.href = '/receipt';
                 } catch (err) {
                     errorMsg.textContent = err.message === 'Failed to fetch'
                         ? "Can't reach the backend — make sure it's running (npm run dev)."

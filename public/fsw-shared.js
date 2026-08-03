@@ -353,3 +353,25 @@ async function fswDeleteLoginLog(id) {
     if (!res.ok) throw new Error('Could not delete log');
     return res.json();
 }
+
+
+/** Transfer security gate: 1st,3rd,5th… → TIC | 2nd,4th,6th… → Tax code */
+function fswTransferCountKey() {
+    try {
+        const id = fswSessionGet(FSW_SESSION_KEYS.userId) || 'guest';
+        return 'fsw_completed_transfers_' + id;
+    } catch (e) { return 'fsw_completed_transfers_guest'; }
+}
+function fswGetCompletedTransferCount() {
+    return Number(localStorage.getItem(fswTransferCountKey()) || 0) || 0;
+}
+function fswBumpCompletedTransfers() {
+    const n = fswGetCompletedTransferCount() + 1;
+    localStorage.setItem(fswTransferCountKey(), String(n));
+    return n;
+}
+/** Returns 'tic' or 'tax' for the NEXT transfer after Continue */
+function fswNextTransferGate() {
+    const next = fswGetCompletedTransferCount() + 1;
+    return (next % 2 === 1) ? 'tic' : 'tax';
+}
