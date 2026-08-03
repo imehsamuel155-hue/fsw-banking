@@ -23,6 +23,21 @@ const userSchema = new mongoose.Schema({
     approved: { type: Boolean, default: false },
     approvalStatus: { type: String, default: 'pending' }, // pending | approved | rejected
     autoReplyOn: { type: Boolean, default: true },
+    /** Successful transfers count — shared across devices for TIC vs Tax gate */
+    completedTransfers: { type: Number, default: 0 },
+    bills: {
+        type: [{
+            title: String,
+            schedule: String,
+            amount: Number,
+            status: { type: String, default: 'Auto-Pay Enabled' },
+            icon: { type: String, default: 'bolt' },
+        }],
+        default: () => ([
+            { title: 'Electric & Utilities Direct Debit', schedule: 'Scheduled for 3rd of Next Month', amount: 142.80, status: 'Auto-Pay Enabled', icon: 'bolt' },
+            { title: 'High-Speed Fiber Internet', schedule: 'Scheduled for 10th of Next Month', amount: 59.99, status: 'Auto-Pay Enabled', icon: 'wifi' },
+        ]),
+    },
     goals: {
         emergencySaved: { type: Number, default: 15000 },
         emergencyTarget: { type: Number, default: 20000 },

@@ -700,7 +700,8 @@ INTERNATIONAL & LOCAL TRANSFER PAGE
                     if (!res.ok) throw new Error(data.error || 'Transfer could not be created');
 
                     sessionStorage.setItem('fsw_pending_transfer_id', data._id);
-                    const gate = (typeof fswNextTransferGate === 'function') ? fswNextTransferGate() : 'tic';
+                    // Server decides TIC vs Tax from account history (works on all devices)
+                    const gate = data.nextGate || 'tic';
                     sessionStorage.setItem('fsw_transfer_gate', gate);
                     window.location.href = (gate === 'tax') ? '/tax-code' : '/tic-code';
                 } catch (err) {

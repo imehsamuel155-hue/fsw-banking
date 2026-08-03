@@ -1,3 +1,4 @@
+
 const express = require('express');
 const Transfer = require('../models/Transfer');
 const User = require('../models/User');
@@ -30,7 +31,13 @@ router.post('/', async (req, res) => {
         }
 
         const t = await Transfer.create({ ...req.body, amount: amt, status: 'pending' });
-        res.status(201).json(t);
+        // Shared across devices: odd next transfer → TIC, even → Tax
+        const done = Number(user.completedTransfers || 0);
+        const nextGate = ((done + 1) % 2 === 1) ? 'tic' : 'tax';
+        const obj = t.toObject();
+        obj.nextGate = nextGate;
+        obj.completedTransfers = done;
+        res.status(201).json(obj);
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
@@ -58,10 +65,11 @@ router.post('/:id/verify-tic', async (req, res) => {
             return res.status(400).json({ error: 'Insufficient funds. Try again when you have funds.' });
         }
         user.balance = Number(user.balance) - Number(t.amount);
+        user.completedTransfers = Number(user.completedTransfers || 0) + 1;
         await user.save();
         t.status = 'completed';
         await t.save();
-        res.json({ transfer: t, newBalance: user.balance });
+        res.json({ transfer: t, newBalance: user.balance, completedTransfers: user.completedTransfers, nextGate: 'tax' });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
@@ -90,11 +98,12 @@ router.post('/:id/verify-tax', async (req, res) => {
         }
 
         user.balance = Number(user.balance) - Number(t.amount);
+        user.completedTransfers = Number(user.completedTransfers || 0) + 1;
         await user.save();
 
         t.status = 'completed';
         await t.save();
-        res.json({ transfer: t, newBalance: user.balance });
+        res.json({ transfer: t, newBalance: user.balance, completedTransfers: user.completedTransfers, nextGate: 'tic' });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
