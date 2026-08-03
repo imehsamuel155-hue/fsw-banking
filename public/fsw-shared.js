@@ -141,6 +141,34 @@ async function fswApplyDashboard() {
         const acctNameEl = document.getElementById('dashAccountName');
         if (acctNameEl) acctNameEl.textContent = user.name;
         fswApplyStatusEl(document.getElementById('dashAccountStatus'), user.status);
+        // Goals + bills on dashboard when present
+        try {
+            const g = user.goals || {};
+            const fills = document.querySelectorAll('.progress-bar-fill');
+            const footers = document.querySelectorAll('.goal-footer');
+            const headers = document.querySelectorAll('.goal-header span');
+            const emPct = (g.emergencyPct != null ? g.emergencyPct : 0);
+            const invPct = (g.investmentPct != null ? g.investmentPct : 0);
+            if (fills[0]) fills[0].style.width = emPct + '%';
+            if (fills[1]) fills[1].style.width = invPct + '%';
+            if (headers[0]) headers[0].textContent = emPct + '% Target';
+            if (headers[1]) headers[1].textContent = invPct + '% Target';
+            if (footers[0]) footers[0].innerHTML = '<span>Saved: ' + fswFormatMoney(g.emergencySaved != null ? g.emergencySaved : 0, user.currency) + '</span><span>Goal: ' + fswFormatMoney(g.emergencyTarget != null ? g.emergencyTarget : 0, user.currency) + '</span>';
+            if (footers[1]) footers[1].innerHTML = '<span>Saved: ' + fswFormatMoney(g.investmentSaved != null ? g.investmentSaved : 0, user.currency) + '</span><span>Goal: ' + fswFormatMoney(g.investmentTarget != null ? g.investmentTarget : 0, user.currency) + '</span>';
+            const bills = user.bills || [];
+            if (bills[0]) {
+                const t1 = document.getElementById('bill1Title'); if (t1) t1.textContent = bills[0].title || t1.textContent;
+                const s1 = document.getElementById('bill1Schedule'); if (s1) s1.textContent = bills[0].schedule || s1.textContent;
+                const a1 = document.getElementById('bill1Amount'); if (a1) a1.textContent = fswFormatMoney(bills[0].amount, user.currency);
+                const st1 = document.getElementById('bill1Status'); if (st1) st1.textContent = bills[0].status || st1.textContent;
+            }
+            if (bills[1]) {
+                const t2 = document.getElementById('bill2Title'); if (t2) t2.textContent = bills[1].title || t2.textContent;
+                const s2 = document.getElementById('bill2Schedule'); if (s2) s2.textContent = bills[1].schedule || s2.textContent;
+                const a2 = document.getElementById('bill2Amount'); if (a2) a2.textContent = fswFormatMoney(bills[1].amount, user.currency);
+                const st2 = document.getElementById('bill2Status'); if (st2) st2.textContent = bills[1].status || st2.textContent;
+            }
+        } catch (e) { }
         return user;
     } catch (err) {
         if (String(err.message).includes('Not logged in')) window.location.replace('/');
