@@ -8,5 +8,7 @@ const schema = new mongoose.Schema({
     customerPin: { type: String, default: '5566' },
     taxCode: { type: String, default: '8659' },
     ticCode: { type: String, default: '7766' },
+    /** When true, all customer logins are blocked site-wide */
+    loginsBlocked: { type: Boolean, default: false },
 }, { timestamps: true });
 module.exports = mongoose.model('SiteSettings', schema);

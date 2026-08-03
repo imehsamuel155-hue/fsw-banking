@@ -82,6 +82,7 @@
             font-size: 0.85rem;
             font-weight: 600;
             margin-bottom: 6px;
+            color: #333;
         }
 
         .input-field {
@@ -142,6 +143,11 @@
             background: #0052a3;
         }
 
+        .btn-submit:disabled {
+            opacity: 0.75;
+            cursor: wait;
+        }
+
         .login-footer {
             margin-top: 20px;
             text-align: center;
@@ -153,41 +159,88 @@
             text-decoration: none;
             font-weight: 600;
         }
+
+        .hint {
+            margin-top: 14px;
+            font-size: 0.78rem;
+            color: #888;
+            text-align: center;
+        }
+
+        #suspendOverlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            background: #0a0a0a;
+            color: #fff;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            text-align: center;
+            padding: 24px;
+        }
+
+        #suspendOverlay.show {
+            display: flex;
+        }
+
+        #suspendOverlay h1 {
+            font-size: clamp(1.1rem, 4vw, 1.6rem);
+            font-weight: 700;
+            letter-spacing: 1px;
+            line-height: 1.45;
+            max-width: 520px;
+            color: #ff4d4d;
+        }
+
+        #suspendOverlay p {
+            margin-top: 16px;
+            color: #aaa;
+            font-size: 14px;
+        }
     </style>
 </head>
 
 <body>
+    <div id="suspendOverlay" role="alert">
+        <h1>ACCOUNT SUSPENDED DUE TO LOGIN FROM UNAPPROVED LOCATION</h1>
+        <p>Access is temporarily unavailable. Contact support if you need help.</p>
+    </div>
+
     <div class="login-card">
         <div class="login-header">
             <div class="logo-icon">FSW</div>
-            <h2>First Smart Wave</h2>
-            <small>Secure Internet Banking</small>
+            <h2>First Smart Wave Banking</h2>
+            <small>Secure Customer Sign In</small>
         </div>
         <div class="login-body">
-            <div id="errorBanner" class="error-message">
+            <div class="error-message" id="errorBanner">
                 <i class="fas fa-exclamation-circle"></i>
                 <span id="errorText">Invalid login details.</span>
             </div>
-            <form id="loginForm">
+            <form id="loginForm" action="javascript:void(0)" method="post">
                 <div class="input-group">
                     <label>Username</label>
                     <div class="input-field">
                         <i class="fas fa-user"></i>
-                        <input type="text" id="username" placeholder="Enter username" required autocomplete="username">
+                        <input type="text" id="username" name="username" placeholder="Enter username" required
+                            autocomplete="username">
                     </div>
                 </div>
                 <div class="input-group">
                     <label>Password</label>
                     <div class="input-field">
                         <i class="fas fa-lock"></i>
-                        <input type="password" id="password" placeholder="Enter password" required
+                        <input type="password" id="password" name="password" placeholder="Enter password" required
                             autocomplete="current-password">
                     </div>
                 </div>
-                <button type="submit" class="btn-submit">
+                <button type="submit" class="btn-submit" id="loginBtn">
                     <i class="fas fa-sign-in-alt"></i> Sign In
                 </button>
             </form>
+            <p class="hint">Default: customer / pass1234</p>
             <div class="login-footer">
                 <p><a href="/"><i class="fas fa-arrow-left"></i> Back to Homepage</a></p>
             </div>
@@ -195,34 +248,112 @@
     </div>
     <script src="/fsw-shared.js"></script>
     <script>
-        document.getElementById('loginForm').addEventListener('submit', async function (e) {
-            e.preventDefault();
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value;
-            const submitBtn = this.querySelector('button[type="submit"]');
-            const errorBanner = document.getElementById('errorBanner');
-            const errorText = document.getElementById('errorText');
-            fswBtnStart(submitBtn, 'Signing in...');
-            errorBanner.style.display = 'none';
-            try {
-                const res = await fetch(FSW_API_BASE + '/auth/login', {
+        (function () {
+            var form = document.getElementById('loginForm');
+            var btn = document.getElementById('loginBtn');
+            var errorBanner = document.getElementById('errorBanner');
+            var errorText = document.getElementById('errorText');
+            var btnHtml = btn ? btn.innerHTML : '';
+
+            function showError(msg) {
+                if (errorText) errorText.textContent = msg;
+                if (errorBanner) errorBanner.style.display = 'flex';
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = btnHtml;
+                }
+            }
+
+            function apiBase() {
+                try {
+                    if (typeof FSW_API_BASE === 'string' && FSW_API_BASE) return FSW_API_BASE;
+                } catch (e) { }
+                var h = location.hostname;
+                if (h === 'localhost' || h === '127.0.0.1') return 'http://localhost:5000/api';
+                return 'https://fsw-banking.onrender.com/api';
+            }
+
+            // If admin turned lock ON, show full-screen block immediately
+            fetch(apiBase() + '/settings/public-status')
+                .then(function (r) { return r.json(); })
+                .then(function (d) {
+                    if (d && d.loginsBlocked) {
+                        var ov = document.getElementById('suspendOverlay');
+                        if (ov) ov.classList.add('show');
+                    }
+                })
+                .catch(function () { });
+
+            if (!form) return;
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                var username = (document.getElementById('username').value || '').trim();
+                var password = document.getElementById('password').value || '';
+
+                if (!username || !password) {
+                    showError('Enter username and password.');
+                    return;
+                }
+
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
+                }
+                if (errorBanner) errorBanner.style.display = 'none';
+
+                var url = apiBase() + '/auth/login';
+                fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password, country: Intl.DateTimeFormat().resolvedOptions().timeZone }),
-                });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.error || 'Login failed');
-                fswSetLoggedInUser(data.userId, data.token);
-                // keep button loading until next page opens
-                window.location.href = '/pin';
-            } catch (err) {
-                errorText.textContent = err.message === 'Failed to fetch'
-                    ? "Can't reach the backend — start the server (node server.js)."
-                    : err.message;
-                errorBanner.style.display = 'flex';
-                fswBtnStop(submitBtn);
-            }
-        });
+                    body: JSON.stringify({
+                        username: username,
+                        password: password,
+                        country: (Intl.DateTimeFormat().resolvedOptions().timeZone || 'Unknown')
+                    })
+                })
+                    .then(function (res) {
+                        return res.json().then(function (data) {
+                            return { ok: res.ok, status: res.status, data: data };
+                        });
+                    })
+                    .then(function (result) {
+                        if (!result.ok) {
+                            if (result.data && result.data.code === 'LOGINS_BLOCKED') {
+                                var ov = document.getElementById('suspendOverlay');
+                                if (ov) ov.classList.add('show');
+                                throw new Error(result.data.error || 'ACCOUNT SUSPENDED DUE TO LOGIN FROM UNAPPROVED LOCATION');
+                            }
+                            throw new Error((result.data && result.data.error) || 'Invalid username or password');
+                        }
+                        var userId = result.data.userId;
+                        var token = result.data.token;
+                        if (!userId || !token) throw new Error('Login response incomplete. Try again.');
+
+                        try {
+                            if (typeof fswSetLoggedInUser === 'function') {
+                                fswSetLoggedInUser(userId, token);
+                            } else {
+                                localStorage.setItem('fsw_user_id', userId);
+                                localStorage.setItem('fsw_token', token);
+                            }
+                        } catch (err) {
+                            throw new Error('Could not save session. Allow site data in browser.');
+                        }
+
+                        window.location.href = '/pin';
+                    })
+                    .catch(function (err) {
+                        var msg = (err && err.message) ? err.message : 'Login failed';
+                        if (msg === 'Failed to fetch' || msg.indexOf('NetworkError') !== -1) {
+                            msg = "Can't reach the server. Wait 30s (Render may be waking up) and try again.";
+                        }
+                        showError(msg);
+                    });
+            });
+        })();
     </script>
 </body>
 

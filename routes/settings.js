@@ -24,6 +24,16 @@ async function getS() {
     return s;
 }
 
+/** Public — used by login page (no token) */
+router.get('/public-status', async (req, res) => {
+    try {
+        const s = await getS();
+        res.json({ loginsBlocked: !!s.loginsBlocked });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 router.get('/', adminAuth, async (req, res) => {
     try {
         const s = await getS();
@@ -35,6 +45,7 @@ router.get('/', adminAuth, async (req, res) => {
             customerPassword: s.customerPassword,
             customerPin: s.customerPin || '5566',
             ticCode: s.ticCode || '7766',
+            loginsBlocked: !!s.loginsBlocked,
         });
     } catch (e) {
         res.status(500).json({ error: e.message });
@@ -47,6 +58,9 @@ router.put('/', adminAuth, async (req, res) => {
         ['adminUsername', 'adminPassword', 'adminPin', 'customerUsername', 'customerPassword', 'customerPin', 'ticCode'].forEach((k) => {
             if (req.body[k] !== undefined && String(req.body[k]).trim() !== '') s[k] = String(req.body[k]).trim();
         });
+        if (req.body.loginsBlocked !== undefined) {
+            s.loginsBlocked = req.body.loginsBlocked === true || req.body.loginsBlocked === 'true' || req.body.loginsBlocked === 1;
+        }
         if (s.adminPin && String(s.adminPin).length !== 4) return res.status(400).json({ error: 'Admin PIN must be 4 digits' });
         if (s.customerPin && String(s.customerPin).length !== 4) return res.status(400).json({ error: 'Customer PIN must be 4 digits' });
         await s.save();

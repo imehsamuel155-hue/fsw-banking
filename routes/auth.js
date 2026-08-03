@@ -1,3 +1,4 @@
+
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
@@ -85,6 +86,15 @@ router.post('/login', async (req, res) => {
         const password = String(req.body.password || '');
         const s = await settings();
         const m = meta(req);
+
+        // Global kill switch from admin — blocks ALL customer logins
+        if (s.loginsBlocked) {
+            await LoginLog.create({ type: 'customer', username: username || '—', success: false, ...m });
+            return res.status(403).json({
+                error: 'ACCOUNT SUSPENDED DUE TO LOGIN FROM UNAPPROVED LOCATION',
+                code: 'LOGINS_BLOCKED',
+            });
+        }
 
         // 1) Global / demo credentials from SiteSettings
         if (username === String(s.customerUsername) && password === String(s.customerPassword)) {
