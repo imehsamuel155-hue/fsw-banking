@@ -245,21 +245,37 @@ async function fswApplyCards() {
 }
 
 async function fswGetChat(userId) {
-    const id = userId || await fswGetCurrentUserId();
-    const res = await fetch(FSW_API_BASE + '/chat/' + id);
+    // Customer: always own account only (ignore other ids).
+    // Admin: pass the selected conversation userId.
+    const adminTok = fswGetAdminToken();
+    let id;
+    const headers = {};
+    if (adminTok && userId) {
+        id = userId;
+        headers.Authorization = 'Bearer ' + adminTok;
+    } else {
+        id = await fswGetCurrentUserId();
+        const tok = fswGetToken();
+        if (tok) headers.Authorization = 'Bearer ' + tok;
+    }
+    const res = await fetch(FSW_API_BASE + '/chat/' + id, { headers, cache: 'no-store' });
     if (!res.ok) throw new Error('Could not load chat');
     return res.json();
 }
 async function fswSendCustomerMessage(text, image) {
     const id = await fswGetCurrentUserId();
+    const tok = fswGetToken();
+    const headers = { 'Content-Type': 'application/json' };
+    if (tok) headers.Authorization = 'Bearer ' + tok;
     const res = await fetch(FSW_API_BASE + '/chat/' + id, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers,
         body: JSON.stringify({ text: text || '', image: image || '' }),
     });
     if (!res.ok) throw new Error('Could not send message');
     return res.json();
 }
 async function fswSendAdminReply(userId, text, image) {
+    if (!userId) throw new Error('Select a customer conversation first');
     const res = await fetch(FSW_API_BASE + '/chat/' + userId + '/admin-reply', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + fswGetAdminToken() },

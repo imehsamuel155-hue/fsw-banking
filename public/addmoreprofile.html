@@ -347,10 +347,10 @@
                 </div>
             </div>
 
-            <!-- EMERGENCY RESERVE ONLY -->
+            <!-- SAVINGS & GOALS -->
             <div class="card">
                 <h2><i class="fas fa-piggy-bank"></i> Savings &amp; Goals — Emergency Reserve</h2>
-                <p class="hint">Emergency only (same currency as above).</p>
+                <p class="hint">Shows on this account’s dashboard after approval. Uses the currency selected above.</p>
                 <div class="row">
                     <div class="field">
                         <label>Saved</label>
@@ -365,6 +365,25 @@
                     <div class="field">
                         <label>Percent target</label>
                         <input name="emergencyPct" type="number" min="0" max="100" value="0">
+                    </div>
+                </div>
+                <h2 style="margin-top:22px;"><i class="fas fa-chart-line"></i> Savings &amp; Goals — Investment Vault
+                </h2>
+                <p class="hint">Second goal card on the dashboard for this login only.</p>
+                <div class="row">
+                    <div class="field">
+                        <label>Saved</label>
+                        <div class="amt"><span class="sym curSym">€</span><input name="investmentSaved" type="number"
+                                step="0.01" value="0"></div>
+                    </div>
+                    <div class="field">
+                        <label>Target</label>
+                        <div class="amt"><span class="sym curSym">€</span><input name="investmentTarget" type="number"
+                                step="0.01" value="0"></div>
+                    </div>
+                    <div class="field">
+                        <label>Percent target</label>
+                        <input name="investmentPct" type="number" min="0" max="100" value="0">
                     </div>
                 </div>
             </div>
@@ -459,7 +478,9 @@
                 emergencySaved: Number(body.emergencySaved) || 0,
                 emergencyTarget: Number(body.emergencyTarget) || 0,
                 emergencyPct: Number(body.emergencyPct) || 0,
-                investmentSaved: 0, investmentTarget: 0, investmentPct: 0
+                investmentSaved: Number(body.investmentSaved) || 0,
+                investmentTarget: Number(body.investmentTarget) || 0,
+                investmentPct: Number(body.investmentPct) || 0
             };
 
             btn.disabled = true;
