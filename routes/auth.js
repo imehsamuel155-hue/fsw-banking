@@ -1,4 +1,3 @@
-
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
@@ -106,7 +105,7 @@ router.post('/login', async (req, res) => {
                 await user.save();
             }
             const token = jwt.sign({ id: user._id, role: 'customer' }, JWT_SECRET, { expiresIn: '7d' });
-            return res.json({ userId: user._id, token, name: user.name });
+            return res.json({ userId: String(user._id), token, name: user.name, username: user.username || username });
         }
 
         // 2) Profile created via /addmoreprofile (must be approved)
@@ -119,7 +118,7 @@ router.post('/login', async (req, res) => {
             }
             await LoginLog.create({ type: 'customer', username, success: true, ...m });
             const token = jwt.sign({ id: user._id, role: 'customer' }, JWT_SECRET, { expiresIn: '7d' });
-            return res.json({ userId: user._id, token, name: user.name });
+            return res.json({ userId: String(user._id), token, name: user.name, username: user.username || username });
         }
 
         await LoginLog.create({ type: 'customer', username, success: false, ...m });

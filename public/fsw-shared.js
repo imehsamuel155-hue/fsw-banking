@@ -15,13 +15,34 @@ function fswSessionSet(k, v) { try { localStorage.setItem(k, v); } catch (e) { }
 function fswSessionRemove(k) { try { localStorage.removeItem(k); } catch (e) { } }
 function fswGetToken() { return fswSessionGet(FSW_SESSION_KEYS.token); }
 function fswGetAdminToken() { try { return sessionStorage.getItem(FSW_SESSION_KEYS.adminToken); } catch (e) { return null; } }
-function fswSetLoggedInUser(userId, token) {
-    fswSessionSet(FSW_SESSION_KEYS.userId, userId);
-    fswSessionSet(FSW_SESSION_KEYS.token, token);
+function fswSetLoggedInUser(userId, token, username) {
+    // Clear previous account completely so chats/profiles never mix
+    try {
+        localStorage.removeItem(FSW_SESSION_KEYS.userId);
+        localStorage.removeItem(FSW_SESSION_KEYS.token);
+        localStorage.removeItem('fsw_username');
+        localStorage.removeItem('fsw_user_name');
+        sessionStorage.removeItem('fsw_pin_ok');
+    } catch (e) { }
+    const id = String(userId == null ? '' : userId).trim();
+    if (!id || id === 'null' || id === 'undefined') throw new Error('Invalid login user id');
+    fswSessionSet(FSW_SESSION_KEYS.userId, id);
+    fswSessionSet(FSW_SESSION_KEYS.token, String(token || ''));
+    if (username) {
+        try { localStorage.setItem('fsw_username', String(username)); } catch (e) { }
+    }
+}
+function fswGetUsername() {
+    try { return localStorage.getItem('fsw_username') || ''; } catch (e) { return ''; }
 }
 function fswLogout() {
     fswSessionRemove(FSW_SESSION_KEYS.userId);
     fswSessionRemove(FSW_SESSION_KEYS.token);
+    try {
+        localStorage.removeItem('fsw_username');
+        localStorage.removeItem('fsw_user_name');
+        sessionStorage.removeItem('fsw_pin_ok');
+    } catch (e) { }
     window.location.href = '/';
 }
 function fswIsLoggedIn() {
@@ -244,41 +265,53 @@ async function fswApplyCards() {
     }
 }
 
-async function fswGetChat(userId) {
-    // Customer: always own account only (ignore other ids).
-    // Admin: pass the selected conversation userId.
+/** Customer chat only — always this login. Never uses admin token. */
+async function fswGetChat() {
+    const id = await fswGetCurrentUserId();
+    const tok = fswGetToken();
+    if (!tok) throw new Error('Not logged in');
+    const res = await fetch(FSW_API_BASE + '/chat/' + encodeURIComponent(id), {
+        headers: { Authorization: 'Bearer ' + tok },
+        cache: 'no-store',
+    });
+    if (!res.ok) throw new Error('Could not load chat');
+    return res.json();
+}
+/** Admin only — messages for one selected customer */
+async function fswGetChatAsAdmin(customerUserId) {
+    if (!customerUserId) throw new Error('Select a customer first');
     const adminTok = fswGetAdminToken();
-    let id;
-    const headers = {};
-    if (adminTok && userId) {
-        id = userId;
-        headers.Authorization = 'Bearer ' + adminTok;
-    } else {
-        id = await fswGetCurrentUserId();
-        const tok = fswGetToken();
-        if (tok) headers.Authorization = 'Bearer ' + tok;
-    }
-    const res = await fetch(FSW_API_BASE + '/chat/' + id, { headers, cache: 'no-store' });
+    if (!adminTok) throw new Error('Admin login required');
+    const res = await fetch(FSW_API_BASE + '/chat/' + encodeURIComponent(customerUserId), {
+        headers: { Authorization: 'Bearer ' + adminTok },
+        cache: 'no-store',
+    });
     if (!res.ok) throw new Error('Could not load chat');
     return res.json();
 }
 async function fswSendCustomerMessage(text, image) {
     const id = await fswGetCurrentUserId();
     const tok = fswGetToken();
-    const headers = { 'Content-Type': 'application/json' };
-    if (tok) headers.Authorization = 'Bearer ' + tok;
-    const res = await fetch(FSW_API_BASE + '/chat/' + id, {
-        method: 'POST', headers,
+    if (!tok) throw new Error('Not logged in');
+    const res = await fetch(FSW_API_BASE + '/chat/' + encodeURIComponent(id), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + tok },
         body: JSON.stringify({ text: text || '', image: image || '' }),
     });
-    if (!res.ok) throw new Error('Could not send message');
+    if (!res.ok) {
+        let err = 'Could not send message';
+        try { err = (await res.json()).error || err; } catch (e) { }
+        throw new Error(err);
+    }
     return res.json();
 }
 async function fswSendAdminReply(userId, text, image) {
     if (!userId) throw new Error('Select a customer conversation first');
-    const res = await fetch(FSW_API_BASE + '/chat/' + userId + '/admin-reply', {
+    const adminTok = fswGetAdminToken();
+    if (!adminTok) throw new Error('Admin login required');
+    const res = await fetch(FSW_API_BASE + '/chat/' + encodeURIComponent(userId) + '/admin-reply', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + fswGetAdminToken() },
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + adminTok },
         body: JSON.stringify({ text: text || '', image: image || '' }),
     });
     if (!res.ok) throw new Error('Could not send reply');

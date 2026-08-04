@@ -212,7 +212,7 @@
         <div class="login-header">
             <div class="logo-icon">FSW</div>
             <h2>First Smart Wave Banking</h2>
-            <small>Sign In</small>
+            <small>Secure Customer Sign In</small>
         </div>
         <div class="login-body">
             <div class="error-message" id="errorBanner">
@@ -241,6 +241,9 @@
                 </button>
             </form>
 
+            <div class="login-footer">
+                <p><a href="/"><i class="fas fa-arrow-left"></i> Back to Homepage</a></p>
+            </div>
         </div>
     </div>
     <script src="/fsw-shared.js"></script>
@@ -327,14 +330,17 @@
                         }
                         var userId = result.data.userId;
                         var token = result.data.token;
+                        var uname = result.data.username || username;
                         if (!userId || !token) throw new Error('Login response incomplete. Try again.');
 
                         try {
                             if (typeof fswSetLoggedInUser === 'function') {
-                                fswSetLoggedInUser(userId, token);
+                                fswSetLoggedInUser(String(userId), String(token), uname);
                             } else {
-                                localStorage.setItem('fsw_user_id', userId);
-                                localStorage.setItem('fsw_token', token);
+                                localStorage.clear();
+                                localStorage.setItem('fsw_user_id', String(userId));
+                                localStorage.setItem('fsw_token', String(token));
+                                localStorage.setItem('fsw_username', String(uname || ''));
                             }
                         } catch (err) {
                             throw new Error('Could not save session. Allow site data in browser.');

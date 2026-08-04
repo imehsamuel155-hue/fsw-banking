@@ -1383,7 +1383,7 @@
         async function renderChat() {
             const win = document.getElementById('chatWindow');
             let msgs = [];
-            try { msgs = await fswGetChat(currentAdminUserId); } catch (err) {
+            try { msgs = await fswGetChatAsAdmin(currentAdminUserId); } catch (err) {
                 win.innerHTML = '<p class="chat-empty">Could not load chat: ' + err.message + '</p>';
                 return;
             }
@@ -1416,11 +1416,11 @@
                 });
             });
 
-            let lastCount = (await fswGetChat(currentAdminUserId)).length;
+            let lastCount = (await fswGetChatAsAdmin(currentAdminUserId)).length;
             if (chatPollInterval) clearInterval(chatPollInterval);
             chatPollInterval = setInterval(async () => {
                 try {
-                    const msgs = await fswGetChat(currentAdminUserId);
+                    const msgs = await fswGetChatAsAdmin(currentAdminUserId);
                     if (msgs.length !== lastCount) { lastCount = msgs.length; renderChat(); }
                 } catch (e) { /* silent — will retry next tick */ }
             }, 2500);
