@@ -18,8 +18,7 @@ function adminAuth(req, res, next) {
     }
 }
 
-
-// Broadcast admin message to ALL customers (when no conversation selected)
+// Broadcast (only when admin explicitly chooses — do not use for normal replies)
 router.post('/admin/broadcast', adminAuth, async (req, res) => {
     try {
         const users = await User.find({ $or: [{ approved: true }, { isDemo: true }] });
@@ -30,6 +29,7 @@ router.post('/admin/broadcast', adminAuth, async (req, res) => {
                 sender: 'admin',
                 text: req.body.text || '',
                 image: req.body.image || '',
+                readByCustomer: false,
             });
             created.push(msg);
             await User.findByIdAndUpdate(u._id, { autoReplyOn: false });
@@ -40,7 +40,6 @@ router.post('/admin/broadcast', adminAuth, async (req, res) => {
     }
 });
 
-// Clear chats: body.userIds = [] for all, or list of ids
 router.post('/admin/clear', adminAuth, async (req, res) => {
     try {
         const ids = req.body.userIds;
@@ -48,18 +47,33 @@ router.post('/admin/clear', adminAuth, async (req, res) => {
             await Chat.deleteMany({});
             return res.json({ ok: true, cleared: 'all' });
         }
-        const list = Array.isArray(ids) ? ids : [ids];
-        await Chat.deleteMany({ userId: { $in: list } });
-        res.json({ ok: true, cleared: list });
+        if (Array.isArray(ids) && ids.length) {
+            await Chat.deleteMany({ userId: { $in: ids } });
+            return res.json({ ok: true, cleared: ids.length });
+        }
+        res.json({ ok: true, cleared: 0 });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
 });
 
-
+/** Messages for ONE user only — never mixed with other accounts */
 router.get('/:userId', async (req, res) => {
     try {
         res.json(await Chat.find({ userId: req.params.userId }).sort({ createdAt: 1 }));
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+/** Admin opens a conversation → clear unread (1) for that user only */
+router.post('/:userId/mark-read', adminAuth, async (req, res) => {
+    try {
+        await Chat.updateMany(
+            { userId: req.params.userId, sender: 'customer', readByAdmin: { $ne: true } },
+            { $set: { readByAdmin: true } }
+        );
+        res.json({ success: true });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
@@ -72,26 +86,22 @@ router.post('/:userId', async (req, res) => {
             sender: 'customer',
             text: req.body.text || '',
             image: req.body.image || '',
+            readByAdmin: false,
         });
         const user = await User.findById(req.params.userId);
-        // Auto-reply only if enabled AND no admin message yet in thread (or still on)
         if (user && user.autoReplyOn !== false) {
-            const adminCount = await Chat.countDocuments({ userId: req.params.userId, sender: 'admin' });
-            // If admin has taken over (sent real replies beyond auto), still respect toggle
-            if (user.autoReplyOn) {
-                setTimeout(async () => {
-                    try {
-                        // re-check autoReplyOn
-                        const u2 = await User.findById(req.params.userId);
-                        if (!u2 || u2.autoReplyOn === false) return;
-                        await Chat.create({
-                            userId: req.params.userId,
-                            sender: 'admin',
-                            text: 'Thanks for your message. A support agent will assist you shortly.',
-                        });
-                    } catch (_) { }
-                }, 1200);
-            }
+            setTimeout(async () => {
+                try {
+                    const u2 = await User.findById(req.params.userId);
+                    if (!u2 || u2.autoReplyOn === false) return;
+                    await Chat.create({
+                        userId: req.params.userId,
+                        sender: 'admin',
+                        text: 'Thanks for your message. A support agent will assist you shortly.',
+                        readByCustomer: false,
+                    });
+                } catch (_) { }
+            }, 1200);
         }
         res.status(201).json(msg);
     } catch (e) {
@@ -99,15 +109,16 @@ router.post('/:userId', async (req, res) => {
     }
 });
 
+/** Admin reply goes ONLY to this userId */
 router.post('/:userId/admin-reply', adminAuth, async (req, res) => {
     try {
-        // When admin replies, turn off auto-reply for that user
         await User.findByIdAndUpdate(req.params.userId, { autoReplyOn: false });
         const msg = await Chat.create({
             userId: req.params.userId,
             sender: 'admin',
             text: req.body.text || '',
             image: req.body.image || '',
+            readByCustomer: false,
         });
         res.status(201).json(msg);
     } catch (e) {

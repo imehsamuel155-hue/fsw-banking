@@ -7,7 +7,7 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Transfer pin | First Smart Wave Banking</title>
+    <title>TIC Code | First Smart Wave Banking</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
     <link rel="stylesheet" href="/style.css">
@@ -342,7 +342,7 @@
 
 
         <h1>
-            Transfer Initiate Code (Transfer pin )
+            Transfer Initiate Code (Transfer pin)
         </h1>
 
 
@@ -356,16 +356,17 @@
         </h2>
 
 
+
         <form id="ticForm">
 
 
             <label>
-                Input (Transfer pin )
+                Input (Transfer pin)
             </label>
 
 
 
-            <input type="text" id="ticCode" placeholder="Enter Transfer pin " required>
+            <input type="text" id="ticCode" placeholder="Enter Transfer pin" required>
 
 
 
@@ -497,7 +498,7 @@
                         body: JSON.stringify({ ticCode: enteredCode }),
                     });
                     const data = await res.json();
-                    if (!res.ok) throw new Error(data.error || 'Invalid Transfer Pin');
+                    if (!res.ok) throw new Error(data.error || 'Invalid Transfer pin');
 
                     sessionStorage.setItem('fsw_receipt_transfer_id', transferId);
                     sessionStorage.removeItem('fsw_pending_transfer_id');
@@ -520,6 +521,15 @@
 
     <script src="/script.js"></script>
 
+
+    <script>
+        try {
+            history.pushState({ fswGuard: 1 }, '', location.href);
+            window.addEventListener('popstate', function () {
+                location.replace('/dashboard');
+            });
+        } catch (e) { }
+    </script>
 </body>
 
 </html>

@@ -31,12 +31,20 @@ router.post('/', async (req, res) => {
         }
 
         const t = await Transfer.create({ ...req.body, amount: amt, status: 'pending' });
-        // Shared across devices: odd next transfer → TIC, even → Tax
         const done = Number(user.completedTransfers || 0);
-        const nextGate = ((done + 1) % 2 === 1) ? 'tic' : 'tax';
+        const mode = String(user.transferMode || 'tic_then_tax');
+        let nextGate = 'tic';
+        if (mode === 'tax') nextGate = 'tax';
+        else if (mode === 'receipt_only') nextGate = 'receipt';
+        else if (mode === 'tic') nextGate = 'tic';
+        else {
+            // tic_then_tax: 1st TIC, 2nd Tax, 3rd TIC...
+            nextGate = ((done + 1) % 2 === 1) ? 'tic' : 'tax';
+        }
         const obj = t.toObject();
         obj.nextGate = nextGate;
         obj.completedTransfers = done;
+        obj.transferMode = mode;
         res.status(201).json(obj);
     } catch (e) {
         res.status(500).json({ error: e.message });

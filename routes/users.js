@@ -153,7 +153,7 @@ router.get('/admin/conversations', adminAuth, async (req, res) => {
         const out = [];
         for (const u of users) {
             const count = await Chat.countDocuments({ userId: u._id });
-            const unread = await Chat.countDocuments({ userId: u._id, sender: 'customer' });
+            const unread = await Chat.countDocuments({ userId: u._id, sender: 'customer', readByAdmin: { $ne: true } });
             const last = await Chat.findOne({ userId: u._id }).sort({ createdAt: -1 });
             // Always show if they have messages OR are approved/demo
             if (count === 0 && !(u.approved || u.isDemo)) continue;
@@ -234,7 +234,7 @@ router.put('/:id', adminAuth, async (req, res) => {
         const allowed = [
             'name', 'accountNumber', 'email', 'phone', 'gender', 'dob', 'nationality', 'address',
             'balance', 'currency', 'status', 'kycStatus', 'accountType', 'branch', 'dateOpened',
-            'profileImage', 'cards', 'autoReplyOn', 'goals', 'bills', 'username', 'password',
+            'profileImage', 'cards', 'autoReplyOn', 'goals', 'bills', 'username', 'password', 'transferMode', 'completedTransfers',
             'approved', 'approvalStatus',
         ];
         const updates = {};

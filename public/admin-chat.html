@@ -467,9 +467,14 @@
                         selectedId = el.dataset.id;
                         selectedName = el.dataset.name;
                         document.getElementById('whoTitle').textContent = selectedName;
-                        document.getElementById('modeLabel').textContent = 'Replying only to this customer';
+                        document.getElementById('modeLabel').textContent = 'Replying only to this customer — messages stay private to this account';
                         lastCount = -1;
                         closeNav();
+                        // Mark this conversation read (clears the 1 badge for this user only)
+                        fetch(FSW_API_BASE + '/chat/' + selectedId + '/mark-read', {
+                            method: 'POST',
+                            headers: { Authorization: 'Bearer ' + fswGetAdminToken() }
+                        }).catch(function () { });
                         loadConvs().then(function () { loadMessages(true); });
                     };
                 });
