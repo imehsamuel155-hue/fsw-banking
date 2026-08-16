@@ -461,14 +461,15 @@
             document.getElementById("transactionId").textContent = receipt.reference;
             document.getElementById("transferType").textContent =
                 receipt.type === 'international' ? 'International Transfer' : 'Local Transfer';
-            document.getElementById("recipientName").textContent = receipt.recipientName;
-            document.getElementById("recipientBank").textContent = receipt.recipientBank;
+            document.getElementById("recipientName").textContent = receipt.recipientName || '—';
+            document.getElementById("recipientBank").textContent = receipt.recipientBank || '—';
             document.getElementById("accountNumber").textContent =
-                receipt.type === 'international' ? receipt.iban : receipt.recipientAccountNumber;
+                receipt.recipientAccountNumber || receipt.iban || receipt.accountNumber || '—';
 
             const swiftEl = document.getElementById("swiftCode");
-            if (swiftEl) swiftEl.textContent = receipt.swift || '—';
-            document.getElementById("country").textContent = receipt.country || '—';
+            if (swiftEl) swiftEl.textContent = (receipt.swift && String(receipt.swift).trim()) ? receipt.swift : '—';
+            const countryEl = document.getElementById("country");
+            if (countryEl) countryEl.textContent = (receipt.country && String(receipt.country).trim()) ? receipt.country : '—';
             document.getElementById("currency").textContent = receipt.currency;
             document.getElementById("amount").textContent =
                 fswCurrencySymbol(receipt.currency) + Number(receipt.amount).toLocaleString();

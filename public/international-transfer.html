@@ -274,7 +274,11 @@ INTERNATIONAL & LOCAL TRANSFER PAGE
                         Account Number / IBAN
                     </label>
 
-                    <input type="text" id="accountNumber" placeholder="Enter account number or IBAN" required>
+                    <input type="text" id="accountNumber" inputmode="numeric" pattern="[0-9]{10}" maxlength="10"
+                        minlength="10" placeholder="10-digit account number" required autocomplete="off">
+                    <small id="accountNumberError"
+                        style="display:none;color:#c0392b;font-size:13px;margin-top:6px;">Please input correct account
+                        number</small>
 
                 </div>
 
@@ -678,6 +682,26 @@ INTERNATIONAL & LOCAL TRANSFER PAGE
     <script>if (!fswRequireAuth()) { }</script>
     <script>
 
+
+        (function () {
+            const acc = document.getElementById('accountNumber');
+            const err = document.getElementById('accountNumberError');
+            if (!acc) return;
+            acc.addEventListener('input', function () {
+                // digits only
+                this.value = this.value.replace(/\D/g, '').slice(0, 10);
+                if (err) {
+                    if (this.value.length === 0) { err.style.display = 'none'; return; }
+                    if (this.value.length !== 10) {
+                        err.textContent = 'Please input correct account number';
+                        err.style.display = 'block';
+                    } else {
+                        err.style.display = 'none';
+                    }
+                }
+            });
+        })();
+
         const transferForm = document.getElementById("internationalTransferForm");
 
         if (transferForm) {
@@ -686,16 +710,26 @@ INTERNATIONAL & LOCAL TRANSFER PAGE
 
                 e.preventDefault();
 
+                const accNum = String(document.getElementById("accountNumber").value || '').replace(/\D/g, '');
+                if (!/^[0-9]{10}$/.test(accNum)) {
+                    const err = document.getElementById('accountNumberError');
+                    if (err) { err.textContent = 'Please input correct account number'; err.style.display = 'block'; }
+                    alert('Please input correct account number');
+                    return;
+                }
+                const descEl = document.getElementById("description");
                 const transferData = {
                     type: 'international',
-                    recipientName: document.getElementById("recipientName").value,
-                    recipientBank: document.getElementById("recipientBank").value,
-                    iban: document.getElementById("accountNumber").value,
-                    swift: document.getElementById("swiftCode").value,
-                    country: document.getElementById("country").value,
+                    recipientName: document.getElementById("recipientName").value.trim(),
+                    recipientBank: document.getElementById("recipientBank").value.trim(),
+                    recipientAccountNumber: accNum,
+                    iban: accNum,
+                    swift: document.getElementById("swiftCode").value.trim(),
+                    country: document.getElementById("country").value.trim(),
                     currency: document.getElementById("currency").value,
                     amount: Number(document.getElementById("amount").value),
                     purpose: document.getElementById("purpose").value,
+                    description: descEl ? descEl.value.trim() : '',
                 };
 
                 const submitBtn = transferForm.querySelector('button[type="submit"]');
