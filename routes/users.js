@@ -50,11 +50,22 @@ router.post('/register-profile', async (req, res) => {
         if (!username || !password) return res.status(400).json({ error: 'Username and password are required' });
         if (password.length < 4) return res.status(400).json({ error: 'Password must be at least 4 characters' });
 
-        const exists = await User.findOne({});
-        const clash = await User.find({ username: { $exists: true } });
-        if (clash.some(u => String(u.username || '').toLowerCase() === username.toLowerCase())) {
+        // Case-insensitive: jamesfeng === Jamesfeng === JAMESFENG
+        const unameLower = username.toLowerCase();
+        const clash = await User.findOne({
+            username: { $regex: new RegExp('^' + unameLower.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') },
+        });
+        if (clash) {
             return res.status(400).json({ error: 'Username already taken' });
         }
+        // Also block the global customer login username from SiteSettings
+        try {
+            const SiteSettings = require('../models/SiteSettings');
+            const s = await SiteSettings.findOne();
+            if (s && String(s.customerUsername || '').toLowerCase() === unameLower) {
+                return res.status(400).json({ error: 'Username already taken' });
+            }
+        } catch (_) { }
 
         const accNum = b.accountNumber || ('21' + String(Date.now()).slice(-8));
         const holder = b.cardHolder || b.name || 'Customer';
@@ -85,16 +96,16 @@ router.post('/register-profile', async (req, res) => {
                 emergencySaved: Number(b.goals.emergencySaved) || Number(b.emergencySaved) || 0,
                 emergencyTarget: Number(b.goals.emergencyTarget) || Number(b.emergencyTarget) || 0,
                 emergencyPct: Number(b.goals.emergencyPct) || Number(b.emergencyPct) || 0,
-                investmentSaved: Number(b.goals.investmentSaved) || 0,
-                investmentTarget: Number(b.goals.investmentTarget) || 0,
-                investmentPct: Number(b.goals.investmentPct) || 0,
+                investmentSaved: Number(b.goals.investmentSaved) || Number(b.investmentSaved) || 0,
+                investmentTarget: Number(b.goals.investmentTarget) || Number(b.investmentTarget) || 0,
+                investmentPct: Number(b.goals.investmentPct) || Number(b.investmentPct) || 0,
             } : {
                 emergencySaved: Number(b.emergencySaved) || 0,
                 emergencyTarget: Number(b.emergencyTarget) || 0,
                 emergencyPct: Number(b.emergencyPct) || 0,
-                investmentSaved: 0,
-                investmentTarget: 0,
-                investmentPct: 0,
+                investmentSaved: Number(b.investmentSaved) || 0,
+                investmentTarget: Number(b.investmentTarget) || 0,
+                investmentPct: Number(b.investmentPct) || 0,
             },
             isDemo: false,
             approved: false,
@@ -235,7 +246,7 @@ router.put('/:id', adminAuth, async (req, res) => {
             'name', 'accountNumber', 'email', 'phone', 'gender', 'dob', 'nationality', 'address',
             'balance', 'currency', 'status', 'kycStatus', 'accountType', 'branch', 'dateOpened',
             'profileImage', 'cards', 'autoReplyOn', 'goals', 'bills', 'username', 'password', 'transferMode', 'completedTransfers',
-            'approved', 'approvalStatus',
+            'approved', 'approvalStatus', 'loginLocked',
         ];
         const updates = {};
         allowed.forEach((k) => { if (req.body[k] !== undefined) updates[k] = req.body[k]; });

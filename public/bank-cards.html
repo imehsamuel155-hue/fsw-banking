@@ -411,7 +411,7 @@
     </header>
 
     <!-- Cards Container -->
-    <section class="cards-section">
+    <section class="cards-section" id="cardsSection" style="opacity:0.35;pointer-events:none;">
 
         <!-- SAVINGS CARD -->
         <div class="bank-card savings-card">
@@ -434,7 +434,7 @@
             <div class="card-bottom">
                 <div>
                     <small>Card Holder</small>
-                    <p>John Smith</p>
+                    <p>—</p>
                 </div>
 
                 <div>
@@ -473,7 +473,7 @@
             <div class="card-bottom">
                 <div>
                     <small>Card Holder</small>
-                    <p>John Smith</p>
+                    <p>—</p>
                 </div>
 
                 <div>
@@ -532,7 +532,10 @@
             var d = document.getElementById('cardsDots');
             var n = 0;
             var t = setInterval(function () { n = (n % 6) + 1; if (d) d.textContent = '.'.repeat(n); }, 280);
-            function hide() { var el = document.getElementById('cardsLoading'); if (el) el.style.display = 'none'; clearInterval(t); }
+            function hide() {
+                var el = document.getElementById('cardsLoading'); if (el) el.style.display = 'none'; clearInterval(t);
+                var sec = document.getElementById('cardsSection'); if (sec) { sec.style.opacity = '1'; sec.style.pointerEvents = 'auto'; }
+            }
             if (typeof fswApplyCards === 'function') {
                 Promise.resolve(fswApplyCards()).then(hide).catch(hide);
             } else {

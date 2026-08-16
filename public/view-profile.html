@@ -58,6 +58,64 @@
         #profileContent {
             transition: opacity .2s;
         }
+
+        /* Profile: white bg, black text, blue labels */
+        .profile-page,
+        body.profile-page,
+        .view-profile-page {
+            background: #f8fafc !important;
+        }
+
+        .profile-header,
+        .profile-hero,
+        .profile-banner,
+        .profile-top-card,
+        .user-info-card {
+            background: #ffffff !important;
+            color: #0f172a !important;
+        }
+
+        .profile-header h1,
+        .profile-header h2,
+        .profile-hero h1,
+        .profile-hero h2,
+        .user-info-card h1,
+        .user-info-card h2,
+        .profile-name {
+            color: #0f172a !important;
+        }
+
+        .profile-header small,
+        .profile-header p,
+        .profile-sub {
+            color: #64748b !important;
+        }
+
+        .info-label,
+        .profile-label,
+        .detail-label,
+        .field-label,
+        .profile-details label,
+        .info-row label,
+        .detail-item span:first-child {
+            color: #0b63ce !important;
+            font-weight: 600;
+        }
+
+        .info-value,
+        .detail-value,
+        .profile-details p,
+        .detail-item p,
+        .info-row p {
+            color: #0f172a !important;
+        }
+
+        .profile-details,
+        .info-card,
+        .detail-card {
+            background: #ffffff !important;
+            color: #0f172a !important;
+        }
     </style>
     <title>My Profile | First Smart Wave Banking</title>
 
@@ -87,11 +145,11 @@
            DASHBOARD HEADER (Top Nav)
         ====================================== */
         .dashboard-header {
-            background: #071a52;
+            background: #ffffff;
             padding: 18px 30px;
             display: flex;
             align-items: center;
-            color: #fff;
+            color: #0f172a;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
@@ -102,7 +160,7 @@
         }
 
         .back-btn {
-            color: #fff;
+            color: #0b63ce;
             font-size: 22px;
             text-decoration: none;
             transition: all 0.3s ease;
@@ -112,7 +170,7 @@
         }
 
         .back-btn:hover {
-            color: #ffd700;
+            color: #071a52;
             transform: translateX(-4px);
         }
 
@@ -142,14 +200,14 @@
         }
 
         .profile-top {
-            background: linear-gradient(135deg, #071a52, #0b63ce);
-            color: #fff;
+            background: #ffffff;
+            border-bottom: 1px solid #e2e8f0;
+            color: #0f172a;
             text-align: center;
             padding: 40px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            /* Centers profile image horizontally */
         }
 
         .profile-top img {
@@ -191,13 +249,13 @@
         }
 
         .detail span {
-            color: #555;
+            color: #0b63ce;
             font-size: 16px;
             font-weight: 600;
         }
 
         .detail strong {
-            color: #071a52;
+            color: #0f172a;
             font-size: 16px;
             text-align: right;
             word-break: break-word;
@@ -248,7 +306,7 @@
             padding: 14px 30px;
             border: none;
             border-radius: 10px;
-            background: #071a52;
+            background: #ffffff;
             color: #fff;
             font-size: 16px;
             font-weight: 600;
@@ -287,7 +345,7 @@
         }
 
         .popup-header {
-            background: #071a52;
+            background: #ffffff;
             color: #fff;
             padding: 16px 20px;
             display: flex;
@@ -357,7 +415,7 @@
         }
 
         .popup-footer button {
-            background: #071a52;
+            background: #ffffff;
             color: #fff;
             border: none;
             padding: 10px 16px;

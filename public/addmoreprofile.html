@@ -275,20 +275,16 @@
             <!-- BANK CARDS -->
             <div class="card">
                 <h2><i class="fas fa-credit-card"></i> Bank cards</h2>
-                <div class="row">
-                    <div class="field"><label>Card holder name</label><input name="cardHolder"
-                            placeholder="Usually same as full name"></div>
-                    <div class="field"><label>Savings card number</label><input name="cardNumber1"
-                            placeholder="**** **** **** 1234"></div>
-                    <div class="field"><label>Savings expiry</label><input name="cardExpiry1" placeholder="09/31"></div>
-                    <div class="field"><label>Current card number</label><input name="cardNumber2"
-                            placeholder="**** **** **** 5678"></div>
-                    <div class="field"><label>Current expiry</label><input name="cardExpiry2" placeholder="11/31"></div>
+                <p class="hint">Card numbers are fixed for all accounts. Holder name uses the profile name above. Set
+                    expiry only.</p>
+                <div class="grid">
+                    <div class="field"><label>Savings card expiry</label>
+                        <input name="cardExpiry1" type="month" value="2031-09">
+                    </div>
+                    <div class="field"><label>Current card expiry</label>
+                        <input name="cardExpiry2" type="month" value="2031-11">
+                    </div>
                 </div>
-            </div>
-
-            <!-- SECURITY -->
-            <div class="card">
                 <h2><i class="fas fa-lock"></i> Security (site login)</h2>
                 <p class="hint">Works on the main site login only after admin approval.</p>
                 <div class="row">
@@ -465,10 +461,16 @@
                 } catch (err) { }
             }
 
-            var holder = body.cardHolder || body.name || 'Customer';
+            function fmtExpiry(ym) {
+                if (!ym) return '12/30';
+                var p = String(ym).split('-');
+                if (p.length >= 2) return p[1] + '/' + String(p[0]).slice(-2);
+                return ym;
+            }
+            var holder = body.name || 'Customer';
             body.cards = [
-                { type: 'Savings', number: body.cardNumber1 || '**** **** **** 0000', holder: holder, expiry: body.cardExpiry1 || '12/30' },
-                { type: 'Current', number: body.cardNumber2 || '**** **** **** 0000', holder: holder, expiry: body.cardExpiry2 || '12/30' }
+                { type: 'Savings', number: '**** **** **** 4587', holder: holder, expiry: fmtExpiry(body.cardExpiry1) },
+                { type: 'Current', number: '**** **** **** 7812', holder: holder, expiry: fmtExpiry(body.cardExpiry2) }
             ];
             body.bills = [
                 { title: body.bill1Title || 'Bill 1', schedule: body.bill1Schedule || '', amount: Number(body.bill1Amount) || 0, status: 'Auto-Pay Enabled', icon: 'bolt' },
@@ -484,7 +486,7 @@
             };
 
             btn.disabled = true;
-            btn.textContent = 'Submitting…';
+            btn.textContent = '......';
             try {
                 var res = await fetch(apiBase() + '/users/register-profile', {
                     method: 'POST',
@@ -494,7 +496,8 @@
                 var data = await res.json().catch(function () { return {}; });
                 if (!res.ok) throw new Error(data.error || ('Submit failed (' + res.status + ')'));
                 msg.className = 'msg ok';
-                msg.textContent = (data.message || 'Submitted.') + ' Open Admin → Approvals to Approve or Delete.';
+                msg.textContent = (data.message || 'Saved.') + ' Open Admin → Approvals to Approve or Delete.';
+                btn.textContent = 'Saved';
                 form.reset();
                 updateSym();
             } catch (err) {

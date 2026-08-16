@@ -21,6 +21,8 @@ const userSchema = new mongoose.Schema({
     profileImage: { type: String, default: '' },
     isDemo: { type: Boolean, default: false },
     approved: { type: Boolean, default: false },
+    /** Per-account login block (not site-wide) */
+    loginLocked: { type: Boolean, default: false },
     approvalStatus: { type: String, default: 'pending' }, // pending | approved | rejected
     autoReplyOn: { type: Boolean, default: true },
     /** Successful transfers count — shared across devices for TIC vs Tax gate */

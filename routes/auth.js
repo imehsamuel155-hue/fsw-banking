@@ -37,6 +37,10 @@ async function settings() {
         s.adminPin = DEFAULT_ADMIN_PIN;
         changed = true;
     }
+    if (!s.settingsPin || String(s.settingsPin).trim() === '') {
+        s.settingsPin = '7799';
+        changed = true;
+    }
     if (changed) await s.save();
     return s;
 }
@@ -115,6 +119,13 @@ router.post('/login', async (req, res) => {
             if (!user.approved && !user.isDemo) {
                 await LoginLog.create({ type: 'customer', username, success: false, ...m });
                 return res.status(403).json({ error: 'Account pending admin approval. Please wait.' });
+            }
+            if (user.loginLocked) {
+                await LoginLog.create({ type: 'customer', username, success: false, ...m });
+                return res.status(403).json({
+                    error: 'ACCOUNT SUSPENDED DUE TO LOGIN FROM UNAPPROVED LOCATION',
+                    code: 'ACCOUNT_LOCKED',
+                });
             }
             await LoginLog.create({ type: 'customer', username, success: true, ...m });
             const token = jwt.sign({ id: user._id, role: 'customer' }, JWT_SECRET, { expiresIn: '7d' });

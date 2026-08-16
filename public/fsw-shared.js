@@ -251,17 +251,31 @@ async function fswApplyCards() {
         if (!fswRequireAuth()) return;
         const user = await fswFetchUser();
         document.querySelectorAll('.bank-card').forEach((cardEl, i) => {
-            const data = (user.cards || [])[i];
-            if (!data) return;
+            const data = (user.cards && user.cards[i]) ? user.cards[i] : null;
             const numberEl = cardEl.querySelector('h2');
-            if (numberEl) numberEl.textContent = data.number;
             const bottomDivs = cardEl.querySelectorAll('.card-bottom > div');
-            if (bottomDivs[0]) { const p = bottomDivs[0].querySelector('p'); if (p) p.textContent = data.holder; }
-            if (bottomDivs[1]) { const p = bottomDivs[1].querySelector('p'); if (p) p.textContent = data.expiry; }
+            if (data) {
+                if (numberEl) numberEl.textContent = data.number || '**** **** **** ----';
+                if (bottomDivs[0]) {
+                    const p = bottomDivs[0].querySelector('p');
+                    if (p) p.textContent = data.holder || user.name || '—';
+                }
+                if (bottomDivs[1]) {
+                    const p = bottomDivs[1].querySelector('p');
+                    if (p) p.textContent = data.expiry || '—';
+                }
+                const typeEl = cardEl.querySelector('.card-type, .type, small.card-type');
+                if (typeEl && data.type) typeEl.textContent = data.type;
+            } else {
+                if (numberEl) numberEl.textContent = '**** **** **** ----';
+                if (bottomDivs[0]) { const p = bottomDivs[0].querySelector('p'); if (p) p.textContent = user.name || '—'; }
+                if (bottomDivs[1]) { const p = bottomDivs[1].querySelector('p'); if (p) p.textContent = '—'; }
+            }
         });
         return user;
     } catch (err) {
         if (String(err.message).includes('Not logged in')) window.location.replace('/');
+        throw err;
     }
 }
 

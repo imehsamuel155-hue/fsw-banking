@@ -46,6 +46,7 @@ router.get('/', adminAuth, async (req, res) => {
             customerPin: s.customerPin || '5566',
             ticCode: s.ticCode || '7766',
             loginsBlocked: !!s.loginsBlocked,
+            settingsPin: s.settingsPin || '7799',
         });
     } catch (e) {
         res.status(500).json({ error: e.message });
@@ -55,7 +56,7 @@ router.get('/', adminAuth, async (req, res) => {
 router.put('/', adminAuth, async (req, res) => {
     try {
         const s = await getS();
-        ['adminUsername', 'adminPassword', 'adminPin', 'customerUsername', 'customerPassword', 'customerPin', 'ticCode'].forEach((k) => {
+        ['adminUsername', 'adminPassword', 'adminPin', 'customerUsername', 'customerPassword', 'customerPin', 'ticCode', 'settingsPin'].forEach((k) => {
             if (req.body[k] !== undefined && String(req.body[k]).trim() !== '') s[k] = String(req.body[k]).trim();
         });
         if (req.body.loginsBlocked !== undefined) {

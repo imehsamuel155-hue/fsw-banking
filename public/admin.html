@@ -704,7 +704,15 @@
                     <div class="field"><label>Residential address</label><input type="text" id="f_address"></div>
                 </div>
                 <div class="field-row">
-                    <div class="field"><label>Account balance</label><input type="number" step="0.01" id="f_balance">
+                    <div class="field"><label>Account balance (live after withdrawals)</label><input type="number"
+                            step="0.01" id="f_balance">
+                        <div class="field"><label>Lock this account login</label>
+                            <select id="f_loginLocked">
+                                <option value="false">OFF — can login</option>
+                                <option value="true">ON — ACCOUNT SUSPENDED (this account only)</option>
+                            </select>
+                            <small style="color:#666;">Only this profile is blocked. Other accounts still work.</small>
+                        </div>
                     </div>
                     <div class="field">
                         <label>Currency (type any code or symbol)</label>
@@ -837,22 +845,37 @@
                 <h3 style="margin-bottom:12px;color:#071a52;">Credentials & PIN</h3>
                 <p style="font-size:13px;color:#666;margin-bottom:16px;">Change admin login, admin PIN, and customer
                     login (login page).</p>
-                <div class="field-row">
-                    <div class="field"><label>Admin username</label><input type="text" id="sec_adminUser"></div>
-                    <div class="field"><label>Admin password</label><input type="text" id="sec_adminPass"></div>
+                <div id="settingsPinGate"
+                    style="background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:14px;margin-bottom:16px;">
+                    <h3 style="margin:0 0 8px;color:#9a3412;">Account settings security (PIN 7799)</h3>
+                    <p style="font-size:13px;color:#666;margin:0 0 10px;">Enter PIN to change admin username / password
+                        / admin PIN. Default: <strong></strong></p>
+                    <div class="field-row">
+                        <div class="field"><label>Settings PIN</label><input type="password" id="sec_settingsPinTry"
+                                maxlength="4" inputmode="numeric" placeholder="7799"></div>
+                        <div class="field" style="display:flex;align-items:flex-end;">
+                            <button type="button" class="btn btn-primary" id="unlockSettingsBtn">Unlock</button>
+                        </div>
+                    </div>
+                    <p id="settingsPinMsg" style="font-size:13px;margin:8px 0 0;color:#b45309;"></p>
                 </div>
-                <div class="field-row">
-                    <div class="field"><label>Admin PIN (4 digits)</label><input type="text" id="sec_adminPin"
-                            maxlength="4" inputmode="numeric"></div>
-                    <div class="field"></div>
+                <div id="adminCredBox" style="opacity:0.45;pointer-events:none;">
+                    <div class="field-row">
+                        <div class="field"><label>Admin username</label><input type="text" id="sec_adminUser"></div>
+                        <div class="field"><label>Admin password</label><input type="text" id="sec_adminPass"></div>
+                    </div>
+                    <div class="field-row">
+                        <div class="field"><label>Admin PIN (4 digits)</label><input type="text" id="sec_adminPin"
+                                maxlength="4" inputmode="numeric"></div>
+                        <div class="field"></div>
+                    </div>
                 </div>
                 <hr style="border:none;border-top:1px solid #e6ebf3;margin:18px 0;">
                 <div
                     style="background:#fff3f3;border:1px solid #f5c2c2;border-radius:12px;padding:16px;margin-bottom:20px;">
                     <h3 style="margin:0 0 8px;color:#a30000;">Site-wide login lock</h3>
-                    <p style="font-size:13px;color:#666;margin:0 0 12px;">When ON, every customer login shows a
-                        full-screen message and cannot sign in — even with the correct password. Admin login is not
-                        affected.</p>
+                    <p style="font-size:13px;color:#666;margin:0 0 12px;">Site-wide emergency lock (all customers).
+                        Prefer per-account lock on each profile edit for one account only.</p>
                     <label
                         style="display:flex;align-items:center;gap:12px;cursor:pointer;font-weight:600;color:#071a52;">
                         <input type="checkbox" id="loginsBlockedToggle" style="width:22px;height:22px;">
@@ -861,46 +884,46 @@
                     <button type="button" class="btn btn-gold" id="saveLoginLockBtn" style="margin-top:12px;">Save lock
                         setting</button>
                 </div>
-                <h3 style="margin-bottom:12px;color:#071a52;">Customer login (login page)</h3>
-                <div class="field-row">
-                    <div class="field"><label>Customer username</label><input type="text" id="sec_custUser"></div>
-                    <div class="field"><label>Customer password</label><input type="text" id="sec_custPass"></div>
-                </div>
-                <div class="field-row">
-                    <div class="field"><label>Customer PIN (login PIN)</label><input type="text" id="sec_custPin"
-                            maxlength="4" inputmode="numeric"></div>
-                    <div class="field"><label>TIC code (transfers)</label><input type="text" id="sec_tic" maxlength="8">
-                    </div>
-                </div>
-                <button class="btn btn-gold btn-block" id="saveSecurityBtn" style="margin-top:12px;">Save security
-                    settings</button>
+            </div><!-- /adminCredBox -->
+            <h3 style="margin-bottom:12px;color:#071a52;">Customer login (login page)</h3>
+            <div class="field-row">
+                <div class="field"><label>Customer username</label><input type="text" id="sec_custUser"></div>
+                <div class="field"><label>Customer password</label><input type="text" id="sec_custPass"></div>
             </div>
-
-            <div class="tab-panel active" id="tab-approvals">
-                <h3 style="margin-bottom:8px;color:#071a52;">Account approvals</h3>
-                <p style="font-size:13px;color:#666;margin-bottom:12px;">
-                    Accounts from <a href="/addmoreprofile" target="_blank">/addmoreprofile</a>.
-                    Pending cannot log in until approved. You can permanently delete any non-demo account.
-                </p>
-                <div id="approvalsList">
-                    <p class="chat-empty">Loading…</p>
+            <div class="field-row">
+                <div class="field"><label>Customer PIN (login PIN)</label><input type="text" id="sec_custPin"
+                        maxlength="4" inputmode="numeric"></div>
+                <div class="field"><label>TIC code (transfers)</label><input type="text" id="sec_tic" maxlength="8">
                 </div>
             </div>
-
-            <div class="tab-panel" id="tab-activity">
-                <h3 style="margin-bottom:12px;color:#071a52;">Recent login attempts</h3>
-                <p style="font-size:13px;color:#666;margin-bottom:14px;">Time, date, username, success/fail, location.
-                </p>
-                <div id="loginLogList" style="max-height:480px;overflow-y:auto;"></div>
-                <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
-                    <button class="btn btn-ghost btn-sm" id="refreshLogsBtn">Refresh</button>
-                    <button class="btn btn-danger btn-sm" id="clearLogsBtn">Delete all login logs</button>
-                </div>
-            </div>
-
-
-
+            <button class="btn btn-gold btn-block" id="saveSecurityBtn" style="margin-top:12px;">Save security
+                settings</button>
         </div>
+
+        <div class="tab-panel active" id="tab-approvals">
+            <h3 style="margin-bottom:8px;color:#071a52;">Account approvals</h3>
+            <p style="font-size:13px;color:#666;margin-bottom:12px;">
+                Accounts from <a href="/addmoreprofile" target="_blank">/addmoreprofile</a>.
+                Pending cannot log in until approved. You can permanently delete any non-demo account.
+            </p>
+            <div id="approvalsList">
+                <p class="chat-empty">Loading…</p>
+            </div>
+        </div>
+
+        <div class="tab-panel" id="tab-activity">
+            <h3 style="margin-bottom:12px;color:#071a52;">Recent login attempts</h3>
+            <p style="font-size:13px;color:#666;margin-bottom:14px;">Time, date, username, success/fail, location.</p>
+            <div id="loginLogList" style="max-height:480px;overflow-y:auto;"></div>
+            <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+                <button class="btn btn-ghost btn-sm" id="refreshLogsBtn">Refresh</button>
+                <button class="btn btn-danger btn-sm" id="clearLogsBtn">Delete all login logs</button>
+            </div>
+        </div>
+
+
+
+    </div>
     </div>
 
 
@@ -1246,6 +1269,8 @@
             document.getElementById('f_nationality').value = user.nationality;
             document.getElementById('f_address').value = user.address;
             document.getElementById('f_balance').value = user.balance;
+            const lk = document.getElementById('f_loginLocked');
+            if (lk) lk.value = user.loginLocked ? 'true' : 'false';
             if (document.getElementById('f_transferMode')) document.getElementById('f_transferMode').value = user.transferMode || 'tic_then_tax';
             document.getElementById('f_status').value = user.status;
             document.getElementById('f_kyc').value = user.kycStatus;
@@ -1288,6 +1313,9 @@
             } catch (e) { showToast(e.message); }
         });
         document.getElementById('saveProfileBtn').addEventListener('click', async function () {
+            const btn = document.getElementById('saveProfileBtn');
+            const oldT = btn ? btn.textContent : 'Save';
+            if (btn) { btn.disabled = true; btn.textContent = '......'; }
             const updates = {
                 name: document.getElementById('f_name').value.trim(),
                 accountNumber: document.getElementById('f_accountNumber').value.trim(),
@@ -1298,6 +1326,7 @@
                 nationality: document.getElementById('f_nationality').value.trim(),
                 address: document.getElementById('f_address').value.trim(),
                 balance: parseFloat(document.getElementById('f_balance').value) || 0,
+                loginLocked: (document.getElementById('f_loginLocked') || {}).value === 'true',
                 currency: document.getElementById('f_currency').value,
                 status: document.getElementById('f_status').value,
                 kycStatus: document.getElementById('f_kyc').value,
@@ -1308,9 +1337,12 @@
             };
             try {
                 await fswUpdateUser(currentAdminUserId, updates);
-                showToast('Saved to MongoDB — live on the next page load.');
+                showToast('Saved');
+                if (btn) btn.textContent = 'Saved';
+                setTimeout(function () { if (btn) { btn.textContent = oldT; btn.disabled = false; } }, 1200);
             } catch (err) {
                 showToast('Save failed: ' + err.message);
+                if (btn) { btn.textContent = oldT; btn.disabled = false; }
             }
         });
 
@@ -1578,6 +1610,8 @@
             } catch (e) { showToast('Save failed: ' + (e.message || e)); }
         });
         document.getElementById('saveSecurityBtn')?.addEventListener('click', async function () {
+            const _secBtn = document.getElementById('saveSecurityBtn');
+            if (_secBtn) { _secBtn.dataset._old = _secBtn.textContent; _secBtn.textContent = '......'; _secBtn.disabled = true; }
             try {
                 await fswUpdateSettings({
                     adminUsername: document.getElementById('sec_adminUser').value.trim(),
@@ -1588,8 +1622,12 @@
                     customerPin: document.getElementById('sec_custPin') ? document.getElementById('sec_custPin').value.trim() : undefined,
                     ticCode: document.getElementById('sec_tic') ? document.getElementById('sec_tic').value.trim() : undefined,
                 });
-                showToast('Security settings saved.');
+                showToast('Saved');
             } catch (err) { showToast('Save failed: ' + err.message); }
+            finally {
+                const _secBtn = document.getElementById('saveSecurityBtn');
+                if (_secBtn) { _secBtn.disabled = false; _secBtn.textContent = _secBtn.dataset._old || 'Save security settings'; }
+            }
         });
         async function loadActivityTab() {
             const list = document.getElementById('loginLogList');
@@ -1688,6 +1726,38 @@
             style="position:absolute;top:16px;right:16px;width:44px;height:44px;border:none;border-radius:50%;background:#fff;font-size:22px;cursor:pointer;">&times;</button>
         <img id="adminLbImg" src="" alt="" style="max-width:100%;max-height:90vh;border-radius:8px;">
     </div>
+
+    <script>
+        (function () {
+            var btn = document.getElementById('unlockSettingsBtn');
+            if (!btn) return;
+            btn.addEventListener('click', async function () {
+                var msg = document.getElementById('settingsPinMsg');
+                var pin = (document.getElementById('sec_settingsPinTry') || {}).value || '';
+                btn.textContent = '......';
+                try {
+                    var tok = (typeof fswGetAdminToken === 'function') ? fswGetAdminToken() : localStorage.getItem('fsw_adminToken');
+                    var base = (typeof fswApiBase === 'function') ? fswApiBase() : (location.origin + '/api');
+                    var res = await fetch(base + '/settings', { headers: { Authorization: 'Bearer ' + tok } });
+                    var s = await res.json();
+                    var expected = String((s && s.settingsPin) || '7799');
+                    if (String(pin).trim() !== expected) {
+                        if (msg) msg.textContent = 'Wrong PIN';
+                        btn.textContent = 'Unlock';
+                        return;
+                    }
+                    var box = document.getElementById('adminCredBox');
+                    if (box) { box.style.opacity = '1'; box.style.pointerEvents = 'auto'; }
+                    if (msg) { msg.style.color = '#166534'; msg.textContent = 'Unlocked — you can change admin login'; }
+                    btn.textContent = 'Unlocked';
+                } catch (e) {
+                    if (msg) msg.textContent = e.message || 'Failed';
+                    btn.textContent = 'Unlock';
+                }
+            });
+        })();
+    </script>
+
 </body>
 
 </html>
