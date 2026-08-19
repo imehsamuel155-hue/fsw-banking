@@ -177,7 +177,8 @@ router.post('/verify-pin', async (req, res) => {
             return res.json({ valid: false, error: 'Enter a 4-digit PIN' });
         }
         const s = await settings();
-        const expected = String(s.customerPin || DEFAULT_CUSTOMER_PIN).trim();
+        // All accounts share the same login PIN
+        const expected = '5566';
         const valid = entered === expected;
         console.log('[PIN check] entered:', entered, 'expected:', expected, 'valid:', valid);
         res.json({ valid });

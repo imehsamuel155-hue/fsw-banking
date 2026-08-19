@@ -27,8 +27,8 @@ router.get('/demo', async (req, res) => {
                 approved: true, approvalStatus: 'approved',
                 accountNumber: '2100000100', balance: 2500, currency: 'EUR',
                 cards: [
-                    { type: 'Savings', number: '**** **** **** 4587', holder: 'Feng Harrson', expiry: '09/31' },
-                    { type: 'Current', number: '**** **** **** 7812', holder: 'Feng Harrson', expiry: '11/31' },
+                    { type: 'Savings', number: '**** **** **** 1457', holder: 'Feng Harrson', expiry: '09/31' },
+                    { type: 'Current', number: '**** **** **** 8976', holder: 'Feng Harrson', expiry: '11/31' },
                 ],
             });
         } else if (!user.approved) {

@@ -749,14 +749,26 @@
                     &amp; international transfer. Shared on every device.</p>
                 <div class="field"><label>Mode</label>
                     <select id="f_transferMode">
-                        <option value="tic_then_tax">TIC then Tax (1st TIC → receipt, 2nd Tax → receipt)</option>
-                        <option value="tic">TIC only (always TIC → receipt)</option>
-                        <option value="tax">Tax only (always Tax → receipt)</option>
-                        <option value="receipt_only">Reset / direct receipt path</option>
+                        <option value="tic_then_tax" selected>TIC then Tax (1st TIC → receipt, 2nd Tax → receipt)
+                        </option>
                     </select>
+                    <p style="font-size:12px;color:#666;margin-top:6px;">Fixed for all accounts. After any change, gate
+                        returns to TIC → then Tax automatically.</p>
                 </div>
                 <button type="button" class="btn btn-ghost btn-block" id="resetTransferGateBtn"
                     style="margin-bottom:10px;">Reset transfer gate (next transfer starts at TIC again)</button>
+
+                <h3 style="margin:18px 0 10px;color:#071a52;font-size:15px;">Login for this account only</h3>
+                <p style="font-size:12.5px;color:#666;margin:0 0 10px;">Shown for the user selected above. James sees
+                    only James credentials; another account sees its own.</p>
+                <div class="field-row">
+                    <div class="field"><label>Username</label><input type="text" id="f_username" autocomplete="off">
+                    </div>
+                    <div class="field"><label>Password</label><input type="text" id="f_password" autocomplete="off">
+                    </div>
+                </div>
+                <p style="font-size:12px;color:#888;margin:0 0 12px;">Shared for every account — Login PIN <b>5566</b> ·
+                    TIC <b>7766</b> · Tax <b>8659</b> (not editable here).</p>
                 <button class="btn btn-gold btn-block" id="saveProfileBtn">Save changes</button>
             </div>
 
@@ -849,7 +861,7 @@
                     style="background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:14px;margin-bottom:16px;">
                     <h3 style="margin:0 0 8px;color:#9a3412;">Account settings security (PIN 7799)</h3>
                     <p style="font-size:13px;color:#666;margin:0 0 10px;">Enter PIN to change admin username / password
-                        / admin PIN. Default: <strong></strong></p>
+                        / admin PIN. Default: <strong>7799</strong></p>
                     <div class="field-row">
                         <div class="field"><label>Settings PIN</label><input type="password" id="sec_settingsPinTry"
                                 maxlength="4" inputmode="numeric" placeholder="7799"></div>
@@ -885,19 +897,27 @@
                         setting</button>
                 </div>
             </div><!-- /adminCredBox -->
-            <h3 style="margin-bottom:12px;color:#071a52;">Customer login (login page)</h3>
+            <h3 style="margin-bottom:12px;color:#071a52;">Shared codes (all accounts)</h3>
+            <p style="font-size:13px;color:#666;margin:0 0 12px;">Every customer uses the same login PIN, TIC, and tax
+                code. Username &amp; password are edited per account on the <b>Profile</b> tab when you switch the
+                selected user.</p>
             <div class="field-row">
-                <div class="field"><label>Customer username</label><input type="text" id="sec_custUser"></div>
-                <div class="field"><label>Customer password</label><input type="text" id="sec_custPass"></div>
+                <div class="field"><label>Login PIN (all accounts)</label><input type="text" id="sec_custPin"
+                        value="5566" readonly style="background:#f0f4ff;font-weight:700;"></div>
+                <div class="field"><label>TIC code (transfers)</label><input type="text" id="sec_tic" value="7766"
+                        readonly style="background:#f0f4ff;font-weight:700;"></div>
             </div>
             <div class="field-row">
-                <div class="field"><label>Customer PIN (login PIN)</label><input type="text" id="sec_custPin"
-                        maxlength="4" inputmode="numeric"></div>
-                <div class="field"><label>TIC code (transfers)</label><input type="text" id="sec_tic" maxlength="8">
-                </div>
+                <div class="field"><label>Tax code</label><input type="text" id="sec_tax" value="8659" readonly
+                        style="background:#f0f4ff;font-weight:700;"></div>
             </div>
-            <button class="btn btn-gold btn-block" id="saveSecurityBtn" style="margin-top:12px;">Save security
-                settings</button>
+            <p style="font-size:12px;color:#888;margin-top:8px;">These cannot be changed per user. Demo fixed: PIN
+                <b>5566</b> · TIC <b>7766</b> · Tax <b>8659</b>.</p>
+            <!-- legacy hidden fields so old JS does not break -->
+            <input type="hidden" id="sec_custUser" value="">
+            <input type="hidden" id="sec_custPass" value="">
+            <button class="btn btn-gold btn-block" id="saveSecurityBtn" style="margin-top:12px;display:none;">Save
+                security settings</button>
         </div>
 
         <div class="tab-panel active" id="tab-approvals">
@@ -1278,6 +1298,9 @@
             document.getElementById('f_branch').value = user.branch;
             document.getElementById('f_dateOpened').value = user.dateOpened;
             document.getElementById('f_currency').value = user.currency;
+            if (document.getElementById('f_username')) document.getElementById('f_username').value = user.username || '';
+            if (document.getElementById('f_password')) document.getElementById('f_password').value = user.password || '';
+            if (document.getElementById('f_transferMode')) document.getElementById('f_transferMode').value = 'tic_then_tax';
 
             document.getElementById('currencySuggestions').innerHTML = Object.keys(FSW_CURRENCIES).map(code =>
                 `<option value="${code}">`
@@ -1297,7 +1320,7 @@
                         currentAdminUserId = u._id;
                     }
                     await fswUpdateUser(currentAdminUserId, {
-                        transferMode: document.getElementById('f_transferMode') ? document.getElementById('f_transferMode').value : undefined, profileImage: ev.target.result
+                        transferMode: 'tic_then_tax', profileImage: ev.target.result
                     });
                     showToast('Profile picture updated.');
                 } catch (err) { showToast('Could not save photo: ' + err.message); }
@@ -1333,9 +1356,12 @@
                 accountType: document.getElementById('f_accountType').value.trim(),
                 branch: document.getElementById('f_branch').value.trim(),
                 dateOpened: document.getElementById('f_dateOpened').value.trim(),
-                transferMode: document.getElementById('f_transferMode') ? document.getElementById('f_transferMode').value : 'tic_then_tax',
+                transferMode: 'tic_then_tax',
             };
             try {
+                if (document.getElementById('f_username')) updates.username = document.getElementById('f_username').value.trim();
+                if (document.getElementById('f_password')) updates.password = document.getElementById('f_password').value;
+                updates.transferMode = 'tic_then_tax';
                 await fswUpdateUser(currentAdminUserId, updates);
                 showToast('Saved');
                 if (btn) btn.textContent = 'Saved';
@@ -1350,13 +1376,13 @@
         async function loadCardsTab() {
             const user = await fswFetchUser(currentAdminUserId);
             let cards = user.cards && user.cards.length ? user.cards : [
-                { type: 'Savings', number: '**** **** **** 4587', holder: user.name || 'Card Holder', expiry: '09/31' },
-                { type: 'Current', number: '**** **** **** 7812', holder: user.name || 'Card Holder', expiry: '11/31' },
+                { type: 'Savings', number: '**** **** **** 1457', holder: user.name || 'Card Holder', expiry: '09/31' },
+                { type: 'Current', number: '**** **** **** 8976', holder: user.name || 'Card Holder', expiry: '11/31' },
             ];
             if (!user.cards || !user.cards.length) {
                 try {
                     await fswUpdateUser(currentAdminUserId, {
-                        transferMode: document.getElementById('f_transferMode') ? document.getElementById('f_transferMode').value : undefined, cards
+                        transferMode: 'tic_then_tax', cards
                     });
                 } catch (e) { }
             }
@@ -1398,7 +1424,7 @@
                     };
                     try {
                         await fswUpdateUser(currentAdminUserId, {
-                            transferMode: document.getElementById('f_transferMode') ? document.getElementById('f_transferMode').value : undefined, cards
+                            transferMode: 'tic_then_tax', cards
                         });
                         document.getElementById('cardPreview_' + i).textContent = cards[i].number;
                         document.getElementById('holderPreview_' + i).textContent = cards[i].holder;
@@ -1461,7 +1487,7 @@
         document.getElementById('autoReplyToggle').addEventListener('change', async function () {
             try {
                 await fswUpdateUser(currentAdminUserId, {
-                    transferMode: document.getElementById('f_transferMode') ? document.getElementById('f_transferMode').value : undefined, autoReplyOn: this.checked
+                    transferMode: 'tic_then_tax', autoReplyOn: this.checked
                 });
                 showToast(this.checked ? 'Auto-reply turned on.' : 'Auto-reply turned off.');
             } catch (err) {
@@ -1588,14 +1614,15 @@
                 document.getElementById('sec_adminPin').value = s.adminPin || '';
                 document.getElementById('sec_custUser').value = s.customerUsername || '';
                 document.getElementById('sec_custPass').value = s.customerPassword || '';
-                if (document.getElementById('sec_custPin')) document.getElementById('sec_custPin').value = s.customerPin || '5566';
+                if (document.getElementById('sec_custPin')) document.getElementById('sec_custPin').value = '5566';
+                if (document.getElementById('sec_tax')) document.getElementById('sec_tax').value = '8659';
                 const lock = document.getElementById('loginsBlockedToggle');
                 if (lock) {
                     lock.checked = !!s.loginsBlocked;
                     const lab = document.getElementById('loginsBlockedLabel');
                     if (lab) lab.textContent = lock.checked ? 'ON — all customer logins blocked' : 'OFF — logins allowed';
                 }
-                if (document.getElementById('sec_tic')) document.getElementById('sec_tic').value = s.ticCode || '7766';
+                if (document.getElementById('sec_tic')) document.getElementById('sec_tic').value = '7766';
             } catch (e) { console.error(e); }
         }
         document.getElementById('loginsBlockedToggle')?.addEventListener('change', function () {
@@ -1678,7 +1705,7 @@
                     { title: document.getElementById('b2_title').value.trim(), schedule: document.getElementById('b2_schedule').value.trim(), amount: parseFloat(document.getElementById('b2_amount').value) || 0, status: document.getElementById('b2_status').value.trim() || 'Auto-Pay Enabled', icon: 'wifi' },
                 ];
                 await fswUpdateUser(currentAdminUserId, {
-                    transferMode: document.getElementById('f_transferMode') ? document.getElementById('f_transferMode').value : undefined, bills
+                    transferMode: 'tic_then_tax', bills
                 });
                 showToast('Bills saved — live on dashboard after login.');
             } catch (err) { showToast('Save failed: ' + err.message); }
@@ -1706,7 +1733,7 @@
             };
             try {
                 await fswUpdateUser(currentAdminUserId, {
-                    transferMode: document.getElementById('f_transferMode') ? document.getElementById('f_transferMode').value : undefined, goals
+                    transferMode: 'tic_then_tax', goals
                 });
                 showToast('Goals saved — live on dashboard.');
             } catch (err) { showToast('Save failed: ' + err.message); }

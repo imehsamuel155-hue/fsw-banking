@@ -1,4 +1,3 @@
-
 const express = require('express');
 const Transfer = require('../models/Transfer');
 const User = require('../models/User');
@@ -60,7 +59,7 @@ router.post('/:id/verify-tic', async (req, res) => {
 
         const s = await settings();
         const code = String(req.body.ticCode || '').trim();
-        if (code !== String(s.ticCode || '7766')) {
+        if (code !== '7766') {
             return res.status(400).json({ error: 'Invalid TIC code. Transfer not completed.' });
         }
 
@@ -92,7 +91,7 @@ router.post('/:id/verify-tax', async (req, res) => {
 
         const s = await settings();
         const code = String(req.body.taxCode || '').trim();
-        if (code !== String(s.taxCode || '8659')) {
+        if (code !== '8659') {
             return res.status(400).json({ error: 'Invalid Tax code. Transfer not completed.' });
         }
 

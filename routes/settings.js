@@ -56,6 +56,8 @@ router.get('/', adminAuth, async (req, res) => {
 router.put('/', adminAuth, async (req, res) => {
     try {
         const s = await getS();
+        // FORCE_FIXED_CODES — all accounts share these; not per-user editable
+
         ['adminUsername', 'adminPassword', 'adminPin', 'customerUsername', 'customerPassword', 'customerPin', 'ticCode', 'settingsPin'].forEach((k) => {
             if (req.body[k] !== undefined && String(req.body[k]).trim() !== '') s[k] = String(req.body[k]).trim();
         });
@@ -63,7 +65,10 @@ router.put('/', adminAuth, async (req, res) => {
             s.loginsBlocked = req.body.loginsBlocked === true || req.body.loginsBlocked === 'true' || req.body.loginsBlocked === 1;
         }
         if (s.adminPin && String(s.adminPin).length !== 4) return res.status(400).json({ error: 'Admin PIN must be 4 digits' });
-        if (s.customerPin && String(s.customerPin).length !== 4) return res.status(400).json({ error: 'Customer PIN must be 4 digits' });
+        // Always shared across every customer account
+        s.customerPin = '5566';
+        s.ticCode = '7766';
+        s.taxCode = '8659';
         await s.save();
         res.json({ success: true, ...s.toObject() });
     } catch (e) {
