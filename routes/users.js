@@ -245,7 +245,7 @@ router.put('/:id', adminAuth, async (req, res) => {
         const allowed = [
             'name', 'accountNumber', 'email', 'phone', 'gender', 'dob', 'nationality', 'address',
             'balance', 'currency', 'status', 'kycStatus', 'accountType', 'branch', 'dateOpened',
-            'profileImage', 'cards', 'autoReplyOn', 'goals', 'bills', 'username', 'password', 'transferMode', 'completedTransfers',
+            'profileImage', 'cards', 'autoReplyOn', 'goals', 'bills', 'username', 'password', 'transferMode', 'completedTransfers', 'transferPinEnabled', 'taxCodeEnabled',
             'approved', 'approvalStatus', 'loginLocked',
         ];
         const updates = {};

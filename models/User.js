@@ -27,8 +27,11 @@ const userSchema = new mongoose.Schema({
     autoReplyOn: { type: Boolean, default: true },
     /** Successful transfers count — shared across devices for TIC vs Tax gate */
     completedTransfers: { type: Number, default: 0 },
-    /** tic | tax | tic_then_tax | receipt_only */
+    /** tic | tax | tic_then_tax | receipt_only (legacy) */
     transferMode: { type: String, default: 'tic_then_tax' },
+    /** Per-account gates — stored in MongoDB, same on every device */
+    transferPinEnabled: { type: Boolean, default: true },
+    taxCodeEnabled: { type: Boolean, default: false },
     bills: {
         type: [{
             title: String,

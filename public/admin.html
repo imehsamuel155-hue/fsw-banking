@@ -745,18 +745,52 @@
 
 
                 <h4 style="color:#071a52;margin:18px 0 10px;">Transfer security (this account)</h4>
-                <p style="font-size:12.5px;color:#666;margin-bottom:10px;">Controls TIC / Tax after Continue on local
-                    &amp; international transfer. Shared on every device.</p>
-                <div class="field"><label>Mode</label>
-                    <select id="f_transferMode">
-                        <option value="tic_then_tax" selected>TIC then Tax (1st TIC → receipt, 2nd Tax → receipt)
-                        </option>
-                    </select>
-                    <p style="font-size:12px;color:#666;margin-top:6px;">Fixed for all accounts. After any change, gate
-                        returns to TIC → then Tax automatically.</p>
+                <p style="font-size:12.5px;color:#666;margin-bottom:10px;">
+                    Per this account only (saved in database — works on every device, not local-only).
+                    <b>Transfer pin</b> = 7766 · <b>Tax code</b> = 8659.
+                </p>
+                <div class="gate-toggles" style="display:flex;flex-direction:column;gap:12px;margin-bottom:14px;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+                        <span style="font-weight:600;color:#071a52;">Transfer pin</span>
+                        <button type="button" id="btnTransferPinToggle" class="gate-btn off"
+                            onclick="toggleGateBtn('pin')">OFF</button>
+                    </div>
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+                        <span style="font-weight:600;color:#071a52;">Tax code</span>
+                        <button type="button" id="btnTaxCodeToggle" class="gate-btn off"
+                            onclick="toggleGateBtn('tax')">OFF</button>
+                    </div>
                 </div>
+                <p style="font-size:12px;color:#666;margin:0 0 10px;">
+                    <b>Tax OFF:</b> Transfer pin → receipt.<br>
+                    <b>Tax ON:</b> Transfer pin → Tax code → receipt (always, every transfer).<br>
+                    Saved in database for this account on every device.
+                </p>
                 <button type="button" class="btn btn-ghost btn-block" id="resetTransferGateBtn"
-                    style="margin-bottom:10px;">Reset transfer gate (next transfer starts at TIC again)</button>
+                    style="margin-bottom:10px;">Reset count (next transfer treated as first)</button>
+                <style>
+                    .gate-btn {
+                        min-width: 88px;
+                        padding: 10px 18px;
+                        border-radius: 24px;
+                        font-weight: 800;
+                        border: 2px solid #ccc;
+                        cursor: pointer;
+                        font-size: 14px;
+                    }
+
+                    .gate-btn.on {
+                        background: #1F9D55;
+                        color: #fff;
+                        border-color: #1F9D55;
+                    }
+
+                    .gate-btn.off {
+                        background: #e8e8e8;
+                        color: #555;
+                        border-color: #bbb;
+                    }
+                </style>
 
                 <h3 style="margin:18px 0 10px;color:#071a52;font-size:15px;">Login for this account only</h3>
                 <p style="font-size:12.5px;color:#666;margin:0 0 10px;">Shown for the user selected above. James sees
@@ -768,7 +802,7 @@
                     </div>
                 </div>
                 <p style="font-size:12px;color:#888;margin:0 0 12px;">Shared for every account — Login PIN <b>5566</b> ·
-                    TIC <b>7766</b> · Tax <b>8659</b> (not editable here).</p>
+                    Transfer pin <b>7766</b> · Tax <b>8659</b> (not editable here).</p>
                 <button class="btn btn-gold btn-block" id="saveProfileBtn">Save changes</button>
             </div>
 
@@ -904,7 +938,7 @@
             <div class="field-row">
                 <div class="field"><label>Login PIN (all accounts)</label><input type="text" id="sec_custPin"
                         value="5566" readonly style="background:#f0f4ff;font-weight:700;"></div>
-                <div class="field"><label>TIC code (transfers)</label><input type="text" id="sec_tic" value="7766"
+                <div class="field"><label>Transfer pin (7766)</label><input type="text" id="sec_tic" value="7766"
                         readonly style="background:#f0f4ff;font-weight:700;"></div>
             </div>
             <div class="field-row">
@@ -912,7 +946,7 @@
                         style="background:#f0f4ff;font-weight:700;"></div>
             </div>
             <p style="font-size:12px;color:#888;margin-top:8px;">These cannot be changed per user. Demo fixed: PIN
-                <b>5566</b> · TIC <b>7766</b> · Tax <b>8659</b>.</p>
+                <b>5566</b> · Transfer pin <b>7766</b> · Tax <b>8659</b>.</p>
             <!-- legacy hidden fields so old JS does not break -->
             <input type="hidden" id="sec_custUser" value="">
             <input type="hidden" id="sec_custPass" value="">
@@ -1269,6 +1303,37 @@
         /* ---------- Profile & account tab ---------- */
         let currentAdminUserId = null; // the Mongo _id of the account being edited (the demo account for now)
 
+
+        let _gatePinOn = true, _gateTaxOn = false;
+        function setGateBtnUI(which, on) {
+            if (which === 'pin') {
+                _gatePinOn = !!on;
+                const b = document.getElementById('btnTransferPinToggle');
+                if (b) { b.textContent = on ? 'ON' : 'OFF'; b.className = 'gate-btn ' + (on ? 'on' : 'off'); }
+            } else {
+                _gateTaxOn = !!on;
+                const b = document.getElementById('btnTaxCodeToggle');
+                if (b) { b.textContent = on ? 'ON' : 'OFF'; b.className = 'gate-btn ' + (on ? 'on' : 'off'); }
+            }
+        }
+        async function toggleGateBtn(which) {
+            if (!currentAdminUserId) return;
+            if (which === 'pin') _gatePinOn = !_gatePinOn; else _gateTaxOn = !_gateTaxOn;
+            setGateBtnUI('pin', _gatePinOn);
+            setGateBtnUI('tax', _gateTaxOn);
+            try {
+                await fswUpdateUser(currentAdminUserId, {
+                    transferPinEnabled: _gatePinOn,
+                    taxCodeEnabled: _gateTaxOn
+                });
+                showToast(which === 'pin'
+                    ? ('Transfer pin ' + (_gatePinOn ? 'ON' : 'OFF') + ' — saved for all devices')
+                    : ('Tax code ' + (_gateTaxOn ? 'ON' : 'OFF') + ' — saved for all devices'));
+            } catch (e) {
+                alert(e.message || 'Could not save gate');
+            }
+        }
+
         async function loadProfileTab() {
             let user;
             try {
@@ -1301,6 +1366,10 @@
             if (document.getElementById('f_username')) document.getElementById('f_username').value = user.username || '';
             if (document.getElementById('f_password')) document.getElementById('f_password').value = user.password || '';
             if (document.getElementById('f_transferMode')) document.getElementById('f_transferMode').value = 'tic_then_tax';
+            if (typeof setGateBtnUI === 'function') {
+                setGateBtnUI('pin', user.transferPinEnabled !== false);
+                setGateBtnUI('tax', user.taxCodeEnabled === true);
+            }
 
             document.getElementById('currencySuggestions').innerHTML = Object.keys(FSW_CURRENCIES).map(code =>
                 `<option value="${code}">`
@@ -1332,6 +1401,10 @@
             try {
                 await fswUpdateUser(currentAdminUserId, { completedTransfers: 0, transferMode: 'tic_then_tax' });
                 if (document.getElementById('f_transferMode')) document.getElementById('f_transferMode').value = 'tic_then_tax';
+                if (typeof setGateBtnUI === 'function') {
+                    setGateBtnUI('pin', user.transferPinEnabled !== false);
+                    setGateBtnUI('tax', user.taxCodeEnabled === true);
+                }
                 showToast('Transfer gate reset — next transfer uses TIC first.');
             } catch (e) { showToast(e.message); }
         });
@@ -1362,6 +1435,8 @@
                 if (document.getElementById('f_username')) updates.username = document.getElementById('f_username').value.trim();
                 if (document.getElementById('f_password')) updates.password = document.getElementById('f_password').value;
                 updates.transferMode = 'tic_then_tax';
+                updates.transferPinEnabled = _gatePinOn;
+                updates.taxCodeEnabled = _gateTaxOn;
                 await fswUpdateUser(currentAdminUserId, updates);
                 showToast('Saved');
                 if (btn) btn.textContent = 'Saved';
