@@ -4,7 +4,7 @@ const FSW_API_BASE = (typeof location !== 'undefined' && (location.hostname === 
     : 'https://fsw-banking.onrender.com/api');
 
 const FSW_SESSION_KEYS = { userId: 'fsw_user_id', token: 'fsw_token', adminToken: 'fsw_admin_token' };
-const FSW_CURRENCIES = { USD: '$', GBP: '£', EUR: '€', JPY: '¥', CAD: 'C$', AUD: 'A$', CHF: 'Fr', CNY: '¥', NGN: '₦', ZAR: 'R', INR: '₹', AED: 'د.إ', KES: 'KSh' };
+const FSW_CURRENCIES = { USD: '$', EUR: '€', GBP: '£', CAD: 'C$', AUD: 'A$', NZD: 'NZ$', CHF: 'Fr', JPY: '¥', CNY: '¥', HKD: 'HK$', SGD: 'S$', INR: '₹', PKR: '₨', BDT: '৳', IDR: 'Rp', MYR: 'RM', THB: '฿', PHP: '₱', VND: '₫', KRW: '₩', AED: 'د.إ', SAR: '﷼', QAR: 'ر.ق', KWD: 'د.ك', BHD: '.د.ب', OMR: 'ر.ع.', ILS: '₪', TRY: '₺', RUB: '₽', ZAR: 'R', EGP: 'E£', GHS: 'GH₵', KES: 'KSh', UGX: 'USh', TZS: 'TSh', XOF: 'CFA', XAF: 'FCFA', BRL: 'R$', MXN: 'Mex$', ARS: 'AR$', CLP: 'CL$', COP: 'COL$', PEN: 'S/', SEK: 'kr', NOK: 'kr', DKK: 'kr', PLN: 'zł', CZK: 'Kč', HUF: 'Ft', RON: 'lei' };
 
 function fswCurrencySymbol(code) { return FSW_CURRENCIES[code] || code || '$'; }
 function fswFormatMoney(amount, code) {

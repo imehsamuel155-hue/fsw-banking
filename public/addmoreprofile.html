@@ -237,8 +237,51 @@
                             <option value="GBP">£ British Pound</option>
                             <option value="CAD">C$ Canadian Dollar</option>
                             <option value="AUD">A$ Australian Dollar</option>
+                            <option value="NZD">NZ$ New Zealand Dollar</option>
+                            <option value="CHF">Fr Swiss Franc</option>
                             <option value="JPY">¥ Japanese Yen</option>
+                            <option value="CNY">¥ Chinese Yuan</option>
+                            <option value="HKD">HK$ Hong Kong Dollar</option>
+                            <option value="SGD">S$ Singapore Dollar</option>
+                            <option value="INR">₹ Indian Rupee</option>
+                            <option value="PKR">₨ Pakistani Rupee</option>
+                            <option value="BDT">৳ Bangladeshi Taka</option>
+                            <option value="IDR">Rp Indonesian Rupiah</option>
+                            <option value="MYR">RM Malaysian Ringgit</option>
+                            <option value="THB">฿ Thai Baht</option>
+                            <option value="PHP">₱ Philippine Peso</option>
+                            <option value="VND">₫ Vietnamese Dong</option>
+                            <option value="KRW">₩ South Korean Won</option>
+                            <option value="AED">د.إ UAE Dirham</option>
+                            <option value="SAR">﷼ Saudi Riyal</option>
+                            <option value="QAR">ر.ق Qatari Riyal</option>
+                            <option value="KWD">د.ك Kuwaiti Dinar</option>
+                            <option value="BHD">.د.ب Bahraini Dinar</option>
+                            <option value="OMR">ر.ع. Omani Rial</option>
+                            <option value="ILS">₪ Israeli Shekel</option>
+                            <option value="TRY">₺ Turkish Lira</option>
+                            <option value="RUB">₽ Russian Ruble</option>
                             <option value="ZAR">R South African Rand</option>
+                            <option value="EGP">E£ Egyptian Pound</option>
+                            <option value="GHS">GH₵ Ghanaian Cedi</option>
+                            <option value="KES">KSh Kenyan Shilling</option>
+                            <option value="UGX">USh Ugandan Shilling</option>
+                            <option value="TZS">TSh Tanzanian Shilling</option>
+                            <option value="XOF">CFA West African CFA</option>
+                            <option value="XAF">FCFA Central African CFA</option>
+                            <option value="BRL">R$ Brazilian Real</option>
+                            <option value="MXN">Mex$ Mexican Peso</option>
+                            <option value="ARS">AR$ Argentine Peso</option>
+                            <option value="CLP">CL$ Chilean Peso</option>
+                            <option value="COP">COL$ Colombian Peso</option>
+                            <option value="PEN">S/ Peruvian Sol</option>
+                            <option value="SEK">kr Swedish Krona</option>
+                            <option value="NOK">kr Norwegian Krone</option>
+                            <option value="DKK">kr Danish Krone</option>
+                            <option value="PLN">zł Polish Zloty</option>
+                            <option value="CZK">Kč Czech Koruna</option>
+                            <option value="HUF">Ft Hungarian Forint</option>
+                            <option value="RON">lei Romanian Leu</option>
                         </select>
                     </div>
                     <div class="field"><label>Starting balance</label>
@@ -300,15 +343,59 @@
                 <h2><i class="fas fa-coins"></i> Currency</h2>
                 <p class="hint">Used for balance, Scheduled Bills amounts, and Emergency Reserve.</p>
                 <div class="field">
-                    <label>Select currency *</label>
+                    <label>Select currency * <small style="font-weight:400;color:#666;">(all major currencies —
+                            Nigeria/NGN not listed)</small></label>
                     <select name="currency" id="currencySelect" required>
                         <option value="USD" data-sym="$">$ US Dollar (USD)</option>
                         <option value="EUR" data-sym="€" selected>€ Euro (EUR)</option>
                         <option value="GBP" data-sym="£">£ British Pound (GBP)</option>
                         <option value="CAD" data-sym="C$">C$ Canadian Dollar (CAD)</option>
                         <option value="AUD" data-sym="A$">A$ Australian Dollar (AUD)</option>
+                        <option value="NZD" data-sym="NZ$">NZ$ New Zealand Dollar (NZD)</option>
+                        <option value="CHF" data-sym="Fr">Fr Swiss Franc (CHF)</option>
                         <option value="JPY" data-sym="¥">¥ Japanese Yen (JPY)</option>
+                        <option value="CNY" data-sym="¥">¥ Chinese Yuan (CNY)</option>
+                        <option value="HKD" data-sym="HK$">HK$ Hong Kong Dollar (HKD)</option>
+                        <option value="SGD" data-sym="S$">S$ Singapore Dollar (SGD)</option>
+                        <option value="INR" data-sym="₹">₹ Indian Rupee (INR)</option>
+                        <option value="PKR" data-sym="₨">₨ Pakistani Rupee (PKR)</option>
+                        <option value="BDT" data-sym="৳">৳ Bangladeshi Taka (BDT)</option>
+                        <option value="IDR" data-sym="Rp">Rp Indonesian Rupiah (IDR)</option>
+                        <option value="MYR" data-sym="RM">RM Malaysian Ringgit (MYR)</option>
+                        <option value="THB" data-sym="฿">฿ Thai Baht (THB)</option>
+                        <option value="PHP" data-sym="₱">₱ Philippine Peso (PHP)</option>
+                        <option value="VND" data-sym="₫">₫ Vietnamese Dong (VND)</option>
+                        <option value="KRW" data-sym="₩">₩ South Korean Won (KRW)</option>
+                        <option value="AED" data-sym="د.إ">د.إ UAE Dirham (AED)</option>
+                        <option value="SAR" data-sym="﷼">﷼ Saudi Riyal (SAR)</option>
+                        <option value="QAR" data-sym="ر.ق">ر.ق Qatari Riyal (QAR)</option>
+                        <option value="KWD" data-sym="د.ك">د.ك Kuwaiti Dinar (KWD)</option>
+                        <option value="BHD" data-sym=".د.ب">.د.ب Bahraini Dinar (BHD)</option>
+                        <option value="OMR" data-sym="ر.ع.">ر.ع. Omani Rial (OMR)</option>
+                        <option value="ILS" data-sym="₪">₪ Israeli Shekel (ILS)</option>
+                        <option value="TRY" data-sym="₺">₺ Turkish Lira (TRY)</option>
+                        <option value="RUB" data-sym="₽">₽ Russian Ruble (RUB)</option>
                         <option value="ZAR" data-sym="R">R South African Rand (ZAR)</option>
+                        <option value="EGP" data-sym="E£">E£ Egyptian Pound (EGP)</option>
+                        <option value="GHS" data-sym="GH₵">GH₵ Ghanaian Cedi (GHS)</option>
+                        <option value="KES" data-sym="KSh">KSh Kenyan Shilling (KES)</option>
+                        <option value="UGX" data-sym="USh">USh Ugandan Shilling (UGX)</option>
+                        <option value="TZS" data-sym="TSh">TSh Tanzanian Shilling (TZS)</option>
+                        <option value="XOF" data-sym="CFA">CFA West African CFA (XOF)</option>
+                        <option value="XAF" data-sym="FCFA">FCFA Central African CFA (XAF)</option>
+                        <option value="BRL" data-sym="R$">R$ Brazilian Real (BRL)</option>
+                        <option value="MXN" data-sym="Mex$">Mex$ Mexican Peso (MXN)</option>
+                        <option value="ARS" data-sym="AR$">AR$ Argentine Peso (ARS)</option>
+                        <option value="CLP" data-sym="CL$">CL$ Chilean Peso (CLP)</option>
+                        <option value="COP" data-sym="COL$">COL$ Colombian Peso (COP)</option>
+                        <option value="PEN" data-sym="S/">S/ Peruvian Sol (PEN)</option>
+                        <option value="SEK" data-sym="kr">kr Swedish Krona (SEK)</option>
+                        <option value="NOK" data-sym="kr">kr Norwegian Krone (NOK)</option>
+                        <option value="DKK" data-sym="kr">kr Danish Krone (DKK)</option>
+                        <option value="PLN" data-sym="zł">zł Polish Zloty (PLN)</option>
+                        <option value="CZK" data-sym="Kč">Kč Czech Koruna (CZK)</option>
+                        <option value="HUF" data-sym="Ft">Ft Hungarian Forint (HUF)</option>
+                        <option value="RON" data-sym="lei">lei Romanian Leu (RON)</option>
                     </select>
                 </div>
             </div>
@@ -389,7 +476,7 @@
     </div>
     <script src="/fsw-shared.js"></script>
     <script>
-        var symMap = { USD: '$', EUR: '€', GBP: '£', CAD: 'C$', AUD: 'A$', JPY: '¥', ZAR: 'R' };
+        var symMap = { USD: '$', EUR: '€', GBP: '£', CAD: 'C$', AUD: 'A$', NZD: 'NZ$', CHF: 'Fr', JPY: '¥', CNY: '¥', HKD: 'HK$', SGD: 'S$', INR: '₹', PKR: '₨', BDT: '৳', IDR: 'Rp', MYR: 'RM', THB: '฿', PHP: '₱', VND: '₫', KRW: '₩', AED: 'د.إ', SAR: '﷼', QAR: 'ر.ق', KWD: 'د.ك', BHD: '.د.ب', OMR: 'ر.ع.', ILS: '₪', TRY: '₺', RUB: '₽', ZAR: 'R', EGP: 'E£', GHS: 'GH₵', KES: 'KSh', UGX: 'USh', TZS: 'TSh', XOF: 'CFA', XAF: 'FCFA', BRL: 'R$', MXN: 'Mex$', ARS: 'AR$', CLP: 'CL$', COP: 'COL$', PEN: 'S/', SEK: 'kr', NOK: 'kr', DKK: 'kr', PLN: 'zł', CZK: 'Kč', HUF: 'Ft', RON: 'lei' };
         var sel = document.getElementById('currencySelect');
         var selTop = document.getElementById('currencySelectTop');
         function updateSym() {
