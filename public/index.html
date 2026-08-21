@@ -3,621 +3,901 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>DHL Home - Global Logistics and International Shipping</title>
-    <meta name="description"
-        content="DHL — Track your shipment, ship documents and parcels, get a quote. Global logistics and international shipping.">
-    <link rel="icon" href="https://www.dhl.com/favicon.ico">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <link rel="stylesheet" href="/css/style.css?v=20260817mobile">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>First Smart Wave Banking</title>
+
+    <link rel="stylesheet" href="/style.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <style>
+        /* CSS to ensure all images fit screen without breaking layout */
+        img {
+            max-width: 100%;
+            height: auto;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Statistics Fill/Progress Bar Styles */
+        .stat-box {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .stat-header h3 {
+            margin: 0;
+            font-size: 1rem;
+            color: #333;
+        }
+
+        .stat-header .stat-value {
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #0056b3;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 12px;
+            background-color: #e0e0e0;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #0056b3, #00a8ff);
+            border-radius: 6px;
+            transition: width 1.5s ease-in-out;
+        }
+
+        /* Hide Google Translate top bar & tooltips */
+        .goog-te-banner-frame,
+        .skiptranslate {
+            display: none !important;
+        }
+
+        body {
+            top: 0px !important;
+        }
+    </style>
 </head>
 
 <body>
-    <div class="md-please-wait" id="mdPleaseWait" aria-live="polite">
-        <div class="dots" id="mdDots">......</div>
-        <div class="txt">Please wait</div>
-        <div class="sub">Loading…</div>
-    </div>
 
-    <!-- Yellow header — same as dhl.com mobile -->
-    <header class="dhl-header">
-        <div class="header-bar">
-            <a class="dhl-logo" href="/" onclick="showSite(); return true;" aria-label="DHL Home">
-                <!-- Put your logo file in public/images/dhl-logo.png (or .jpg / .svg) -->
-                <img class="dhl-logo-img" src="/images/dhl-logo.png" alt="DHL" width="120" height="40"
-                    onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                <svg class="dhl-logo-svg" style="display:none;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 40"
-                    role="img" aria-label="DHL">
-                    <rect x="0" y="12" width="22" height="3.2" fill="#D40511" />
-                    <rect x="0" y="18.4" width="28" height="3.2" fill="#D40511" />
-                    <rect x="0" y="24.8" width="22" height="3.2" fill="#D40511" />
-                    <text x="34" y="30" font-family="Arial Black,Impact,Arial,sans-serif" font-size="30"
-                        font-weight="900" fill="#D40511" letter-spacing="-1.5">DHL</text>
-                    <rect x="128" y="12" width="22" height="3.2" fill="#D40511" />
-                    <rect x="122" y="18.4" width="28" height="3.2" fill="#D40511" />
-                    <rect x="128" y="24.8" width="22" height="3.2" fill="#D40511" />
-                </svg>
-            </a>
-            <div class="header-right">
-                <button type="button" class="header-icon-btn" title="Location" aria-label="Change location">🌐</button>
-                <button type="button" class="hamburger" onclick="toggleMobileMenu()" aria-label="Open menu">
-                    <span></span><span></span><span></span>
-                </button>
+    <!-- Hidden Container for Google Translate element -->
+    <div id="google_translate_element" style="display:none;"></div>
+
+    <!-- ================= NAVIGATION ================= -->
+
+    <header class="header">
+
+        <div class="logo">
+
+            <div class="logo-icon">
+                FSW
             </div>
+
+            <div class="logo-text">
+                <h2>First Smart Wave </h2>
+
+            </div>
+
         </div>
+
+        <nav id="navMenu">
+
+            <a href="#home">Home</a>
+
+            <a href="#about">About</a>
+
+            <a href="#services">Services</a>
+
+            <a href="#testimonials">Testimonials</a>
+
+            <a href="#faq">FAQs</a>
+
+            <a href="#contact">Contact</a>
+
+            <a href="/login" class="signin-btn">
+                Sign In
+            </a>
+
+            <a href="/signup" class="signup-btn">
+                Open Account
+            </a>
+
+            <!-- Language Selection Dropdown -->
+
+            <select id="languageSelect">
+
+                <option value="en">🇺🇸 English</option>
+
+                <option value="fr">🇫🇷 French</option>
+
+                <option value="es">🇪🇸 Spanish</option>
+
+                <option value="de">🇩🇪 German</option>
+
+                <option value="it">🇮🇹 Italian</option>
+
+                <option value="pt">🇵🇹 Portuguese</option>
+
+                <option value="tr">🇹🇷 Turkish</option>
+
+                <option value="ar">🇸🇦 Arabic</option>
+
+                <option value="zh-CN">🇨🇳 Chinese</option>
+
+                <option value="ja">🇯🇵 Japanese</option>
+
+            </select>
+
+        </nav>
+
+        <!-- Mobile Button -->
+
+        <button id="menuBtn">
+
+            <i class="fas fa-bars"></i>
+
+        </button>
+
     </header>
 
-    <div id="overlay" onclick="toggleMobileMenu()"></div>
-    <div id="mobileMenu">
-        <div class="mm-head">
-            <a class="dhl-logo" href="/" onclick="showSite();toggleMobileMenu();return true;" aria-label="DHL Home">
-                <img class="dhl-logo-img" src="/images/dhl-logo.png" alt="DHL" width="120" height="40"
-                    onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                <svg class="dhl-logo-svg" style="display:none;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 40"
-                    role="img" aria-label="DHL">
-                    <rect x="0" y="12" width="22" height="3.2" fill="#D40511" />
-                    <rect x="0" y="18.4" width="28" height="3.2" fill="#D40511" />
-                    <rect x="0" y="24.8" width="22" height="3.2" fill="#D40511" />
-                    <text x="34" y="30" font-family="Arial Black,Impact,Arial,sans-serif" font-size="30"
-                        font-weight="900" fill="#D40511" letter-spacing="-1.5">DHL</text>
-                    <rect x="128" y="12" width="22" height="3.2" fill="#D40511" />
-                    <rect x="122" y="18.4" width="28" height="3.2" fill="#D40511" />
-                    <rect x="128" y="24.8" width="22" height="3.2" fill="#D40511" />
-                </svg>
-            </a>
-            <button type="button" class="close-menu" onclick="toggleMobileMenu()" aria-label="Close">×</button>
-        </div>
-        <nav class="mm-nav">
-            <a href="#" onclick="goTrack();toggleMobileMenu();return false;">Track</a>
-            <button type="button" class="mm-acc" onclick="this.classList.toggle('open')">Ship <span
-                    class="chev">›</span></button>
-            <div class="mm-sub">
-                <a href="#quote" onclick="showSite();toggleMobileMenu()">Get a Quote</a>
-                <a href="#express" onclick="showSite();toggleMobileMenu()">Ship Now</a>
-                <p class="mm-label">Document and Package</p>
-                <a href="#express" onclick="showSite();toggleMobileMenu()">Express document and package shipping</a>
-                <p class="mm-label">Pallets, Containers and Cargo (Business Only)</p>
-                <a href="#forwarding" onclick="showSite();toggleMobileMenu()">Explore Freight Services</a>
-                <p class="mm-label">DHL for Business</p>
-                <a href="#business" onclick="showSite();toggleMobileMenu()">Frequent Shipping Options</a>
-            </div>
-            <a href="#customer-service" onclick="showSite();toggleMobileMenu()">Customer Service</a>
-            <a href="#business" onclick="showSite();toggleMobileMenu()">Customer Portal Logins</a>
-            <a href="#customer-service" onclick="showSite();toggleMobileMenu()">Find a Service Point</a>
-            <a href="#" onclick="goTrack();toggleMobileMenu();return false;">Search</a>
-            <a href="/receipt" onclick="toggleMobileMenu()">Receipt</a>
-            <a href="/box.html" onclick="toggleMobileMenu()">Box</a>
-            <button type="button" class="btn btn-red mm-admin"
-                onclick="openModal('loginModal');toggleMobileMenu()">Admin / Log In</button>
-        </nav>
-    </div>
+    <!-- ================= HERO ================= -->
 
-    <main id="siteView">
+    <section class="hero" id="home">
 
-        <!-- Hero photo (replace src with your image) -->
-        <div class="hero-photo-wrap">
-            <img class="hero-photo" src="/images/hero-delivery.jpg" alt="DHL delivery"
-                onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
-            <div class="hero-photo-fallback" style="display:none;" aria-hidden="true"></div>
-        </div>
+        <div class="hero-overlay">
 
-        <!-- Track + action cards (dhl.com mobile stack) -->
-        <section class="home-actions" id="home">
-            <div class="track-card">
-                <h2>Track Your Shipment</h2>
-                <input id="heroTrackInput" type="text" placeholder="Enter your tracking number(s)" class="mono"
-                    autocomplete="off">
-                <button type="button" class="btn btn-red btn-block" onclick="trackFromHero()">Track</button>
-                <div class="track-msg" id="heroTrackMsg"></div>
-            </div>
+            <div class="hero-content">
 
-            <a class="action-tile" href="#express" onclick="showSite()">
-                <span class="tile-icon"><svg viewBox="0 0 24 24" width="28" height="28" fill="#D40511">
-                        <path
-                            d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z" />
-                    </svg></span>
-                <strong>Ship Now</strong>
-                <span class="tile-sub">Find the right service</span>
-            </a>
+                <h1 id="heroTitle">
 
-            <a class="action-tile" href="#quote" onclick="showSite()">
-                <span class="tile-icon"><svg viewBox="0 0 24 24" width="28" height="28" fill="#D40511">
-                        <path
-                            d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z" />
-                    </svg></span>
-                <strong>Get a Quote</strong>
-                <span class="tile-sub">Estimate cost to share and compare</span>
-            </a>
+                    Banking Without Limits
 
-            <a class="action-tile tile-corner" href="#business" onclick="showSite()">
-                <span class="tile-icon"><svg viewBox="0 0 24 24" width="28" height="28" fill="#D40511">
-                        <path
-                            d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z" />
-                    </svg></span>
-                <strong>DHL for Business</strong>
-                <span class="tile-sub">Shipping regularly? Request a business account and profit from exclusive
-                    benefits</span>
-            </a>
-        </section>
+                </h1>
 
-        <!-- Yellow tariff banner -->
-        <section class="tariff-banner" id="tariff">
-            <h2>Navigating Latest Tariff Developments</h2>
-            <p>Global trade is becoming increasingly complex as new U.S. tariffs and varying reciprocal measures emerge
-                across countries and industries. At DHL, we are committed to helping you navigate these changes.</p>
-            <a class="btn btn-red" href="#customer-service">Explore Our U.S. Tariff Solutions</a>
-        </section>
+                <p id="heroText">
 
-        <!-- Document and Parcel Shipping -->
-        <section class="content-block" id="express">
-            <div class="photo-card">
-                <img src="/images/express-delivery.jpg" alt="Document and parcel shipping"
-                    onerror="this.parentElement.classList.add('no-img')">
-            </div>
-            <div class="text-card">
-                <h2>Document and Parcel Shipping</h2>
-                <p class="eyebrow-gray">For All Shippers</p>
-                <p>Learn about DHL Express – the undisputed global leader in international express shipping.</p>
-                <h3>Services Available</h3>
-                <ul class="svc-list">
-                    <li><span class="svc-ico"><svg viewBox="0 0 24 24" width="20" height="20" fill="#1a1a1a">
-                                <path
-                                    d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" />
-                            </svg></span> Next Possible Business Day</li>
-                    <li><span class="svc-ico"><svg viewBox="0 0 24 24" width="20" height="20" fill="#1a1a1a">
-                                <path
-                                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
-                            </svg></span> Flexible Import/Export Options</li>
-                    <li><span class="svc-ico"><svg viewBox="0 0 24 24" width="20" height="20" fill="#1a1a1a">
-                                <path
-                                    d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-6 0h-4V4h4v2z" />
-                            </svg></span> Tailored Business Solutions</li>
-                    <li><span class="svc-ico"><svg viewBox="0 0 24 24" width="28" height="28" fill="#D40511">
-                                <path
-                                    d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm4 18H6V4h7v5h5v11z" />
-                            </svg></span> Wide Variety of Optional Services</li>
-                </ul>
-                <a class="btn btn-red" href="#" onclick="goTrack(); return false;">Track an Express shipment</a>
-            </div>
-        </section>
+                    Manage your money safely from anywhere in the world with First Smart Wave Banking.
 
-        <!-- Express solutions -->
-        <section class="content-block band-gray">
-            <h2>Choose the Best DHL Express Shipping Solution for You</h2>
-            <p>Go global with fast, reliable international express shipping from DHL Express. With unrivaled customs
-                expertise and a network across 220 countries and territories, we’ll connect you to the world.</p>
-            <div class="info-stack">
-                <div class="info-panel">
-                    <h3>Ship as a Guest</h3>
-                    <p class="muted">Pay with a Credit Card</p>
-                    <a class="btn btn-red btn-block" href="#quote">Get a Quote and Ship Now</a>
-                    <ul class="check-list">
-                        <li>Ship online and immediately save up to 56%*</li>
-                        <li>Drop off at a DHL location near you or schedule a pick-up</li>
-                        <li>Best for individual or occasional shippers</li>
-                        <li>Expert support from in-store Sales Associates</li>
-                        <li>No DHL Business Account needed</li>
-                        <li>Export to other countries or import to your country</li>
-                    </ul>
-                </div>
-                <div class="info-panel">
-                    <h3>Enjoy More Sustainable Shipping Options with GoGreen Plus</h3>
-                    <p>DHL Express’ GoGreen Plus helps reduce the carbon / CO₂e emissions associated with your shipment
-                        through Sustainable Fuels (SAF, HVO), a cleaner alternative to traditional fuels that can cut
-                        shipping emissions by around 80%.</p>
-                    <p><strong>GoGreen Plus Benefits</strong></p>
-                    <ul class="check-list">
-                        <li>Lower your environmental impact</li>
-                        <li>Scale and customize emissions reductions</li>
-                    </ul>
-                </div>
-            </div>
-        </section>
-
-        <!-- Quote section -->
-        <section class="content-block" id="quote">
-            <div class="quote-yellow">
-                <h2>Get a Free Domestic or International Business Shipping Quote Online</h2>
-                <p>Packages and pallets, big and small, we can offer you an instant quote for your shipping needs both
-                    domestically and internationally. Fill out your shipment details below to discover your quotes. If
-                    you are satisfied, simply continue to book.</p>
-            </div>
-            <div class="quote-form-card">
-                <button type="button" class="btn btn-red btn-block"
-                    onclick="document.getElementById('quoteForm').classList.toggle('open')">Describe your
-                    Shipment</button>
-                <form id="quoteForm" class="quote-form"
-                    onsubmit="event.preventDefault(); alert('Quote request received. Our team will contact you.');">
-                    <label>From country<input type="text" placeholder="e.g. Nigeria" required></label>
-                    <label>To country<input type="text" placeholder="e.g. United States" required></label>
-                    <label>Weight (kg)<input type="number" min="0.1" step="0.1" placeholder="1.5" required></label>
-                    <label>Email<input type="email" placeholder="you@email.com" required></label>
-                    <button type="submit" class="btn btn-red btn-block">Get Quote</button>
-                </form>
-            </div>
-        </section>
-
-        <!-- DHL for Business -->
-        <section class="content-block" id="business">
-            <h2>DHL for Business</h2>
-            <p>Get connected to the right experts in a few easy steps</p>
-            <ul class="check-list">
-                <li>Benefit from attractive prices for businesses based on your shipment volume and frequency.</li>
-                <li>Increase efficiency and control all your shipments with our exclusive DHL Shipping tools.</li>
-                <li>Benefit from our global experience and a large and reliable logistics network.</li>
-            </ul>
-            <h3>Which DHL for Business Services Are Right for You?</h3>
-            <p>From sending flyers and small packages to forwarding large cargo or freight—and everything in between—we
-                can set you up with the right account to simplify the way you ship and cut costs.</p>
-            <a class="btn btn-red" href="#customer-service">Get Started With a Shipping Profile</a>
-        </section>
-
-        <!-- eCommerce / volume -->
-        <section class="content-block band-gray" id="ecommerce">
-            <p class="eyebrow-red">Business Only</p>
-            <h2>Retailer or Volume Shipping</h2>
-            <p>We have two divisions that offer reliable business shipping for e-commerce, supplier or manufacturing
-                companies.</p>
-            <div class="two-stack">
-                <div class="info-panel">
-                    <h3>DHL eCommerce</h3>
-                    <p>Connecting businesses to consumers with standard domestic and international residential delivery
-                        and returns solutions.</p>
-                </div>
-                <div class="info-panel">
-                    <h3>DHL Express</h3>
-                    <p>Fast, door-to-door, courier delivered. Time definite delivery to 220+ countries.</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Global Forwarding -->
-        <section class="content-block" id="forwarding">
-            <p class="eyebrow-red">Business Only</p>
-            <h2>Cargo Shipping</h2>
-            <p>Discover shipping and logistics service options from DHL Global Forwarding.</p>
-            <ul class="svc-list">
-                <li><span class="svc-ico yellow-bg"><svg viewBox="0 0 24 24" width="20" height="20" fill="#1a1a1a">
-                            <path
-                                d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" />
-                        </svg></span> Air Freight</li>
-                <li><span class="svc-ico yellow-bg"><svg viewBox="0 0 24 24" width="20" height="20" fill="#1a1a1a">
-                            <path
-                                d="M20 8h-3V4H3c-1.1 0-2 .9-2 2v11h2c0 1.66 1.34 3 3 3s3-1.34 3-3h6c0 1.66 1.34 3 3 3s3-1.34 3-3h2v-5l-3-4zM6 18.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm13.5-9l1.96 2.5H17V9.5h2.5zm-1.5 9c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z" />
-                        </svg></span> Road Freight</li>
-                <li><span class="svc-ico yellow-bg"><svg viewBox="0 0 24 24" width="20" height="20" fill="#1a1a1a">
-                            <path
-                                d="M20 21c-1.39 0-2.78-.47-4-1.32-2.44 1.71-5.56 1.71-8 0C6.78 20.53 5.39 21 4 21H2v2h2c1.38 0 2.74-.35 4-.99 2.52 1.29 5.48 1.29 8 0 1.26.65 2.62.99 4 .99h2v-2h-2zM3.95 19H4c1.6 0 3.02-.88 4-2 .98 1.12 2.4 2 4 2s3.02-.88 4-2c.98 1.12 2.4 2 4 2h.05l1.89-6.68c.08-.26.06-.54-.05-.78s-.3-.42-.56-.5L20 10.62V6c0-1.1-.9-2-2-2h-3V1H9v3H6c-1.1 0-2 .9-2 2v4.62l-1.29.42c-.26.08-.48.26-.56.5s-.13.52-.05.78L3.95 19zM6 6h12v3.97L12 8 6 9.97V6z" />
-                        </svg></span> Ocean Freight</li>
-                <li><span class="svc-ico yellow-bg"><svg viewBox="0 0 24 24" width="20" height="20" fill="#1a1a1a">
-                            <path
-                                d="M12 2c-4 0-8 .5-8 4v9.5C4 17.43 5.57 19 7.5 19L6 20.5v.5h2l2-2h4l2 2h2v-.5L16.5 19c1.93 0 3.5-1.57 3.5-3.5V6c0-3.5-4-4-8-4zm0 2c3.5 0 5.5.67 5.96 1.45C17.5 5.33 15.5 5 12 5S6.5 5.33 6.04 5.45C6.5 4.67 8.5 4 12 4zm0 14c-.83 0-1.5-.67-1.5-1.5S11.17 15 12 15s1.5.67 1.5 1.5S12.83 18 12 18zm6-3.5c0 .83-.67 1.5-1.5 1.5h-9c-.83 0-1.5-.67-1.5-1.5V9h12v5.5z" />
-                        </svg></span> Rail Freight</li>
-            </ul>
-            <a class="btn btn-red" href="#customer-service">Explore DHL Global Forwarding</a>
-        </section>
-
-        <!-- Supply Chain -->
-        <section class="content-block band-gray" id="supply-chain">
-            <p class="eyebrow-red">Business Only</p>
-            <h2>Enterprise Logistics Services</h2>
-            <p>Find out how DHL Supply Chain can revolutionize your business as a 3PL provider. Solutions include
-                Warehousing, Transport, Packaging, Service Logistics, Real Estate and more.</p>
-        </section>
-
-        <!-- Service updates -->
-        <section class="content-block" id="updates">
-            <h2>Important Service Updates</h2>
-            <p class="muted">Service bulletins keep you up to date with news and alerts</p>
-            <ul class="link-list">
-                <li><a href="#tariff">New Customs Rules for Shipments Under €150 From Outside the EU Starting July 1,
-                        2026</a></li>
-                <li><a href="#tariff">Operational Update Middle East</a></li>
-                <li><a href="#tariff">DHL Express will implement weekly Fuel Surcharge updates</a></li>
-            </ul>
-            <div class="photo-card mt">
-                <img src="/images/sustainability-van.jpg" alt="Sustainability"
-                    onerror="this.parentElement.classList.add('no-img')">
-            </div>
-        </section>
-
-        <!-- Sustainability + Innovation + Report -->
-        <section class="content-block" id="about">
-            <div class="info-panel">
-                <h2>Sustainability <span class="chev">›</span></h2>
-                <p>Sustainable business begins with low carbon supply chains. Find out what we have to offer and how we
-                    integrate sustainability into our operations to reduce environmental impacts for your supply chain.
                 </p>
-            </div>
-            <div class="photo-grid">
-                <img src="/images/about-1.jpg" alt="" onerror="this.classList.add('ph')">
-                <img src="/images/about-2.jpg" alt="" onerror="this.classList.add('ph')">
-                <img src="/images/about-3.jpg" alt="" onerror="this.classList.add('ph')">
-            </div>
-            <div class="info-panel">
-                <h2>Globalization holds firm at a record level</h2>
-                <p>The DHL Global Connectedness Report 2026 offers the most comprehensive view of globalization
-                    available.</p>
-            </div>
-        </section>
 
-        <!-- FAQs -->
-        <section class="content-block band-gray" id="faq">
-            <h2>Frequently Asked Questions</h2>
-            <div class="faq-item"><button type="button" class="faq-q"
-                    onclick="this.parentElement.classList.toggle('open')">How do you use my contact
-                    information?<span>+</span></button>
-                <div class="faq-a">We use your contact details only to respond to your enquiry and improve our services,
-                    in line with our privacy notice.</div>
-            </div>
-            <div class="faq-item"><button type="button" class="faq-q"
-                    onclick="this.parentElement.classList.toggle('open')">I want to speak with someone. Why do I have to
-                    fill out the shipping profile to get connected?<span>+</span></button>
-                <div class="faq-a">Your shipping profile helps us connect you with the right expert based on volume,
-                    destinations and service needs.</div>
-            </div>
-            <div class="faq-item"><button type="button" class="faq-q"
-                    onclick="this.parentElement.classList.toggle('open')">What different business shipping methods does
-                    DHL offer?<span>+</span></button>
-                <div class="faq-a">Express document and parcel, eCommerce delivery, air/ocean/road/rail freight, and
-                    full supply-chain solutions.</div>
-            </div>
-            <div class="faq-item"><button type="button" class="faq-q"
-                    onclick="this.parentElement.classList.toggle('open')">What benefits do I get from opening a business
-                    account with DHL?<span>+</span></button>
-                <div class="faq-a">Volume-based pricing, shipping tools, dedicated support, and access to our global
-                    logistics network.</div>
-            </div>
-        </section>
+                <div class="hero-buttons">
 
-        <!-- Customer service -->
-        <section class="content-block" id="customer-service">
-            <h2>Customer Service</h2>
-            <p>Tracking online is the fastest way to check the status of your shipment(s). No account, no password and
-                no phone calls required. All you need is the waybill number(s).</p>
-            <div class="btn-stack">
-                <a class="btn btn-red btn-block" href="#" onclick="goTrack(); return false;">Track Your Shipment</a>
-                <a class="btn btn-outline-red btn-block" href="/receipt">Shipment Receipt</a>
-                <a class="btn btn-outline-red btn-block" href="/box.html">Package / Box</a>
+                    <a href="/login" class="hero-login">
+
+                        Sign In
+
+                    </a>
+
+                    <a href="/signup" class="hero-register">
+
+                        Open Account
+
+                    </a>
+
+                </div>
+
             </div>
-        </section>
 
-        <!-- Footer like dhl.com -->
-        <footer class="dhl-footer-site">
-            <div class="footer-inner">
-                <h4 class="ft-red">Quick Links</h4>
-                <a href="#customer-service">Customer Service</a>
-                <a href="#business">Customer Portal Logins</a>
-                <a href="#quote">Get a Quote</a>
-                <a href="#business">DHL for Business</a>
-                <a href="/receipt">Receipt</a>
-                <a href="/box.html">Box</a>
-
-                <h4 class="ft-red">Our Divisions</h4>
-                <a href="#express">DHL Express</a>
-                <a href="#forwarding">DHL Global Forwarding</a>
-                <a href="#supply-chain">DHL Supply Chain</a>
-                <a href="#ecommerce">DHL eCommerce</a>
-
-                <h4 class="ft-red">Company Information</h4>
-                <a href="#about">About DHL</a>
-                <a href="#about">Sustainability</a>
-                <a href="#updates">Press Center</a>
-                <a href="#customer-service">Contact</a>
-            </div>
-            <div class="footer-brand">
-                <img class="dhl-logo-img footer-logo-img" src="/images/dhl-logo.png" alt="DHL" width="100" height="32"
-                    onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                <svg class="dhl-logo-svg" style="display:none;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 40"
-                    role="img" aria-label="DHL">
-                    <rect x="0" y="12" width="22" height="3.2" fill="#D40511" />
-                    <rect x="0" y="18.4" width="28" height="3.2" fill="#D40511" />
-                    <rect x="0" y="24.8" width="22" height="3.2" fill="#D40511" />
-                    <text x="34" y="30" font-family="Arial Black,Impact,Arial,sans-serif" font-size="30"
-                        font-weight="900" fill="#D40511" letter-spacing="-1.5">DHL</text>
-                    <rect x="128" y="12" width="22" height="3.2" fill="#D40511" />
-                    <rect x="122" y="18.4" width="28" height="3.2" fill="#D40511" />
-                    <rect x="128" y="24.8" width="22" height="3.2" fill="#D40511" />
-                </svg>
-                <span>© DHL International GmbH</span>
-            </div>
-        </footer>
-
-        <!-- Sticky bottom CTA like Express pages -->
-        <div class="sticky-cta">
-            <a href="#quote" onclick="showSite()">Get a Quote and Ship Now</a>
         </div>
-    </main>
 
+    </section>
 
-    <div id="trackPage" class="page hidden">
-        <div class="wrap">
-            <button class="btn btn-outline" style="color:var(--ink); border-color:var(--line);"
-                onclick="showSite()">&larr; Back to site</button>
-            <div class="sec-head" style="margin-top:24px; text-align:left; max-width:100%;">
-                <h2>Track your shipment</h2>
-                <p>Enter your tracking code for live status, sender &amp; receiver, timeline, and the live map. This is
-                    normal tracking — not the print receipt.</p>
-            </div>
-            <div class="track-bar" style="max-width:520px; margin:0;">
-                <input id="pageTrackInput" type="text" placeholder="e.g. DHL XXX" class="mono"
-                    style="color:var(--ink); border:1px solid var(--line);">
-                <button class="btn btn-red" onclick="trackFromPage()">Track</button>
-            </div>
-            <div class="track-msg" id="pageTrackMsg" style="color:var(--red-dark);"></div>
-            <div class="ns-live-banner" id="nsLiveBanner"></div>
-            <p style="margin:12px 0 8px;font-size:13.5px;color:var(--gray);">
-                Need a printable document? Use the separate receipt page (does not replace tracking above).
-                <a href="/receipt" id="receiptLink"
-                    style="color:#D40511;font-weight:600;text-decoration:underline;margin-left:6px;">Go to receipt /
-                    print</a>
+    <!-- Floating Customer Service -->
+
+    <div class="customer-service" id="customerService">
+
+        <i class="fas fa-headset"></i>
+
+        <span>Customer Service</span>
+
+    </div>
+
+    <!-- Customer Service Popup -->
+
+    <div id="customerPopup">
+
+        <div class="popup-header">
+
+            <h3>Customer Service</h3>
+
+            <button id="closeChat">
+
+                <i class="fas fa-times"></i>
+
+            </button>
+
+        </div>
+
+        <div class="popup-body">
+
+            <p>
+
+                Hello 👋
+                How can we help you today?
+
             </p>
-            <div id="trackResultBox"></div>
+
         </div>
+
+        <div class="popup-footer">
+
+            <button id="startChat">
+
+                Start Chat
+
+            </button>
+
+        </div>
+
     </div>
 
-    <!-- ===================== LOGIN MODAL ===================== -->
-    <div class="modal-overlay" id="loginModal">
-        <div class="modal-box">
-            <button class="modal-close" onclick="closeModal('loginModal')">&times;</button>
-            <h3>Log In</h3>
-            <p class="sub">DHL.</p>
-            <form onsubmit="return handleLogin(event)">
-                <div class="field">
-                    <label>Username</label>
-                    <input type="text" id="loginUser" required>
+    <!-- ================= ABOUT ================= -->
+
+    <section class="about" id="about">
+
+        <div class="container">
+
+            <div class="section-title">
+
+                <h2>Welcome To <span>First Smart Wave Banking</span></h2>
+
+                <p>
+                    We provide secure banking services with fast, reliable and trusted financial solutions for customers
+                    around the world.
+                </p>
+
+            </div>
+
+            <div class="about-grid">
+
+                <div class="about-image">
+
+                    <img src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1000&q=80"
+                        alt="Modern Financial Center Building" style="width: 100%; border-radius: 8px;">
+
                 </div>
-                <div class="field">
-                    <label>Password</label>
-                    <input type="password" id="loginPass" required>
+
+                <div class="about-content">
+
+                    <h3>Your Trusted Banking Partner</h3>
+
+                    <p>
+
+                        Our internet banking platform gives customers complete control over their accounts anywhere in
+                        the world.
+
+                    </p>
+
+                    <p>
+
+                        Transfer money securely, pay bills, monitor your account, manage your cards and receive instant
+                        transaction updates.
+
+                    </p>
+
+                    <p>
+
+                        Our goal is to provide world-class banking services while protecting every customer's
+                        information using modern security technologies.
+
+                    </p>
+
+                    <a href="#services" class="about-btn">
+
+                        Learn More
+
+                    </a>
+
                 </div>
-                <button type="submit" class="btn btn-red" style="width:100%;">Log In</button>
-                <div class="error-box" id="loginError">Incorrect username or password.</div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- ================= STATISTICS ================= -->
+
+    <section class="statistics">
+
+        <div class="container">
+
+            <!-- Stat 1 -->
+            <div class="stat-box">
+
+                <div class="stat-header">
+                    <h3>Years Experience</h3>
+                    <span class="stat-value" id="val1">0%</span>
+                </div>
+
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="bar1" data-target="95"></div>
+                </div>
+
+            </div>
+
+            <!-- Stat 2 -->
+            <div class="stat-box">
+
+                <div class="stat-header">
+                    <h3>Active Customers</h3>
+                    <span class="stat-value" id="val2">0%</span>
+                </div>
+
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="bar2" data-target="88"></div>
+                </div>
+
+            </div>
+
+            <!-- Stat 3 -->
+            <div class="stat-box">
+
+                <div class="stat-header">
+                    <h3>Global Coverage</h3>
+                    <span class="stat-value" id="val3">0%</span>
+                </div>
+
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="bar3" data-target="78"></div>
+                </div>
+
+            </div>
+
+            <!-- Stat 4 -->
+            <div class="stat-box">
+
+                <div class="stat-header">
+                    <h3>Security Satisfaction</h3>
+                    <span class="stat-value" id="val4">0%</span>
+                </div>
+
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="bar4" data-target="99"></div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- ================= WHY CHOOSE US ================= -->
+
+    <section class="why-us">
+
+        <div class="container">
+
+            <h2 class="section-heading">
+
+                Why Choose Us
+
+            </h2>
+
+            <div class="why-grid">
+
+                <div class="why-card">
+
+                    <i class="fas fa-shield-alt"></i>
+
+                    <h3>Maximum Security</h3>
+
+                    <p>
+
+                        Advanced security systems protect your account and transactions every second.
+
+                    </p>
+
+                </div>
+
+                <div class="why-card">
+
+                    <i class="fas fa-bolt"></i>
+
+                    <h3>Fast Transactions</h3>
+
+                    <p>
+
+                        Transfer money locally and internationally with speed and reliability.
+
+                    </p>
+
+                </div>
+
+                <div class="why-card">
+
+                    <i class="fas fa-headset"></i>
+
+                    <h3>24/7 Customer Support</h3>
+
+                    <p>
+
+                        Our customer care team is available any time you need assistance.
+
+                    </p>
+
+                </div>
+
+                <div class="why-card">
+
+                    <i class="fas fa-mobile-screen-button"></i>
+
+                    <h3>Mobile Banking</h3>
+
+                    <p>
+
+                        Manage your finances from any device anywhere in the world.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- ================= SERVICES ================= -->
+
+    <section id="services" class="services">
+
+        <div class="container">
+
+            <div class="section-title">
+
+                <h2>Our Banking Services</h2>
+
+                <p>
+
+                    Everything you need for personal and business banking.
+
+                </p>
+
+            </div>
+
+            <div class="services-grid">
+
+                <div class="service-card">
+
+                    <i class="fas fa-money-check-dollar"></i>
+
+                    <h3>Money Transfer</h3>
+
+                    <p>
+
+                        Send money locally and internationally in a secure environment.
+
+                    </p>
+
+                </div>
+
+                <div class="service-card">
+
+                    <i class="fas fa-credit-card"></i>
+
+                    <h3>Bank Cards</h3>
+
+                    <p>
+
+                        Manage your debit and credit cards from your dashboard.
+
+                    </p>
+
+                </div>
+
+                <div class="service-card">
+
+                    <i class="fas fa-building-columns"></i>
+
+                    <h3>Business Banking</h3>
+
+                    <p>
+
+                        Powerful financial services designed for companies and businesses.
+
+                    </p>
+
+                </div>
+
+                <div class="service-card">
+
+                    <i class="fas fa-piggy-bank"></i>
+
+                    <h3>Savings</h3>
+
+                    <p>
+
+                        Save money safely while earning competitive interest.
+
+                    </p>
+
+                </div>
+
+                <div class="service-card">
+
+                    <i class="fas fa-hand-holding-dollar"></i>
+
+                    <h3>Loans</h3>
+
+                    <p>
+
+                        Apply for personal and business loans with flexible repayment plans.
+
+                    </p>
+
+                </div>
+
+                <div class="service-card">
+
+                    <i class="fas fa-chart-line"></i>
+
+                    <h3>Investment</h3>
+
+                    <p>
+
+                        Grow your wealth through our investment opportunities.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- ================= TESTIMONIALS ================= -->
+
+    <section class="testimonials" id="testimonials">
+
+        <div class="container">
+
+            <div class="section-title">
+
+                <h2>What Our Customers Say</h2>
+
+                <p>Trusted by customers around the world.</p>
+
+            </div>
+
+            <div class="testimonial-grid">
+
+                <div class="testimonial-card">
+
+                    <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=300&q=80"
+                        alt="James Williams" style="width: 100px; height: 100px; border-radius: 50%;">
+
+                    <h3>James Williams</h3>
+
+                    <h4>Business Owner</h4>
+
+                    <p>
+
+                        "The online banking system is secure, fast and very easy to use."
+
+                    </p>
+
+                </div>
+
+                <div class="testimonial-card">
+
+                    <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=300&q=80"
+                        alt="Sarah Johnson" style="width: 100px; height: 100px; border-radius: 50%;">
+
+                    <h3>Sarah Johnson</h3>
+
+                    <h4>Customer</h4>
+
+                    <p>
+
+                        "I can transfer money internationally without stress."
+
+                    </p>
+
+                </div>
+
+                <div class="testimonial-card">
+
+                    <img src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=300&q=80"
+                        alt="David Brown" style="width: 100px; height: 100px; border-radius: 50%;">
+
+                    <h3>David Brown</h3>
+
+                    <h4>Investor</h4>
+
+                    <p>
+
+                        "Excellent customer support and reliable banking services."
+
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- ================= FAQ ================= -->
+
+    <section class="faq" id="faq">
+
+        <div class="container">
+
+            <div class="section-title">
+
+                <h2>Frequently Asked Questions</h2>
+
+            </div>
+
+            <div class="faq-item">
+
+                <h3>Is my account secure?</h3>
+
+                <p>Yes. We use advanced encryption and multiple security layers to protect your account.</p>
+
+            </div>
+
+            <div class="faq-item">
+
+                <h3>Can I transfer internationally?</h3>
+
+                <p>Yes. International Wire Transfer is available through your dashboard.</p>
+
+            </div>
+
+            <div class="faq-item">
+
+                <h3>Can I contact support anytime?</h3>
+
+                <p>Yes. Customer Service is available 24/7.</p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+    <!-- ================= CONTACT ================= -->
+
+    <section class="contact" id="contact">
+
+        <div class="container">
+
+            <div class="section-title">
+
+                <h2>Contact Us</h2>
+
+                <p>We are always ready to help.</p>
+
+            </div>
+
+            <form id="contactForm" onsubmit="return false;">
+
+                <input type="text" placeholder="Full Name">
+
+                <input type="email" placeholder="Email">
+
+                <input type="tel" placeholder="Phone Number">
+
+                <textarea placeholder="Write your message"></textarea>
+
+                <button type="submit" id="contactSubmit">Send Message</button>
+                <p id="contactMsg" style="display:none;color:#0b63ce;font-weight:600;margin-top:10px;">Message
+                    submitted. We will contact you soon.</p>
+
             </form>
+
         </div>
-    </div>
 
-    <!-- ===================== PIN MODAL (step 2 of admin login) ===================== -->
-    <div class="modal-overlay" id="pinModal">
-        <div class="modal-box">
-            <button class="modal-close" onclick="closeModal('pinModal')">&times;</button>
-            <h3>Enter Your PIN</h3>
-            <p class="sub">One more step — enter your 6-digit admin PIN.</p>
-            <form onsubmit="return handlePinSubmit(event)">
-                <div class="field">
-                    <label>6-Digit PIN</label>
-                    <input type="password" id="pinInput" class="mono" maxlength="6" inputmode="numeric"
-                        autocomplete="one-time-code" required>
-                </div>
-                <button type="submit" class="btn btn-red" style="width:100%;">Verify</button>
-                <div class="error-box" id="pinError">Incorrect PIN.</div>
-            </form>
-        </div>
-    </div>
+    </section>
 
-    <!-- ===================== SIGN UP MODAL (intentionally non-functional) ===================== -->
-    <div class="modal-overlay" id="signupModal">
-        <div class="modal-box">
-            <button class="modal-close" onclick="closeModal('signupModal')">&times;</button>
-            <h3>Create Account</h3>
-            <p class="sub">Set up a customer account.</p>
-            <form onsubmit="return handleSignup(event)">
-                <div class="field">
-                    <label>Full Name</label>
-                    <input type="text" id="suName" required>
-                </div>
-                <div class="field">
-                    <label>Email Address</label>
-                    <input type="email" id="suEmail" required>
-                </div>
-                <div class="field">
-                    <label>Password</label>
-                    <input type="password" id="suPass" required>
-                </div>
-                <button type="submit" class="btn btn-red" style="width:100%;">Sign Up</button>
-                <div class="error-box" id="signupError">Server error. Please try again later.</div>
-            </form>
-        </div>
-    </div>
+    <!-- ================= NEWSLETTER ================= -->
 
-    <!-- ===================== ACCOUNT SETTINGS MODAL (admin only) ===================== -->
+    <section class="newsletter">
 
-    <div class="modal-overlay" id="settingsPinModal">
-        <div class="modal-box">
-            <button class="modal-close" onclick="closeModal('settingsPinModal')">&times;</button>
-            <h3>Account settings PIN</h3>
-            <p class="sub">Enter PIN <b>7799</b> to open account settings and change admin username, password, or login
-                PIN.</p>
-            <div class="field">
-                <label>Settings PIN</label>
-                <input type="password" id="settingsPinInput" maxlength="4" inputmode="numeric" placeholder="••••"
-                    autocomplete="off">
-            </div>
-            <div class="error-box" id="settingsPinError" style="display:none;">Incorrect PIN.</div>
-            <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
-                <button type="button" class="btn btn-red" onclick="submitSettingsPin()">Unlock</button>
-                <button type="button" class="btn btn-outline" onclick="closeModal('settingsPinModal')">Cancel</button>
-            </div>
-        </div>
-    </div>
+        <div class="container">
 
-    <div class="modal-overlay" id="settingsModal">
-        <div class="modal-box">
-            <button class="modal-close" onclick="closeModal('settingsModal')">&times;</button>
-            <h3>Account Settings</h3>
-            <p class="sub">Change admin username, password, or admin login PIN. Current password is required. (Unlocked
-                with settings PIN 7799.)</p>
-            <form onsubmit="return handleCredentialsSubmit(event)">
-                <div class="field">
-                    <label>Current Password</label>
-                    <input type="password" id="settingsCurrentPass" required>
-                </div>
-                <div class="field">
-                    <label>New Username <span style="color:var(--gray);font-weight:400;">(leave blank to
-                            keep)</span></label>
-                    <input type="text" id="settingsNewUser">
-                </div>
-                <div class="field">
-                    <label>New Password <span style="color:var(--gray);font-weight:400;">(leave blank to
-                            keep)</span></label>
-                    <input type="password" id="settingsNewPass">
-                </div>
-                <div class="field">
-                    <label>New 6-Digit PIN <span style="color:var(--gray);font-weight:400;">(leave blank to
-                            keep)</span></label>
-                    <input type="text" id="settingsNewPin" class="mono" maxlength="6" inputmode="numeric">
-                </div>
-                <button type="submit" class="btn btn-red" style="width:100%;">Save Changes</button>
-                <div class="error-box" id="settingsError"></div>
-                <div class="success-box" id="settingsSuccess">Saved successfully.</div>
-            </form>
-            <hr style="margin:18px 0;border:none;border-top:1px solid var(--line);">
-            <div class="field">
-                <label>Box video service</label>
-                <p style="font-size:12.5px;color:var(--gray);margin-bottom:8px;">When OFF, box page shows server
-                    unavailable. When ON, correct receipt QR opens the package video.</p>
-                <button type="button" class="btn btn-outline small-btn" id="boxServiceToggleBtn2"
-                    onclick="toggleBoxService()">Box video: ON</button>
-            </div>
-        </div>
-    </div>
+            <h2>Subscribe To Our Newsletter</h2>
 
-    <!-- ===================== ADMIN DASHBOARD ===================== -->
-    <div id="adminDashboard" class="page hidden">
-        <div class="admin-wrap">
-            <div class="admin-top">
-                <div style="min-width:0;flex:1 1 200px;">
-                    <h2>Admin Dashboard</h2>
-                    <p style="color:var(--gray); font-size:13.5px;">Tracking codes auto-generate as DHL###### if left
-                        empty.</p>
-                </div>
-                <div class="admin-top-actions" style="position:relative;">
-                    <button type="button" class="btn btn-outline small-btn" id="boxServiceToggleBtn"
-                        onclick="toggleBoxService()" title="Box video server">Box video: ON</button>
-                    <button class="btn btn-red small-btn" onclick="startNewShipment()">+ New Shipment</button>
-                    <a class="btn btn-outline small-btn" href="/receipt"
-                        style="color:var(--ink);border-color:var(--line);text-decoration:none;">Receipt</a>
-                    <button class="btn btn-outline small-btn" style="color:var(--ink);border-color:var(--line);"
-                        onclick="openSettingsProtected()">⚙ Settings</button>
-                    <a class="logout-link" onclick="logoutAdmin()">Log Out</a>
-                </div>
+            <p>
+
+                Receive banking updates and important announcements.
+
+            </p>
+
+            <div class="newsletter-box">
+
+                <input type="email" placeholder="Enter Email Address">
+
+                <button>
+
+                    Subscribe
+
+                </button>
+
             </div>
 
-            <div class="admin-layout">
-                <div class="panel">
-                    <h4 class="section-title">All Shipments</h4>
-                    <div class="ship-list" id="shipList"></div>
-                </div>
-
-                <div class="panel" id="shipDetailPanel">
-                    <!-- filled by JS -->
-                </div>
-            </div>
         </div>
-    </div>
 
-    <script src="/js/script.js?v=20260813b"></script>
+    </section>
+
+    <!-- ================= FOOTER ================= -->
+
+    <footer>
+
+        <div class="container footer-grid">
+
+            <div>
+
+                <h3>First Smart Wave Banking</h3>
+
+                <p>
+
+                    Providing secure and reliable banking services worldwide.
+
+                </p>
+
+            </div>
+
+            <div>
+
+                <h3>Quick Links</h3>
+
+                <ul>
+
+                    <li><a href="#home">Home</a></li>
+
+                    <li><a href="#about">About</a></li>
+
+                    <li><a href="#services">Services</a></li>
+
+                    <li><a href="#contact">Contact</a></li>
+
+                </ul>
+
+            </div>
+
+            <div>
+
+                <h3>Support</h3>
+
+                <p>Email: support@firstsmartwavebank.com</p>
+
+                <p>Phone: +1 (800) 555-0000</p>
+
+                <p>Available 24 Hours</p>
+
+            </div>
+
+        </div>
+
+        <div class="copyright">
+
+            <p>
+
+                © First Smart Wave Banking. All Rights Reserved.
+
+            </p>
+
+        </div>
+
+    </footer>
+
+    <!-- ================= JAVASCRIPT ================= -->
+
+    <script src="/fsw-shared.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            // Animated Progress Bars
+            const bars = document.querySelectorAll('.progress-bar-fill');
+
+            const animateBars = () => {
+                bars.forEach((bar, index) => {
+                    const target = parseInt(bar.getAttribute('data-target'));
+                    const valueElem = document.getElementById(`val${index + 1}`);
+
+                    bar.style.width = target + '%';
+
+                    let count = 0;
+                    const speed = 20;
+                    const increment = target / (1000 / speed);
+
+                    const counter = setInterval(() => {
+                        count += increment;
+                        if (count >= target) {
+                            valueElem.textContent = target + '%';
+                            clearInterval(counter);
+                        } else {
+                            valueElem.textContent = Math.ceil(count) + '%';
+                        }
+                    }, speed);
+                });
+            };
+
+            animateBars();
+        });
+
+        // Initialize Google Translate Element
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'en',
+                autoDisplay: false
+            }, 'google_translate_element');
+        }
+
+        // Change language dynamically on dropdown selection
+        document.getElementById('languageSelect').addEventListener('change', function () {
+            const selectedLang = this.value;
+            const googleSelect = document.querySelector('.goog-te-combo');
+            if (googleSelect) {
+                googleSelect.value = selectedLang;
+                googleSelect.dispatchEvent(new Event('change'));
+            }
+        });
+    </script>
+    <script type="text/javascript"
+        src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <script src="/script.js"></script>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const cf = document.getElementById('contactForm');
+            if (cf) {
+                cf.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    const inputs = cf.querySelectorAll('input, textarea');
+                    let ok = true;
+                    inputs.forEach(i => { if (!String(i.value || '').trim()) ok = false; });
+                    if (!ok) { alert('Please fill all form fields.'); return; }
+                    const msg = document.getElementById('contactMsg');
+                    if (msg) msg.style.display = 'block';
+                    cf.reset();
+                });
+            }
+            // Language persistence site-wide via googtrans cookie + localStorage
+            const langSel = document.getElementById('languageSelect');
+            const saved = localStorage.getItem('fsw_lang') || 'en';
+            if (langSel) {
+                langSel.value = saved;
+                langSel.addEventListener('change', function () {
+                    localStorage.setItem('fsw_lang', this.value);
+                    const googleSelect = document.querySelector('.goog-te-combo');
+                    if (googleSelect) {
+                        googleSelect.value = this.value;
+                        googleSelect.dispatchEvent(new Event('change'));
+                    }
+                    // set googtrans cookie for other pages
+                    const lang = this.value === 'en' ? '' : '/en/' + this.value;
+                    document.cookie = 'googtrans=' + lang + ';path=/';
+                    if (this.value === 'en') {
+                        document.cookie = 'googtrans=;path=/;expires=Thu, 01 Jan 1970 00:00:00 GMT';
+                        location.reload();
+                    }
+                });
+            }
+        });
+    </script>
+
 </body>
 
 </html>
