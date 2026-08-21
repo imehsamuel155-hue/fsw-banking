@@ -466,3 +466,15 @@ function fswNextTransferGate() {
     const next = fswGetCompletedTransferCount() + 1;
     return (next % 2 === 1) ? 'tic' : 'tax';
 }
+
+function fswSetCachedBalance(n) {
+    try {
+        sessionStorage.setItem('fsw_balance', String(n));
+        var u = JSON.parse(sessionStorage.getItem('fsw_user') || localStorage.getItem('fsw_user') || 'null');
+        if (u) {
+            u.balance = Number(n);
+            sessionStorage.setItem('fsw_user', JSON.stringify(u));
+            try { localStorage.setItem('fsw_user', JSON.stringify(u)); } catch (e) { }
+        }
+    } catch (e) { }
+}

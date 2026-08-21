@@ -342,7 +342,7 @@
 
 
         <h1>
-            Transfer Initiate Code (Transfer pin)
+            TIC Code
         </h1>
 
 
@@ -361,12 +361,12 @@
 
 
             <label>
-                Input (Transfer pin)
+                Enter TIC Code
             </label>
 
 
 
-            <input type="text" id="ticCode" placeholder="Enter Transfer pin" required>
+            <input type="text" id="ticCode" placeholder="Enter TIC Code" required>
 
 
 
@@ -498,10 +498,17 @@
                         body: JSON.stringify({ ticCode: enteredCode }),
                     });
                     const data = await res.json();
-                    if (!res.ok) throw new Error(data.error || 'Invalid Transfer pin');
+                    if (!res.ok) throw new Error(data.error || 'Invalid TIC code');
 
+                    if (data.nextGate === 'tax') {
+                        sessionStorage.setItem('fsw_pending_transfer_id', transferId);
+                        sessionStorage.setItem('fsw_transfer_gate', 'tax');
+                        window.location.href = '/tax-code';
+                        return;
+                    }
                     sessionStorage.setItem('fsw_receipt_transfer_id', transferId);
                     sessionStorage.removeItem('fsw_pending_transfer_id');
+                    if (data.newBalance != null && typeof fswSetCachedBalance === 'function') fswSetCachedBalance(data.newBalance);
                     if (typeof fswBumpCompletedTransfers === 'function') fswBumpCompletedTransfers();
                     window.location.href = '/receipt';
                 } catch (err) {

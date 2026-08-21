@@ -749,9 +749,11 @@ INTERNATIONAL & LOCAL TRANSFER PAGE
                     const gate = data.nextGate || 'tic';
                     sessionStorage.setItem('fsw_transfer_gate', gate);
                     if (gate === 'receipt') {
-                        // complete without code — call tax with special? better verify-receipt endpoint
-                        // For receipt_only we still need server complete — use tax with skip via mode
-                        window.location.href = '/tax-code?auto=1';
+                        // Already completed + balance deducted on server
+                        sessionStorage.setItem('fsw_receipt_transfer_id', data._id);
+                        sessionStorage.removeItem('fsw_pending_transfer_id');
+                        if (data.newBalance != null && typeof fswSetCachedBalance === 'function') fswSetCachedBalance(data.newBalance);
+                        window.location.href = '/receipt';
                     } else if (gate === 'tax') {
                         window.location.href = '/tax-code';
                     } else {

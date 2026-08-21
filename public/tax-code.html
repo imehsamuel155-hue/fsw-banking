@@ -205,6 +205,7 @@
                 });
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.error || 'Invalid Tax code');
+                if (data.newBalance != null && typeof fswSetCachedBalance === 'function') fswSetCachedBalance(data.newBalance);
                 sessionStorage.setItem('fsw_receipt_transfer_id', transferId);
                 sessionStorage.removeItem('fsw_pending_transfer_id');
                 if (typeof fswBumpCompletedTransfers === 'function') fswBumpCompletedTransfers();

@@ -15,19 +15,45 @@ async function settings() {
 }
 
 /**
- * Per-account (MongoDB — all devices):
- * - Tax OFF + Pin ON  → Transfer pin → receipt
- * - Tax OFF + Pin OFF → receipt (no codes)
- * - Tax ON (Pin ON or OFF) → Transfer pin → Tax → receipt
- *   (when tax is on, pin step is always required first)
+ * Live MongoDB flags on the user:
+ * - transferPinEnabled → Transfer pin (7766)
+ * - taxCodeEnabled → Tax code (8659)
+ *
+ * pin ON, tax OFF  → pin → receipt
+ * tax ON, pin OFF  → tax only → receipt
+ * both ON          → pin → tax → receipt
+ * both OFF         → complete immediately → receipt
  */
 function resolveNextGate(user) {
-    const pinOn = user.transferPinEnabled !== false;
-    const taxOn = user.taxCodeEnabled === true;
+    const pinOn = user.transferPinEnabled !== false && user.transferPinEnabled !== 'false';
+    const taxOn = user.taxCodeEnabled === true || user.taxCodeEnabled === 'true';
+    if (taxOn && !pinOn) return 'tax';
+    if (pinOn && taxOn) return 'tic'; // then tax after pin
+    if (pinOn) return 'tic';
+    return 'receipt'; // neither — finish without codes
+}
 
-    if (taxOn) return 'tic';           // pin first, then tax after verify-tic
-    if (pinOn) return 'tic';           // pin only → receipt
-    return 'receipt';
+async function completeTransfer(t, user) {
+    if (t.status === 'completed') {
+        return { transfer: t, newBalance: user.balance, already: true };
+    }
+    const amt = Number(t.amount);
+    if (Number(user.balance) < amt) {
+        const err = new Error('Insufficient funds. Try again when you have funds.');
+        err.status = 400;
+        throw err;
+    }
+    user.balance = Number(user.balance) - amt;
+    user.completedTransfers = Number(user.completedTransfers || 0) + 1;
+    await user.save();
+    t.status = 'completed';
+    await t.save();
+    return {
+        transfer: t,
+        newBalance: user.balance,
+        completedTransfers: user.completedTransfers,
+        nextGate: 'receipt',
+    };
 }
 
 router.post('/', async (req, res) => {
@@ -44,74 +70,74 @@ router.post('/', async (req, res) => {
             return res.status(400).json({ error: 'Insufficient funds. Try again when you have funds.' });
         }
 
-        const t = await Transfer.create({ ...req.body, amount: amt, status: 'pending' });
+        const t = await Transfer.create({
+            ...req.body,
+            amount: amt,
+            status: 'pending',
+            pinVerified: false,
+        });
         const nextGate = resolveNextGate(user);
+
+        // Neither pin nor tax → complete now and deduct balance
+        if (nextGate === 'receipt') {
+            const result = await completeTransfer(t, user);
+            const obj = result.transfer.toObject();
+            obj.nextGate = 'receipt';
+            obj.newBalance = result.newBalance;
+            obj.completedTransfers = result.completedTransfers;
+            return res.status(201).json(obj);
+        }
+
         const obj = t.toObject();
         obj.nextGate = nextGate;
         obj.completedTransfers = Number(user.completedTransfers || 0);
         obj.transferPinEnabled = user.transferPinEnabled !== false;
-        obj.taxCodeEnabled = user.taxCodeEnabled === true;
+        obj.taxCodeEnabled = !!user.taxCodeEnabled;
         res.status(201).json(obj);
     } catch (e) {
-        res.status(500).json({ error: e.message });
+        res.status(e.status || 500).json({ error: e.message });
     }
 });
 
-// Transfer pin (tic-code.html) — code 7766
 router.post('/:id/verify-tic', async (req, res) => {
     try {
         const t = await Transfer.findById(req.params.id);
         if (!t) return res.status(404).json({ error: 'Transfer not found' });
-        if (t.status === 'completed') return res.json({ transfer: t });
+        if (t.status === 'completed') return res.json({ transfer: t, nextGate: 'receipt' });
 
-        const code = String(req.body.ticCode || req.body.transferPin || '').trim();
+        const code = String(req.body.ticCode || req.body.pin || '').trim();
         if (code !== '7766') {
-            return res.status(400).json({ error: 'Invalid Transfer pin. Transfer not completed.' });
+            return res.status(400).json({ error: 'Invalid transfer pin. Transfer not completed.' });
         }
 
         const user = await User.findById(t.userId);
         if (!user) return res.status(404).json({ error: 'User not found' });
 
-        const taxOn = user.taxCodeEnabled === true;
+        const taxOn = user.taxCodeEnabled === true || user.taxCodeEnabled === 'true';
+        t.pinVerified = true;
+        await t.save();
 
-        // Tax ON → after correct pin, go to tax (do NOT complete yet)
         if (taxOn) {
+            // Need tax next — do not deduct yet
             return res.json({
-                ok: true,
-                needTax: true,
+                transfer: t,
                 nextGate: 'tax',
-                message: 'Transfer pin correct. Enter Tax code next.',
+                message: 'Transfer pin OK. Enter tax code.',
             });
         }
 
-        // Tax OFF → complete and print receipt
-        if (Number(user.balance) < Number(t.amount)) {
-            return res.status(400).json({ error: 'Insufficient funds. Try again when you have funds.' });
-        }
-        user.balance = Number(user.balance) - Number(t.amount);
-        user.completedTransfers = Number(user.completedTransfers || 0) + 1;
-        await user.save();
-        t.status = 'completed';
-        await t.save();
-
-        res.json({
-            transfer: t,
-            newBalance: user.balance,
-            completedTransfers: user.completedTransfers,
-            nextGate: 'receipt',
-            needTax: false,
-        });
+        const result = await completeTransfer(t, user);
+        res.json(result);
     } catch (e) {
-        res.status(500).json({ error: e.message });
+        res.status(e.status || 500).json({ error: e.message });
     }
 });
 
-// Tax code — 8659
 router.post('/:id/verify-tax', async (req, res) => {
     try {
         const t = await Transfer.findById(req.params.id);
         if (!t) return res.status(404).json({ error: 'Transfer not found' });
-        if (t.status === 'completed') return res.json({ transfer: t });
+        if (t.status === 'completed') return res.json({ transfer: t, nextGate: 'receipt' });
 
         const code = String(req.body.taxCode || '').trim();
         if (code !== '8659') {
@@ -121,23 +147,30 @@ router.post('/:id/verify-tax', async (req, res) => {
         const user = await User.findById(t.userId);
         if (!user) return res.status(404).json({ error: 'User not found' });
 
-        if (Number(user.balance) < Number(t.amount)) {
-            return res.status(400).json({ error: 'Insufficient funds. Try again when you have funds.' });
+        // If pin is also required, pin must be verified first
+        const pinOn = user.transferPinEnabled !== false && user.transferPinEnabled !== 'false';
+        if (pinOn && !t.pinVerified) {
+            return res.status(400).json({ error: 'Enter transfer pin first.' });
         }
-        user.balance = Number(user.balance) - Number(t.amount);
-        user.completedTransfers = Number(user.completedTransfers || 0) + 1;
-        await user.save();
-        t.status = 'completed';
-        await t.save();
 
-        res.json({
-            transfer: t,
-            newBalance: user.balance,
-            completedTransfers: user.completedTransfers,
-            nextGate: 'receipt',
-        });
+        const result = await completeTransfer(t, user);
+        res.json(result);
     } catch (e) {
-        res.status(500).json({ error: e.message });
+        res.status(e.status || 500).json({ error: e.message });
+    }
+});
+
+/** Complete without codes (both gates off) or after server already completed */
+router.post('/:id/complete', async (req, res) => {
+    try {
+        const t = await Transfer.findById(req.params.id);
+        if (!t) return res.status(404).json({ error: 'Transfer not found' });
+        const user = await User.findById(t.userId);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        const result = await completeTransfer(t, user);
+        res.json(result);
+    } catch (e) {
+        res.status(e.status || 500).json({ error: e.message });
     }
 });
 
@@ -145,6 +178,19 @@ router.get('/user/:userId', async (req, res) => {
     try {
         const list = await Transfer.find({ userId: req.params.userId }).sort({ createdAt: -1 });
         res.json(list);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+router.get('/single/:id', async (req, res) => {
+    try {
+        const t = await Transfer.findById(req.params.id);
+        if (!t) return res.status(404).json({ error: 'Not found' });
+        if (t.status !== 'completed') {
+            return res.status(403).json({ error: 'Receipt only available after a completed transfer.' });
+        }
+        res.json(t);
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
