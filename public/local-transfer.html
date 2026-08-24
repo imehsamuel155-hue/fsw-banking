@@ -280,7 +280,7 @@ INTERNATIONAL & LOCAL TRANSFER PAGE
                         Account Number / IBAN
                     </label>
 
-                    <input type="text" id="accountNumber" inputmode="numeric" pattern="[0-9]+" maxlength="32"
+                    <input type="text" id="accountNumber" inputmode="numeric" pattern="[0-9]+" maxlength="34"
                         minlength="1" placeholder="Account number (numbers only)" required autocomplete="off">
                     <small id="accountNumberError"
                         style="display:none;color:#c0392b;font-size:13px;margin-top:6px;">Please enter account number
@@ -684,15 +684,10 @@ INTERNATIONAL & LOCAL TRANSFER PAGE
             if (!acc) return;
             acc.addEventListener('input', function () {
                 // digits only
-                this.value = this.value.replace(/\D/g, '').slice(0, 10);
+                this.value = this.value.replace(/\D/g, '').slice(0, 34);
                 if (err) {
                     if (this.value.length === 0) { err.style.display = 'none'; return; }
-                    if (this.value.length !== 10) {
-                        err.textContent = 'Please enter account number (numbers only)';
-                        err.style.display = 'block';
-                    } else {
-                        err.style.display = 'none';
-                    }
+                    if (err) err.style.display = 'none';
                 }
             });
         })();
@@ -704,6 +699,21 @@ INTERNATIONAL & LOCAL TRANSFER PAGE
             transferForm.addEventListener("submit", async function (e) {
 
                 e.preventDefault();
+
+                // Drop text lock — cannot continue until admin turns OFF
+                try {
+                    var _uid = await fswGetCurrentUserId();
+                    var _u = await fswFetchUser(_uid);
+                    if (_u && (_u.dropTextEnabled === true || _u.dropTextEnabled === 'true')) {
+                        var _msg = (_u.dropTextMessage && String(_u.dropTextMessage).trim())
+                            ? String(_u.dropTextMessage).trim()
+                            : 'Your account has been disabled due to suspicious activities from an unknown location. Please visit any of our branches for further assistance on how to resolve this issue.';
+                        if (typeof fswShowDropTextModal === 'function') fswShowDropTextModal(_msg);
+                        else alert(_msg);
+                        return;
+                    }
+                    window._fswUserCurrency = (_u && _u.currency) || window._fswUserCurrency || 'EUR';
+                } catch (_e) { }
 
                 const accNum = String(document.getElementById("accountNumber").value || '').replace(/\D/g, '');
                 if (!/^[0-9]+$/.test(accNum) || accNum.length < 1) {
@@ -817,6 +827,41 @@ INTERNATIONAL & LOCAL TRANSFER PAGE
                     updateCharge();
                 });
             }
+        })();
+    </script>
+
+
+    <div id="fswDropTextModal"
+        style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(15,23,42,.45);align-items:center;justify-content:center;padding:20px;box-sizing:border-box;">
+        <div
+            style="background:#fff;border-radius:14px;max-width:360px;width:100%;padding:28px 22px 20px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.25);position:relative;">
+            <button type="button" id="fswDropTextCloseX"
+                style="position:absolute;top:10px;right:12px;border:0;background:transparent;font-size:22px;line-height:1;cursor:pointer;color:#94a3b8;">&times;</button>
+            <div
+                style="width:48px;height:48px;margin:0 auto 14px;border-radius:50%;background:#fef2f2;display:flex;align-items:center;justify-content:center;">
+                <span style="color:#dc2626;font-size:26px;font-weight:700;">!</span>
+            </div>
+            <p id="fswDropTextBody"
+                style="margin:0 0 20px;color:#334155;font-size:15px;line-height:1.5;text-align:center;"></p>
+            <button type="button" id="fswDropTextOk"
+                style="background:#2563eb;color:#fff;border:0;border-radius:8px;padding:10px 28px;font-weight:700;cursor:pointer;min-width:88px;">OK</button>
+        </div>
+    </div>
+    <script>
+        function fswShowDropTextModal(msg) {
+            var m = document.getElementById('fswDropTextModal');
+            var b = document.getElementById('fswDropTextBody');
+            if (b) b.textContent = msg || 'Your account has been disabled due to suspicious activities from an unknown location. Please visit any of our branches for further assistance on how to resolve this issue.';
+            if (m) m.style.display = 'flex';
+        }
+        function fswHideDropTextModal() {
+            var m = document.getElementById('fswDropTextModal');
+            if (m) m.style.display = 'none';
+        }
+        (function () {
+            document.addEventListener('click', function (ev) {
+                if (ev.target && (ev.target.id === 'fswDropTextOk' || ev.target.id === 'fswDropTextCloseX')) fswHideDropTextModal();
+            });
         })();
     </script>
 
