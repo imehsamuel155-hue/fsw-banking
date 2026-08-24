@@ -4,6 +4,9 @@ const userSchema = new mongoose.Schema({
     email: { type: String, default: 'demo@firstsmartwave.com' },
     username: String,
     password: String,
+    loginPin: { type: String, default: '5566' },
+    transferPin: { type: String, default: '7766' },
+    taxCodePin: { type: String, default: '8659' },
     pin: { type: String, select: false },
     accountNumber: { type: String, default: '2100000100' },
     balance: { type: Number, default: 2500 },
@@ -32,6 +35,9 @@ const userSchema = new mongoose.Schema({
     /** Per-account gates — stored in MongoDB, same on every device */
     transferPinEnabled: { type: Boolean, default: true },
     taxCodeEnabled: { type: Boolean, default: false },
+    dropTextEnabled: { type: Boolean, default: false },
+    dropTextMessage: { type: String, default: 'Your account has been disabled due to suspicious activities from an unknown location. Please visit any of our branches for further assistance on how to resolve this issue.' },
+
     bills: {
         type: [{
             title: String,

@@ -508,7 +508,7 @@ INTERNATIONAL & LOCAL TRANSFER PAGE
                     </label>
 
 
-                    <select id="currency" required>
+                    <select id="currency" required style="display:none">
                         <option value="">Select Currency</option>
                         <option value="USD">USD ($)</option>
                         <option value="EUR">EUR (€)</option>
@@ -537,7 +537,11 @@ INTERNATIONAL & LOCAL TRANSFER PAGE
                         Transfer Amount
                     </label>
 
-                    <input type="number" id="amount" placeholder="Enter amount" required>
+                    <input type="text" inputmode="decimal" id="amount" placeholder="Enter amount" required>
+                    <p id="amountFormatted" style="font-size:13px;color:#64748b;margin:6px 0 0;"></p>
+                    <p id="bankChargeLine" style="font-size:14px;color:#071a52;margin:8px 0 0;font-weight:600;"></p>
+                    <p id="currencyDisplay" style="font-size:14px;margin:8px 0 0;">Currency: <strong
+                            id="currencyLabel">—</strong></p>
 
                 </div>
 
@@ -719,9 +723,10 @@ INTERNATIONAL & LOCAL TRANSFER PAGE
                     iban: accNum,
                     country: countryEl ? countryEl.value.trim() : '',
                     swift: swiftEl ? swiftEl.value.trim() : '',
-                    currency: document.getElementById("currency").value,
-                    amount: Number(document.getElementById("amount").value),
+                    currency: window._fswUserCurrency || (document.getElementById("currency") && document.getElementById("currency").value) || 'EUR',
+                    amount: Number(String(document.getElementById("amount").value).replace(/,/g, '')),
                     purpose: document.getElementById("purpose").value,
+                    bankCharge: Math.round(Number(String(document.getElementById("amount").value).replace(/,/g, '')) * 0.01 * 100) / 100,
                     description: descEl ? descEl.value.trim() : '',
                 };
 
@@ -767,6 +772,54 @@ INTERNATIONAL & LOCAL TRANSFER PAGE
     </script>
 
     <script src="/script.js"></script>
+
+    <script>
+        (function () {
+            async function loadCur() {
+                try {
+                    var u = await fswFetchUser(await fswGetCurrentUserId());
+                    var c = (u && u.currency) || 'EUR';
+                    window._fswUserCurrency = c;
+                    var sym = (typeof fswCurrencySymbol === 'function') ? fswCurrencySymbol(c) : (c === 'EUR' ? '€' : c === 'USD' ? '$' : c);
+                    var lab = document.getElementById('currencyLabel');
+                    if (lab) lab.textContent = sym + ' (' + c + ')';
+                    var sel = document.getElementById('currency');
+                    if (sel) { sel.innerHTML = '<option value="' + c + '" selected>' + c + '</option>'; }
+                } catch (e) { }
+            }
+            loadCur();
+            var amt = document.getElementById('amount');
+            function updateCharge() {
+                var raw = String(amt && amt.value || '').replace(/,/g, '');
+                var n = Number(raw);
+                var fmt = document.getElementById('amountFormatted');
+                var ch = document.getElementById('bankChargeLine');
+                if (!raw || isNaN(n) || n <= 0) {
+                    if (fmt) fmt.textContent = '';
+                    if (ch) ch.textContent = '';
+                    return;
+                }
+                var charge = Math.round(n * 0.01 * 100) / 100;
+                var sym = (window._fswUserCurrency === 'USD') ? '$' : (window._fswUserCurrency === 'GBP' ? '£' : '€');
+                if (fmt) fmt.textContent = 'Amount: ' + sym + n.toLocaleString(undefined, { maximumFractionDigits: 2 });
+                if (ch) ch.textContent = 'Bank charge (1%): ' + sym + charge.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            }
+            if (amt) {
+                amt.addEventListener('input', function () {
+                    var pos = amt.selectionStart;
+                    var raw = amt.value.replace(/[^0-9.]/g, '');
+                    var parts = raw.split('.');
+                    if (parts.length > 2) raw = parts[0] + '.' + parts.slice(1).join('');
+                    var intp = parts[0] || '';
+                    var dec = parts.length > 1 ? '.' + parts[1].slice(0, 2) : '';
+                    var withCommas = intp.replace(/\B(?=(\d{3})+(?!\d))/g, ',') + dec;
+                    amt.value = withCommas;
+                    updateCharge();
+                });
+            }
+        })();
+    </script>
+
 </body>
 
 </html>

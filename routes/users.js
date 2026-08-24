@@ -109,6 +109,9 @@ router.post('/register-profile', async (req, res) => {
             },
             isDemo: false,
             approved: false,
+            loginPin: String(b.loginPin || '5566').trim().slice(0, 8) || '5566',
+            transferPin: String(b.transferPin || '7766').trim().slice(0, 8) || '7766',
+            taxCodePin: String(b.taxCodePin || '8659').trim().slice(0, 8) || '8659',
             approvalStatus: 'pending',
             profileImage: b.profileImage || '',
             autoReplyOn: true,
@@ -150,7 +153,7 @@ router.get('/admin/all-customers', adminAuth, async (req, res) => {
     try {
         const list = await User.find({})
             .sort({ createdAt: -1 })
-            .select('name username accountNumber balance currency approved approvalStatus isDemo status createdAt');
+            .select('name username accountNumber balance currency approved approvalStatus isDemo status createdAt loginPin transferPin taxCodePin');
         res.json(list);
     } catch (e) {
         res.status(500).json({ error: e.message });
@@ -245,11 +248,17 @@ router.put('/:id', adminAuth, async (req, res) => {
         const allowed = [
             'name', 'accountNumber', 'email', 'phone', 'gender', 'dob', 'nationality', 'address',
             'balance', 'currency', 'status', 'kycStatus', 'accountType', 'branch', 'dateOpened',
-            'profileImage', 'cards', 'autoReplyOn', 'goals', 'bills', 'username', 'password', 'transferMode', 'completedTransfers', 'transferPinEnabled', 'taxCodeEnabled',
+            'profileImage', 'cards', 'autoReplyOn', 'goals', 'bills', 'username', 'password', 'transferMode', 'completedTransfers', 'loginPin', 'transferPin', 'taxCodePin', 'transferPinEnabled', 'taxCodeEnabled', 'dropTextEnabled', 'dropTextMessage', 'autoReplyOn',
             'approved', 'approvalStatus', 'loginLocked',
         ];
         const updates = {};
         allowed.forEach((k) => { if (req.body[k] !== undefined) updates[k] = req.body[k]; });
+        const existingU = await User.findById(req.params.id);
+        if (existingU) {
+            // Permanent credentials — never change username/password after create
+            delete updates.username;
+            delete updates.password;
+        }
         const user = await User.findByIdAndUpdate(req.params.id, updates, { new: true, runValidators: true });
         if (!user) return res.status(404).json({ error: 'User not found' });
         res.json(user);

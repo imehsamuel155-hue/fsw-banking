@@ -1681,6 +1681,8 @@ SCHEDULED PAYMENTS
         </div>
 
         <ul>
+            <li><a href="#" id="navLoanService"><i class="fas fa-hand-holding-usd"></i> Loan service</a></li>
+
 
             <li>
 
@@ -2263,6 +2265,70 @@ SCHEDULED PAYMENTS
         src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
     <script src="/script.js"></script>
+
+
+    <div id="loanModal"
+        style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(7,26,82,.55);align-items:center;justify-content:center;padding:16px;">
+        <div
+            style="background:#fff;border-radius:14px;max-width:420px;width:100%;max-height:90vh;overflow:auto;padding:18px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                <strong style="color:#071a52;">Loan service</strong>
+                <button type="button" id="loanExit"
+                    style="border:0;background:#eee;border-radius:8px;padding:6px 10px;cursor:pointer;">Exit</button>
+            </div>
+            <div id="loanFormBox">
+                <label style="font-size:12px;font-weight:600;">Full name</label>
+                <input id="loanName"
+                    style="width:100%;padding:10px;margin:4px 0 10px;border:1px solid #ddd;border-radius:8px;">
+                <label style="font-size:12px;font-weight:600;">Amount requested</label>
+                <input id="loanAmount" type="number"
+                    style="width:100%;padding:10px;margin:4px 0 10px;border:1px solid #ddd;border-radius:8px;">
+                <label style="font-size:12px;font-weight:600;">Purpose</label>
+                <input id="loanPurpose"
+                    style="width:100%;padding:10px;margin:4px 0 10px;border:1px solid #ddd;border-radius:8px;">
+                <label style="font-size:12px;font-weight:600;">Phone</label>
+                <input id="loanPhone"
+                    style="width:100%;padding:10px;margin:4px 0 10px;border:1px solid #ddd;border-radius:8px;">
+                <button type="button" id="loanSubmit" class="btn btn-primary"
+                    style="width:100%;padding:12px;border:0;border-radius:10px;background:#071a52;color:#fff;font-weight:700;">Request
+                    loan</button>
+            </div>
+            <div id="loanDone" style="display:none;text-align:center;padding:12px 0;">
+                <p style="color:#071a52;font-weight:600;">Contact customer service to finish up your loan request.</p>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;">
+                    <button type="button" id="loanCs"
+                        style="border:0;background:#eab308;border-radius:50%;width:48px;height:48px;cursor:pointer;font-size:20px;">💬</button>
+                    <button type="button" id="loanExit2"
+                        style="border:0;background:#eee;border-radius:8px;padding:10px 16px;cursor:pointer;">Exit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        (function () {
+            var modal = document.getElementById('loanModal');
+            function openLoan(e) { if (e) e.preventDefault(); if (modal) { modal.style.display = 'flex'; document.getElementById('loanFormBox').style.display = 'block'; document.getElementById('loanDone').style.display = 'none'; } closeSidebar && closeSidebar(); }
+            function closeLoan() { if (modal) modal.style.display = 'none'; }
+            var nav = document.getElementById('navLoanService');
+            if (nav) nav.addEventListener('click', openLoan);
+            ['loanExit', 'loanExit2'].forEach(function (id) { var el = document.getElementById(id); if (el) el.addEventListener('click', function () { closeLoan(); location.href = '/dashboard'; }); });
+            var sub = document.getElementById('loanSubmit');
+            if (sub) sub.addEventListener('click', function () {
+                document.getElementById('loanFormBox').style.display = 'none';
+                document.getElementById('loanDone').style.display = 'block';
+            });
+            var cs = document.getElementById('loanCs');
+            if (cs) cs.addEventListener('click', function () {
+                closeLoan();
+                if (typeof openGuestChat === 'function') openGuestChat();
+                else if (typeof window.openSupport === 'function') window.openSupport();
+                else {
+                    var fab = document.querySelector('[onclick*="support"], #guestChatFab, .chat-fab');
+                    if (fab) fab.click();
+                }
+            });
+        })();
+    </script>
 
 </body>
 

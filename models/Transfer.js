@@ -10,6 +10,7 @@ const schema = new mongoose.Schema({
     country: String,
     currency: String,
     amount: Number,
+    bankCharge: { type: Number, default: 0 },
     purpose: String,
     description: String,
     ticCode: { type: String, default: () => String(Math.floor(100000 + Math.random() * 900000)) },

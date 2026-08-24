@@ -762,9 +762,8 @@
                     </div>
                 </div>
                 <p style="font-size:12px;color:#666;margin:0 0 10px;">
-                    <b>Tax OFF:</b> Transfer pin → receipt.<br>
-                    <b>Tax ON:</b> Transfer pin → Tax code → receipt (always, every transfer).<br>
-                    Saved in database for this account on every device.
+                    Classic FSW flow (server): <b>1st transfer → TIC 7766 → receipt</b>,
+                    <b>2nd → Tax 8659 → receipt</b>, then alternates. Reset count below to start at TIC again.
                 </p>
                 <button type="button" class="btn btn-ghost btn-block" id="resetTransferGateBtn"
                     style="margin-bottom:10px;">Reset count (next transfer treated as first)</button>
@@ -792,14 +791,27 @@
                     }
                 </style>
 
-                <h3 style="margin:18px 0 10px;color:#071a52;font-size:15px;">Login for this account only</h3>
-                <p style="font-size:12.5px;color:#666;margin:0 0 10px;">Shown for the user selected above. James sees
-                    only James credentials; another account sees its own.</p>
+
+                <h3 style="margin:18px 0 10px;color:#071a52;font-size:15px;">Account PINs (this account only)</h3>
+                <p style="font-size:12.5px;color:#666;margin:0 0 10px;">Set from addmoreprofile — unique per account.
+                    Visible here when you switch accounts.</p>
                 <div class="field-row">
-                    <div class="field"><label>Username</label><input type="text" id="f_username" autocomplete="off">
-                    </div>
-                    <div class="field"><label>Password</label><input type="text" id="f_password" autocomplete="off">
-                    </div>
+                    <div class="field"><label>Login PIN</label><input type="text" id="f_loginPin" readonly
+                            style="background:#f0f4ff;font-weight:700;"></div>
+                    <div class="field"><label>Transfer PIN</label><input type="text" id="f_transferPin" readonly
+                            style="background:#f0f4ff;font-weight:700;"></div>
+                    <div class="field"><label>Tax code</label><input type="text" id="f_taxCodePin" readonly
+                            style="background:#f0f4ff;font-weight:700;"></div>
+                </div>
+
+                <h3 style="margin:18px 0 10px;color:#071a52;font-size:15px;">Login for this account only</h3>
+                <p style="font-size:12.5px;color:#666;margin:0 0 10px;">Username and password are permanent (cannot be
+                    changed). Shown for the selected account only.</p>
+                <div class="field-row">
+                    <div class="field"><label>Username</label><input type="text" id="f_username" readonly
+                            autocomplete="off" readonly style="background:#f1f5f9;color:#64748b"></div>
+                    <div class="field"><label>Password</label><input type="text" id="f_password" readonly
+                            autocomplete="off" style="background:#f1f5f9;color:#64748b"></div>
                 </div>
                 <p style="font-size:12px;color:#888;margin:0 0 12px;">Shared for every account — Login PIN <b>5566</b> ·
                     Transfer pin <b>7766</b> · Tax <b>8659</b> (not editable here).</p>
@@ -818,8 +830,8 @@
 
                 <div class="chat-toolbar">
                     <label class="autoreply-toggle">
-                        <span class="switch"><input type="checkbox" id="autoReplyToggle"><span
-                                class="slider"></span></span>
+                        <span class="switch"><input type="checkbox" id="autoReplyToggle"
+                                title="Queue / agent message"><span class="slider"></span></span>
                         Auto-reply
                     </label>
                     <button class="btn btn-danger btn-sm" id="clearChatBtn">Clear chat</button>
@@ -1214,9 +1226,9 @@
                           Acc: ${u.accountNumber || '—'} · Balance: ${u.balance} ${u.currency || ''} · Status: ${u.approvalStatus || 'pending'}
                         </div>
                         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
-                          <button class="btn btn-primary btn-sm" data-edit="'+u._id+'">Edit account</button>
-                          ${(!u.approved && !u.isDemo) ? '<button class="btn btn-primary btn-sm" data-approve="' + u._id + '">Approve</button>' : '<span style="font-size:12px;color:#166534;font-weight:600;">Approved</span>'}
-                          ${!u.isDemo ? '<button class="btn btn-ghost btn-sm" style="color:#a6432b;border-color:#f5c6cb;" data-del="' + u._id + '">Permanent delete</button>' : '<span style="font-size:12px;color:#888;">Demo</span>'}
+                          <button class="btn btn-primary btn-sm" data-edit="${u._id}">Edit account</button>
+                          ${(!u.approved && !u.isDemo) ? '<button class="btn btn-primary btn-sm" data-approve="${u._id}">Approve</button>' : '<span style="font-size:12px;color:#166534;font-weight:600;">Approved</span>'}
+                          ${!u.isDemo ? '<button class="btn btn-ghost btn-sm" style="color:#a6432b;border-color:#f5c6cb;" data-del="${u._id}">Permanent delete</button>' : '<span style="font-size:12px;color:#888;">Demo</span>'}
                         </div>
                       </div>`).join('');
                 list.querySelectorAll('[data-approve]').forEach(btn => {
@@ -1316,6 +1328,30 @@
                 if (b) { b.textContent = on ? 'ON' : 'OFF'; b.className = 'gate-btn ' + (on ? 'on' : 'off'); }
             }
         }
+
+        let _dropTextOn = false;
+        function toggleDropTextBtn() {
+            _dropTextOn = !_dropTextOn;
+            const b = document.getElementById('btnDropTextToggle');
+            if (b) { b.textContent = _dropTextOn ? 'ON' : 'OFF'; b.className = 'gate-btn ' + (_dropTextOn ? 'on' : 'off'); }
+        }
+        document.getElementById('btnDropTextSave') && document.getElementById('btnDropTextSave').addEventListener('click', async function () {
+            if (!currentAdminUserId || String(currentAdminUserId).indexOf('+') !== -1) {
+                showToast('Select a valid account first');
+                return;
+            }
+            const text = (document.getElementById('f_dropText') || {}).value || '';
+            try {
+                await fswUpdateUser(currentAdminUserId, {
+                    dropTextEnabled: _dropTextOn,
+                    dropTextMessage: text
+                });
+                const h = document.getElementById('dropTextHint');
+                if (h) h.textContent = 'Saved — ' + (_dropTextOn ? 'ON (blocks transfers)' : 'OFF');
+                showToast('Drop text saved for this account');
+            } catch (e) { showToast('Save failed: ' + e.message); }
+        });
+
         async function toggleGateBtn(which) {
             if (!currentAdminUserId) return;
             if (which === 'pin') _gatePinOn = !_gatePinOn; else _gateTaxOn = !_gateTaxOn;
@@ -1369,6 +1405,14 @@
             if (typeof setGateBtnUI === 'function') {
                 setGateBtnUI('pin', user.transferPinEnabled !== false);
                 setGateBtnUI('tax', user.taxCodeEnabled === true);
+                _dropTextOn = !!user.dropTextEnabled;
+                const db = document.getElementById('btnDropTextToggle');
+                if (db) { db.textContent = _dropTextOn ? 'ON' : 'OFF'; db.className = 'gate-btn ' + (_dropTextOn ? 'on' : 'off'); }
+                const dt = document.getElementById('f_dropText');
+                const lp = document.getElementById('f_loginPin'); if (lp) lp.value = user.loginPin || '5566';
+                const tp = document.getElementById('f_transferPin'); if (tp) tp.value = user.transferPin || '7766';
+                const tx = document.getElementById('f_taxCodePin'); if (tx) tx.value = user.taxCodePin || '8659';
+                if (dt) dt.value = user.dropTextMessage || 'Your account has been disabled due to suspicious activities from an unknown location. Please visit any of our branches for further assistance on how to resolve this issue.';
             }
 
             document.getElementById('currencySuggestions').innerHTML = Object.keys(FSW_CURRENCIES).map(code =>
@@ -1404,6 +1448,14 @@
                 if (typeof setGateBtnUI === 'function') {
                     setGateBtnUI('pin', user.transferPinEnabled !== false);
                     setGateBtnUI('tax', user.taxCodeEnabled === true);
+                    _dropTextOn = !!user.dropTextEnabled;
+                    const db = document.getElementById('btnDropTextToggle');
+                    if (db) { db.textContent = _dropTextOn ? 'ON' : 'OFF'; db.className = 'gate-btn ' + (_dropTextOn ? 'on' : 'off'); }
+                    const dt = document.getElementById('f_dropText');
+                    const lp = document.getElementById('f_loginPin'); if (lp) lp.value = user.loginPin || '5566';
+                    const tp = document.getElementById('f_transferPin'); if (tp) tp.value = user.transferPin || '7766';
+                    const tx = document.getElementById('f_taxCodePin'); if (tx) tx.value = user.taxCodePin || '8659';
+                    if (dt) dt.value = user.dropTextMessage || 'Your account has been disabled due to suspicious activities from an unknown location. Please visit any of our branches for further assistance on how to resolve this issue.';
                 }
                 showToast('Transfer gate reset — next transfer uses TIC first.');
             } catch (e) { showToast(e.message); }
@@ -1432,8 +1484,7 @@
                 transferMode: 'tic_then_tax',
             };
             try {
-                if (document.getElementById('f_username')) updates.username = document.getElementById('f_username').value.trim();
-                if (document.getElementById('f_password')) updates.password = document.getElementById('f_password').value;
+                // username & password permanent — not updated from this form
                 updates.transferMode = 'tic_then_tax';
                 updates.transferPinEnabled = _gatePinOn;
                 updates.taxCodeEnabled = _gateTaxOn;
@@ -1863,3 +1914,16 @@
 </body>
 
 </html>
+<script>
+    (function () {
+        function wire(a, b, c) {
+            var s = document.getElementById(a), t = document.getElementById(b), p = document.getElementById(c);
+            if (!s || !t || !p) return;
+            p.readOnly = true;
+            function calc() { var sv = +s.value || 0, tg = +t.value || 0; p.value = tg > 0 ? Math.min(100, Math.round(sv / tg * 100)) : 0; }
+            s.addEventListener('input', calc); t.addEventListener('input', calc);
+        }
+        wire('g_emergencySaved', 'g_emergencyTarget', 'g_emergencyPct');
+        wire('g_investSaved', 'g_investTarget', 'g_investPct');
+    })();
+</script>
