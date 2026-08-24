@@ -1660,6 +1660,14 @@ SCHEDULED PAYMENTS
 
             </a>
 
+            <a href="#" id="quickLoanService" class="quick-link-btn">
+
+                <i class="fas fa-hand-holding-usd"></i>
+
+                Loan service
+
+            </a>
+
         </div>
 
     </section>
@@ -1681,9 +1689,6 @@ SCHEDULED PAYMENTS
         </div>
 
         <ul>
-            <li><a href="#" id="navLoanService"><i class="fas fa-hand-holding-usd"></i> Loan service</a></li>
-
-
             <li>
 
                 <a href="/profile">
@@ -1780,6 +1785,13 @@ SCHEDULED PAYMENTS
 
                 </a>
 
+            </li>
+
+            <li>
+                <a href="#" id="navLoanService">
+                    <i class="fas fa-hand-holding-usd"></i>
+                    <span>Loan service</span>
+                </a>
             </li>
 
             <li>
@@ -2270,36 +2282,42 @@ SCHEDULED PAYMENTS
     <div id="loanModal"
         style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(7,26,82,.55);align-items:center;justify-content:center;padding:16px;">
         <div
-            style="background:#fff;border-radius:14px;max-width:420px;width:100%;max-height:90vh;overflow:auto;padding:18px;">
+            style="background:#fff;border-radius:14px;max-width:420px;width:100%;max-height:90vh;overflow:auto;padding:18px;box-shadow:0 12px 40px rgba(0,0,0,.25);">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-                <strong style="color:#071a52;">Loan service</strong>
+                <strong style="color:#071a52;font-size:17px;">Loan service</strong>
                 <button type="button" id="loanExit"
-                    style="border:0;background:#eee;border-radius:8px;padding:6px 10px;cursor:pointer;">Exit</button>
+                    style="border:0;background:#eef2f7;border-radius:8px;padding:8px 12px;cursor:pointer;font-weight:600;color:#071a52;">Exit</button>
             </div>
+            <p id="loanFormError"
+                style="display:none;color:#b91c1c;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px;font-size:13px;margin:0 0 12px;">
+            </p>
             <div id="loanFormBox">
-                <label style="font-size:12px;font-weight:600;">Full name</label>
+                <label style="font-size:12px;font-weight:600;color:#334155;">Full name</label>
                 <input id="loanName"
-                    style="width:100%;padding:10px;margin:4px 0 10px;border:1px solid #ddd;border-radius:8px;">
-                <label style="font-size:12px;font-weight:600;">Amount requested</label>
-                <input id="loanAmount" type="number"
-                    style="width:100%;padding:10px;margin:4px 0 10px;border:1px solid #ddd;border-radius:8px;">
-                <label style="font-size:12px;font-weight:600;">Purpose</label>
+                    style="width:100%;padding:10px;margin:4px 0 10px;border:1px solid #cbd5e1;border-radius:8px;box-sizing:border-box;">
+                <label style="font-size:12px;font-weight:600;color:#334155;">Amount requested</label>
+                <input id="loanAmount" type="number" min="1" step="any"
+                    style="width:100%;padding:10px;margin:4px 0 10px;border:1px solid #cbd5e1;border-radius:8px;box-sizing:border-box;">
+                <label style="font-size:12px;font-weight:600;color:#334155;">Purpose</label>
                 <input id="loanPurpose"
-                    style="width:100%;padding:10px;margin:4px 0 10px;border:1px solid #ddd;border-radius:8px;">
-                <label style="font-size:12px;font-weight:600;">Phone</label>
-                <input id="loanPhone"
-                    style="width:100%;padding:10px;margin:4px 0 10px;border:1px solid #ddd;border-radius:8px;">
-                <button type="button" id="loanSubmit" class="btn btn-primary"
-                    style="width:100%;padding:12px;border:0;border-radius:10px;background:#071a52;color:#fff;font-weight:700;">Request
+                    style="width:100%;padding:10px;margin:4px 0 10px;border:1px solid #cbd5e1;border-radius:8px;box-sizing:border-box;">
+                <label style="font-size:12px;font-weight:600;color:#334155;">Phone</label>
+                <input id="loanPhone" type="tel"
+                    style="width:100%;padding:10px;margin:4px 0 10px;border:1px solid #cbd5e1;border-radius:8px;box-sizing:border-box;">
+                <button type="button" id="loanSubmit"
+                    style="width:100%;padding:12px;border:0;border-radius:10px;background:#071a52;color:#fff;font-weight:700;cursor:pointer;margin-top:4px;">Request
                     loan</button>
             </div>
-            <div id="loanDone" style="display:none;text-align:center;padding:12px 0;">
-                <p style="color:#071a52;font-weight:600;">Contact customer service to finish up your loan request.</p>
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;">
-                    <button type="button" id="loanCs"
-                        style="border:0;background:#eab308;border-radius:50%;width:48px;height:48px;cursor:pointer;font-size:20px;">💬</button>
+            <div id="loanDone" style="display:none;text-align:center;padding:16px 0 8px;">
+                <p style="color:#071a52;font-weight:600;margin:0 0 18px;line-height:1.45;">Contact customer service to
+                    finish up your loan request.</p>
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;">
+                    <button type="button" id="loanCs" title="Customer Service"
+                        style="border:0;background:#071a52;color:#fff;border-radius:999px;min-width:52px;height:52px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(7,26,82,.35);">
+                        <i class="fas fa-headset" style="font-size:20px;"></i>
+                    </button>
                     <button type="button" id="loanExit2"
-                        style="border:0;background:#eee;border-radius:8px;padding:10px 16px;cursor:pointer;">Exit</button>
+                        style="border:0;background:#eef2f7;border-radius:10px;padding:12px 20px;cursor:pointer;font-weight:700;color:#071a52;">Exit</button>
                 </div>
             </div>
         </div>
@@ -2307,25 +2325,53 @@ SCHEDULED PAYMENTS
     <script>
         (function () {
             var modal = document.getElementById('loanModal');
-            function openLoan(e) { if (e) e.preventDefault(); if (modal) { modal.style.display = 'flex'; document.getElementById('loanFormBox').style.display = 'block'; document.getElementById('loanDone').style.display = 'none'; } closeSidebar && closeSidebar(); }
+            function openLoan(e) {
+                if (e) e.preventDefault();
+                if (!modal) return;
+                modal.style.display = 'flex';
+                var fb = document.getElementById('loanFormBox');
+                var done = document.getElementById('loanDone');
+                var err = document.getElementById('loanFormError');
+                if (fb) fb.style.display = 'block';
+                if (done) done.style.display = 'none';
+                if (err) { err.style.display = 'none'; err.textContent = ''; }
+                if (typeof closeSidebar === 'function') closeSidebar();
+            }
             function closeLoan() { if (modal) modal.style.display = 'none'; }
+            function goDashboard() { closeLoan(); try { location.href = '/dashboard'; } catch (e) { } }
             var nav = document.getElementById('navLoanService');
             if (nav) nav.addEventListener('click', openLoan);
-            ['loanExit', 'loanExit2'].forEach(function (id) { var el = document.getElementById(id); if (el) el.addEventListener('click', function () { closeLoan(); location.href = '/dashboard'; }); });
+            var q = document.getElementById('quickLoanService');
+            if (q) q.addEventListener('click', openLoan);
+            ['loanExit', 'loanExit2'].forEach(function (id) {
+                var el = document.getElementById(id);
+                if (el) el.addEventListener('click', goDashboard);
+            });
             var sub = document.getElementById('loanSubmit');
             if (sub) sub.addEventListener('click', function () {
+                var name = (document.getElementById('loanName') || {}).value || '';
+                var amount = (document.getElementById('loanAmount') || {}).value || '';
+                var purpose = (document.getElementById('loanPurpose') || {}).value || '';
+                var phone = (document.getElementById('loanPhone') || {}).value || '';
+                var err = document.getElementById('loanFormError');
+                if (!String(name).trim() || !String(amount).trim() || !(Number(amount) > 0) || !String(purpose).trim() || !String(phone).trim()) {
+                    if (err) {
+                        err.textContent = 'Please fill all details correctly to get the loan.';
+                        err.style.display = 'block';
+                    } else {
+                        alert('Please fill all details correctly to get the loan.');
+                    }
+                    return;
+                }
+                if (err) { err.style.display = 'none'; err.textContent = ''; }
                 document.getElementById('loanFormBox').style.display = 'none';
                 document.getElementById('loanDone').style.display = 'block';
             });
             var cs = document.getElementById('loanCs');
             if (cs) cs.addEventListener('click', function () {
                 closeLoan();
-                if (typeof openGuestChat === 'function') openGuestChat();
-                else if (typeof window.openSupport === 'function') window.openSupport();
-                else {
-                    var fab = document.querySelector('[onclick*="support"], #guestChatFab, .chat-fab');
-                    if (fab) fab.click();
-                }
+                // Same path as other customer service icons — chat to admin board
+                window.location.href = '/support';
             });
         })();
     </script>
