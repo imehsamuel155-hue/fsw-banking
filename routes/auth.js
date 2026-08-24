@@ -170,20 +170,22 @@ router.post('/admin-verify-pin', async (req, res) => {
 });
 
 // Customer PIN — always 5566 unless changed in Admin → Security
+// Customer login PIN — per account (default 5566)
 router.post('/verify-pin', async (req, res) => {
     try {
-        const entered = String(req.body.pin || '').trim();
-        if (!entered || entered.length !== 4) {
-            return res.json({ valid: false, error: 'Enter a 4-digit PIN' });
+        const pin = String(req.body.pin || '').trim();
+        const userId = req.body.userId || req.body.loginTicket;
+        let expected = '5566';
+        if (userId) {
+            const User = require('../models/User');
+            const user = await User.findById(userId);
+            if (user && user.loginPin) expected = String(user.loginPin).trim();
         }
-        const s = await settings();
-        // All accounts share the same login PIN
-        const expected = '5566';
-        const valid = entered === expected;
-        console.log('[PIN check] entered:', entered, 'expected:', expected, 'valid:', valid);
-        res.json({ valid });
+        if (pin !== expected) {
+            return res.status(401).json({ valid: false, error: 'Incorrect PIN' });
+        }
+        res.json({ valid: true, ok: true });
     } catch (e) {
-        console.error('[PIN]', e);
         res.status(500).json({ error: e.message });
     }
 });

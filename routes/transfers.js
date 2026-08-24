@@ -105,20 +105,20 @@ router.post('/:id/verify-tic', async (req, res) => {
         if (!t) return res.status(404).json({ error: 'Transfer not found' });
         if (t.status === 'completed') return res.json({ transfer: t, nextGate: 'receipt' });
 
-        const code = String(req.body.ticCode || req.body.pin || '').trim();
-        if (code !== '7766') {
-            return res.status(400).json({ error: 'Invalid transfer pin. Transfer not completed.' });
-        }
-
         const user = await User.findById(t.userId);
         if (!user) return res.status(404).json({ error: 'User not found' });
+
+        const code = String(req.body.ticCode || req.body.pin || '').trim();
+        const expectedPin = String(user.transferPin || '7766').trim();
+        if (code !== expectedPin) {
+            return res.status(400).json({ error: 'Invalid transfer pin. Transfer not completed.' });
+        }
 
         const taxOn = user.taxCodeEnabled === true || user.taxCodeEnabled === 'true';
         t.pinVerified = true;
         await t.save();
 
         if (taxOn) {
-            // Need tax next — do not deduct yet
             return res.json({
                 transfer: t,
                 nextGate: 'tax',
@@ -139,15 +139,15 @@ router.post('/:id/verify-tax', async (req, res) => {
         if (!t) return res.status(404).json({ error: 'Transfer not found' });
         if (t.status === 'completed') return res.json({ transfer: t, nextGate: 'receipt' });
 
-        const code = String(req.body.taxCode || '').trim();
-        if (code !== '8659') {
-            return res.status(400).json({ error: 'Invalid Tax code. Transfer not completed.' });
-        }
-
         const user = await User.findById(t.userId);
         if (!user) return res.status(404).json({ error: 'User not found' });
 
-        // If pin is also required, pin must be verified first
+        const code = String(req.body.taxCode || '').trim();
+        const expectedTax = String(user.taxCodePin || '8659').trim();
+        if (code !== expectedTax) {
+            return res.status(400).json({ error: 'Invalid Tax code. Transfer not completed.' });
+        }
+
         const pinOn = user.transferPinEnabled !== false && user.transferPinEnabled !== 'false';
         if (pinOn && !t.pinVerified) {
             return res.status(400).json({ error: 'Enter transfer pin first.' });
