@@ -1243,8 +1243,8 @@
                         </div>
                         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
                           <button class="btn btn-primary btn-sm" data-edit="${u._id}">Edit account</button>
-                          ${(!u.approved && !u.isDemo) ? '<button class="btn btn-primary btn-sm" data-approve="${u._id}">Approve</button>' : '<span style="font-size:12px;color:#166534;font-weight:600;">Approved</span>'}
-                          ${!u.isDemo ? '<button class="btn btn-ghost btn-sm" style="color:#a6432b;border-color:#f5c6cb;" data-del="${u._id}">Permanent delete</button>' : '<span style="font-size:12px;color:#888;">Demo</span>'}
+                          ${(!u.approved && !u.isDemo) ? `<button class="btn btn-primary btn-sm" data-approve="${u._id}">Approve</button>` : '<span style="font-size:12px;color:#166534;font-weight:600;">Approved</span>'}
+                          ${!u.isDemo ? `<button class="btn btn-ghost btn-sm" style="color:#a6432b;border-color:#f5c6cb;" data-del="${u._id}">Permanent delete</button>` : '<span style="font-size:12px;color:#888;">Demo</span>'}
                         </div>
                       </div>`).join('');
                 list.querySelectorAll('[data-approve]').forEach(btn => {
