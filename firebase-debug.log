@@ -1,0 +1,199 @@
+[debug] [2026-09-01T22:41:40.373Z] ----------------------------------------------------------------------
+[debug] [2026-09-01T22:41:40.387Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\HP\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js deploy --only hosting
+[debug] [2026-09-01T22:41:40.389Z] CLI Version:   15.27.0
+[debug] [2026-09-01T22:41:40.389Z] Platform:      win32
+[debug] [2026-09-01T22:41:40.390Z] Node Version:  v26.5.0
+[debug] [2026-09-01T22:41:40.391Z] Detected Agent: unknown
+[debug] [2026-09-01T22:41:40.391Z] Time:          Tue Sep 01 2026 18:41:40 GMT-0400 (Eastern Daylight Time)
+[debug] [2026-09-01T22:41:40.392Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-09-01T22:43:06.548Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-09-01T22:43:06.548Z] > authorizing via signed-in user (imehsamuel155@gmail.com)
+[debug] [2026-09-01T22:43:06.549Z] [iam] checking project firstsmartwavebanking for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2026-09-01T22:43:06.657Z] Checked if tokens are valid: false, expires at: 1788237677742
+[debug] [2026-09-01T22:43:06.657Z] Checked if tokens are valid: false, expires at: 1788237677742
+[debug] [2026-09-01T22:43:06.658Z] > refreshing access token with scopes: []
+[debug] [2026-09-01T22:43:06.665Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-09-01T22:43:06.666Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-09-01T22:43:12.451Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-09-01T22:43:12.451Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-09-01T22:43:12.590Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/firstsmartwavebanking:testIamPermissions [none]
+[debug] [2026-09-01T22:43:12.591Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/firstsmartwavebanking:testIamPermissions  x-goog-user-project=firstsmartwavebanking
+[debug] [2026-09-01T22:43:12.592Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/firstsmartwavebanking:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-09-01T22:43:24.935Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/firstsmartwavebanking:testIamPermissions 200
+[debug] [2026-09-01T22:43:24.936Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/firstsmartwavebanking:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2026-09-01T22:43:24.938Z] Checked if tokens are valid: true, expires at: 1788306191452
+[debug] [2026-09-01T22:43:24.939Z] Checked if tokens are valid: true, expires at: 1788306191452
+[debug] [2026-09-01T22:43:24.939Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/firstsmartwavebanking [none]
+[debug] [2026-09-01T22:43:27.386Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/firstsmartwavebanking 200
+[debug] [2026-09-01T22:43:27.386Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/firstsmartwavebanking {"projectId":"firstsmartwavebanking","projectNumber":"643486333153","displayName":"firstsmartwavebanking","name":"projects/firstsmartwavebanking","resources":{"hostingSite":"firstsmartwavebanking"},"state":"ACTIVE","labels":{"firebase":"enabled"},"etag":"1_ab2e972d-2f10-46a6-b3ad-1fa747e2c0fc"}
+[info] 
+[info] === Deploying to 'firstsmartwavebanking'...
+[info] 
+[info] i  deploying hosting 
+[debug] [2026-09-01T22:43:27.398Z] Checked if tokens are valid: true, expires at: 1788306191452
+[debug] [2026-09-01T22:43:27.398Z] Checked if tokens are valid: true, expires at: 1788306191452
+[debug] [2026-09-01T22:43:27.398Z] >>> [apiv2][query] GET https://firebasehosting.googleapis.com/v1beta1/projects/firstsmartwavebanking/sites/firstsmartwavebanking [none]
+[debug] [2026-09-01T22:43:32.723Z] <<< [apiv2][status] GET https://firebasehosting.googleapis.com/v1beta1/projects/firstsmartwavebanking/sites/firstsmartwavebanking 200
+[debug] [2026-09-01T22:43:32.723Z] <<< [apiv2][body] GET https://firebasehosting.googleapis.com/v1beta1/projects/firstsmartwavebanking/sites/firstsmartwavebanking {"name":"projects/firstsmartwavebanking/sites/firstsmartwavebanking","defaultUrl":"https://firstsmartwavebanking.web.app","type":"DEFAULT_SITE"}
+[debug] [2026-09-01T22:43:32.737Z] Checked if tokens are valid: true, expires at: 1788306191452
+[debug] [2026-09-01T22:43:32.738Z] Checked if tokens are valid: true, expires at: 1788306191452
+[debug] [2026-09-01T22:43:32.740Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/firstsmartwavebanking/versions [none]
+[debug] [2026-09-01T22:43:32.740Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/firstsmartwavebanking/versions {"status":"CREATED","labels":{"deployment-tool":"cli-firebase"}}
+[debug] [2026-09-01T22:43:35.379Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/firstsmartwavebanking/versions 200
+[debug] [2026-09-01T22:43:35.379Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/firstsmartwavebanking/versions {"name":"projects/643486333153/sites/firstsmartwavebanking/versions/e1469bd4c829584b","status":"CREATED","config":{},"labels":{"deployment-tool":"cli-firebase"}}
+[info] i  hosting[firstsmartwavebanking]: beginning deploy... 
+[info] i  hosting[firstsmartwavebanking]: found 23 files in public 
+[debug] [2026-09-01T22:43:35.434Z] [hosting] uploading with 200 concurrency
+[debug] [2026-09-01T22:43:35.578Z] Checked if tokens are valid: true, expires at: 1788306191452
+[debug] [2026-09-01T22:43:35.578Z] Checked if tokens are valid: true, expires at: 1788306191452
+[debug] [2026-09-01T22:43:35.584Z] [hosting] hash cache [cHVibGlj] stored for 23 files
+[debug] [2026-09-01T22:43:35.586Z] [hosting][hash queue][FINAL] {"max":75,"min":2,"avg":8.478260869565217,"active":0,"complete":23,"success":23,"errored":0,"retried":0,"total":23,"elapsed":122}
+[debug] [2026-09-01T22:43:35.588Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/643486333153/sites/firstsmartwavebanking/versions/e1469bd4c829584b:populateFiles [none]
+[debug] [2026-09-01T22:43:35.588Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/643486333153/sites/firstsmartwavebanking/versions/e1469bd4c829584b:populateFiles {"files":{"/view-profile.html":"53bad3f3a75880a35ce8c67aabbd65f32ffca2857fe4101435c4ccbc7329b866","/transaction-statement.html":"d63f2565500178acf9b0675d7757ac2aec518f4a1348cbff5b457bd81c8299ab","/transaction-receipt.html":"3bc29ad9ba462cba2984f3ac4fbd2d8c02f1f5cac13e8e16468a5c142c968b21","/tic-code.html":"832b9cf6b88ef4b6ed94e3379334face732b703cf9090f43dd1e51597f6e3c7b","/tax-code.html":"5a995ce18253862d152aab969025515e606d0a78d088058792b3a34b3e5b5158","/support.html":"ab6dd9c9c962f9bd5e3dc089dd6d299d7fc7ca11b771c02eadd498f5bc14a993","/style.css":"b63c5a9568131b0e6495293112e1e18de0778cc9ffb67e7936819c2a662b4344","/signup.html":"8d6ba20464b6d6048e9cfd981412b58a3c4e0f66c1757daa5cb9db9acf4703c5","/script.js":"c9fce73336fadc5758f9d4a779eeaf7673e430050848319fce62954f3dd3428b","/pin.html":"e80dd5e0b669bcf12b10853899acc4d494aeaa8dcb45f4784b2406cab921bed1","/login.html":"31b82eaeee5e669847dfc12861902fa2bdcce899e22a0037bde76f251a8c547f","/index.html":"1690e63e80e735c32afc2fc0a57a67988403c165038eddc7f588e27d34c7841c","/fsw-shared.js":"954591f6a807fc642fcc44da2d9be5ef143774c848a908c7bd5c5053c0ab997f","/deposit.html":"58c07a922af17f0d59a8025e9877ffc33add29f4a713a8e23d2e2d382ac7a827","/deposit-history.html":"9f99f0e50820687c6a7adf9569eae510ab362bf38ba49f4422f46da4087d0751","/dashboard.html":"0702d56f58b00308f5aeff4c0ce673ad1bd2647917a05b9508d3c87a3d67b378","/bank-cards.html":"a2d11ff878e58ebf7cf19d5a71355f6b1e4d49c62e0dc16c37dda72472575eed","/admin-chat.html":"ed34634283bb48b47d0493456c26b2df1f27009c28965bc313fad24b497c24ad","/addmoreprofile.html":"c1e8bd49d195ab86873f8ac5ce6d1875c833197a44e54e79d79721330ae3be43","/account-settings.html":"6f71629887a6efec7bfb8c8100f4741a76e38e07bad83ce32da62b58e29cd03c","/local-transfer.html":"6e0b4590b6bfbb96d7a186f1b47b1d770fa997842afe5977f4ace95ab00ad1bb","/international-transfer.html":"d3b066ec7c0f65007869d1205ac555031e625bc794dc2e5fbe5dcae6bb13d601","/admin.html":"199a61b3e1cdc2ba21730fbb05643e59cdf3c483cdf000b3cc13df34382dc633"}}
+[debug] [2026-09-01T22:43:45.086Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/643486333153/sites/firstsmartwavebanking/versions/e1469bd4c829584b:populateFiles 200
+[debug] [2026-09-01T22:43:45.087Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/643486333153/sites/firstsmartwavebanking/versions/e1469bd4c829584b:populateFiles {"uploadRequiredHashes":["199a61b3e1cdc2ba21730fbb05643e59cdf3c483cdf000b3cc13df34382dc633","d3b066ec7c0f65007869d1205ac555031e625bc794dc2e5fbe5dcae6bb13d601","6e0b4590b6bfbb96d7a186f1b47b1d770fa997842afe5977f4ace95ab00ad1bb"],"uploadUrl":"https://upload-firebasehosting.googleapis.com/upload/sites/firstsmartwavebanking/versions/e1469bd4c829584b/files"}
+[debug] [2026-09-01T22:43:45.089Z] Checked if tokens are valid: true, expires at: 1788306191452
+[debug] [2026-09-01T22:43:45.089Z] Checked if tokens are valid: true, expires at: 1788306191452
+[debug] [2026-09-01T22:43:45.090Z] Checked if tokens are valid: true, expires at: 1788306191452
+[debug] [2026-09-01T22:43:45.090Z] Checked if tokens are valid: true, expires at: 1788306191452
+[debug] [2026-09-01T22:43:45.091Z] Checked if tokens are valid: true, expires at: 1788306191452
+[debug] [2026-09-01T22:43:45.092Z] Checked if tokens are valid: true, expires at: 1788306191452
+[debug] [2026-09-01T22:43:45.092Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/firstsmartwavebanking/versions/e1469bd4c829584b/files/199a61b3e1cdc2ba21730fbb05643e59cdf3c483cdf000b3cc13df34382dc633 [none]
+[debug] [2026-09-01T22:43:45.092Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/firstsmartwavebanking/versions/e1469bd4c829584b/files/199a61b3e1cdc2ba21730fbb05643e59cdf3c483cdf000b3cc13df34382dc633 [stream]
+[debug] [2026-09-01T22:43:45.095Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/firstsmartwavebanking/versions/e1469bd4c829584b/files/d3b066ec7c0f65007869d1205ac555031e625bc794dc2e5fbe5dcae6bb13d601 [none]
+[debug] [2026-09-01T22:43:45.095Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/firstsmartwavebanking/versions/e1469bd4c829584b/files/d3b066ec7c0f65007869d1205ac555031e625bc794dc2e5fbe5dcae6bb13d601 [stream]
+[debug] [2026-09-01T22:43:45.097Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/firstsmartwavebanking/versions/e1469bd4c829584b/files/6e0b4590b6bfbb96d7a186f1b47b1d770fa997842afe5977f4ace95ab00ad1bb [none]
+[debug] [2026-09-01T22:43:45.097Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/firstsmartwavebanking/versions/e1469bd4c829584b/files/6e0b4590b6bfbb96d7a186f1b47b1d770fa997842afe5977f4ace95ab00ad1bb [stream]
+[debug] [2026-09-01T22:43:45.107Z] [hosting][populate queue][FINAL] {"max":9515,"min":9515,"avg":9515,"active":0,"complete":1,"success":1,"errored":0,"retried":0,"total":1,"elapsed":9530}
+[debug] [2026-09-01T22:43:45.107Z] [hosting] uploads queued: 3
+[debug] [2026-09-01T22:43:49.824Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/firstsmartwavebanking/versions/e1469bd4c829584b/files/6e0b4590b6bfbb96d7a186f1b47b1d770fa997842afe5977f4ace95ab00ad1bb 200
+[debug] [2026-09-01T22:43:49.825Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/firstsmartwavebanking/versions/e1469bd4c829584b/files/6e0b4590b6bfbb96d7a186f1b47b1d770fa997842afe5977f4ace95ab00ad1bb [stream]
+[debug] [2026-09-01T22:43:49.827Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/firstsmartwavebanking/versions/e1469bd4c829584b/files/d3b066ec7c0f65007869d1205ac555031e625bc794dc2e5fbe5dcae6bb13d601 200
+[debug] [2026-09-01T22:43:49.828Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/firstsmartwavebanking/versions/e1469bd4c829584b/files/d3b066ec7c0f65007869d1205ac555031e625bc794dc2e5fbe5dcae6bb13d601 [stream]
+[debug] [2026-09-01T22:43:51.689Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/firstsmartwavebanking/versions/e1469bd4c829584b/files/199a61b3e1cdc2ba21730fbb05643e59cdf3c483cdf000b3cc13df34382dc633 200
+[debug] [2026-09-01T22:43:51.689Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/firstsmartwavebanking/versions/e1469bd4c829584b/files/199a61b3e1cdc2ba21730fbb05643e59cdf3c483cdf000b3cc13df34382dc633 [stream]
+[debug] [2026-09-01T22:43:51.690Z] [hosting][upload queue][FINAL] {"max":6602,"min":4734,"avg":5358.333333333333,"active":0,"complete":3,"success":3,"errored":0,"retried":0,"total":3,"elapsed":6603}
+[info] +  hosting[firstsmartwavebanking]: file upload complete 
+[debug] [2026-09-01T22:43:51.693Z] [hosting] deploy completed after 16305ms
+[debug] [2026-09-01T22:43:51.694Z] [
+  {
+    "config": {
+      "public": "public",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "/login",
+          "destination": "/login.html"
+        },
+        {
+          "source": "/signup",
+          "destination": "/signup.html"
+        },
+        {
+          "source": "/admin",
+          "destination": "/admin.html"
+        },
+        {
+          "source": "/dashboard",
+          "destination": "/dashboard.html"
+        },
+        {
+          "source": "/pin",
+          "destination": "/pin.html"
+        },
+        {
+          "source": "/profile",
+          "destination": "/view-profile.html"
+        },
+        {
+          "source": "/cards",
+          "destination": "/bank-cards.html"
+        },
+        {
+          "source": "/local-transfer",
+          "destination": "/local-transfer.html"
+        },
+        {
+          "source": "/international-transfer",
+          "destination": "/international-transfer.html"
+        },
+        {
+          "source": "/tic-code",
+          "destination": "/tic-code.html"
+        },
+        {
+          "source": "/tax-code",
+          "destination": "/tax-code.html"
+        },
+        {
+          "source": "/support",
+          "destination": "/support.html"
+        },
+        {
+          "source": "/addmoreprofile",
+          "destination": "/addmoreprofile.html"
+        },
+        {
+          "source": "/admin-chat",
+          "destination": "/admin-chat.html"
+        },
+        {
+          "source": "/receipt",
+          "destination": "/transaction-receipt.html"
+        },
+        {
+          "source": "/deposit",
+          "destination": "/deposit.html"
+        },
+        {
+          "source": "/deposit-history",
+          "destination": "/deposit-history.html"
+        },
+        {
+          "source": "/settings",
+          "destination": "/account-settings.html"
+        },
+        {
+          "source": "/statement",
+          "destination": "/transaction-statement.html"
+        }
+      ],
+      "site": "firstsmartwavebanking"
+    },
+    "version": "projects/643486333153/sites/firstsmartwavebanking/versions/e1469bd4c829584b"
+  }
+]
+[info] i  hosting[firstsmartwavebanking]: finalizing version... 
+[debug] [2026-09-01T22:43:51.702Z] Checked if tokens are valid: true, expires at: 1788306191452
+[debug] [2026-09-01T22:43:51.702Z] Checked if tokens are valid: true, expires at: 1788306191452
+[debug] [2026-09-01T22:43:51.721Z] >>> [apiv2][query] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/firstsmartwavebanking/versions/e1469bd4c829584b updateMask=status%2Cconfig
+[debug] [2026-09-01T22:43:51.722Z] >>> [apiv2][body] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/firstsmartwavebanking/versions/e1469bd4c829584b {"status":"FINALIZED","config":{"rewrites":[{"glob":"/login","path":"/login.html"},{"glob":"/signup","path":"/signup.html"},{"glob":"/admin","path":"/admin.html"},{"glob":"/dashboard","path":"/dashboard.html"},{"glob":"/pin","path":"/pin.html"},{"glob":"/profile","path":"/view-profile.html"},{"glob":"/cards","path":"/bank-cards.html"},{"glob":"/local-transfer","path":"/local-transfer.html"},{"glob":"/international-transfer","path":"/international-transfer.html"},{"glob":"/tic-code","path":"/tic-code.html"},{"glob":"/tax-code","path":"/tax-code.html"},{"glob":"/support","path":"/support.html"},{"glob":"/addmoreprofile","path":"/addmoreprofile.html"},{"glob":"/admin-chat","path":"/admin-chat.html"},{"glob":"/receipt","path":"/transaction-receipt.html"},{"glob":"/deposit","path":"/deposit.html"},{"glob":"/deposit-history","path":"/deposit-history.html"},{"glob":"/settings","path":"/account-settings.html"},{"glob":"/statement","path":"/transaction-statement.html"}]}}
+[debug] [2026-09-01T22:43:54.080Z] <<< [apiv2][status] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/firstsmartwavebanking/versions/e1469bd4c829584b 200
+[debug] [2026-09-01T22:43:54.081Z] <<< [apiv2][body] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/firstsmartwavebanking/versions/e1469bd4c829584b {"name":"projects/643486333153/sites/firstsmartwavebanking/versions/e1469bd4c829584b","status":"FINALIZED","config":{"rewrites":[{"glob":"/login","path":"/login.html"},{"glob":"/signup","path":"/signup.html"},{"glob":"/admin","path":"/admin.html"},{"glob":"/dashboard","path":"/dashboard.html"},{"glob":"/pin","path":"/pin.html"},{"glob":"/profile","path":"/view-profile.html"},{"glob":"/cards","path":"/bank-cards.html"},{"glob":"/local-transfer","path":"/local-transfer.html"},{"glob":"/international-transfer","path":"/international-transfer.html"},{"glob":"/tic-code","path":"/tic-code.html"},{"glob":"/tax-code","path":"/tax-code.html"},{"glob":"/support","path":"/support.html"},{"glob":"/addmoreprofile","path":"/addmoreprofile.html"},{"glob":"/admin-chat","path":"/admin-chat.html"},{"glob":"/receipt","path":"/transaction-receipt.html"},{"glob":"/deposit","path":"/deposit.html"},{"glob":"/deposit-history","path":"/deposit-history.html"},{"glob":"/settings","path":"/account-settings.html"},{"glob":"/statement","path":"/transaction-statement.html"}]},"labels":{"deployment-tool":"cli-firebase"},"createTime":"2026-09-01T16:43:30.703544Z","createUser":{"email":"imehsamuel155@gmail.com"},"finalizeTime":"2026-09-01T16:43:51.239995Z","finalizeUser":{"email":"imehsamuel155@gmail.com"}}
+[debug] [2026-09-01T22:43:54.081Z] [hosting] finalized version for firstsmartwavebanking:[object Object]
+[info] +  hosting[firstsmartwavebanking]: version finalized 
+[info] i  hosting[firstsmartwavebanking]: releasing new version... 
+[debug] [2026-09-01T22:43:54.084Z] Checked if tokens are valid: true, expires at: 1788306191452
+[debug] [2026-09-01T22:43:54.084Z] Checked if tokens are valid: true, expires at: 1788306191452
+[debug] [2026-09-01T22:43:54.084Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/firstsmartwavebanking/channels/live/releases versionName=projects%2F643486333153%2Fsites%2Ffirstsmartwavebanking%2Fversions%2Fe1469bd4c829584b
+[debug] [2026-09-01T22:43:54.085Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/firstsmartwavebanking/channels/live/releases {}
+[debug] [2026-09-01T22:43:56.587Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/firstsmartwavebanking/channels/live/releases 200
+[debug] [2026-09-01T22:43:56.587Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/firstsmartwavebanking/channels/live/releases {"name":"projects/643486333153/sites/firstsmartwavebanking/channels/live/releases/1788281031800000","version":{"name":"projects/643486333153/sites/firstsmartwavebanking/versions/e1469bd4c829584b","status":"FINALIZED","config":{"rewrites":[{"glob":"/login","path":"/login.html"},{"glob":"/signup","path":"/signup.html"},{"glob":"/admin","path":"/admin.html"},{"glob":"/dashboard","path":"/dashboard.html"},{"glob":"/pin","path":"/pin.html"},{"glob":"/profile","path":"/view-profile.html"},{"glob":"/cards","path":"/bank-cards.html"},{"glob":"/local-transfer","path":"/local-transfer.html"},{"glob":"/international-transfer","path":"/international-transfer.html"},{"glob":"/tic-code","path":"/tic-code.html"},{"glob":"/tax-code","path":"/tax-code.html"},{"glob":"/support","path":"/support.html"},{"glob":"/addmoreprofile","path":"/addmoreprofile.html"},{"glob":"/admin-chat","path":"/admin-chat.html"},{"glob":"/receipt","path":"/transaction-receipt.html"},{"glob":"/deposit","path":"/deposit.html"},{"glob":"/deposit-history","path":"/deposit-history.html"},{"glob":"/settings","path":"/account-settings.html"},{"glob":"/statement","path":"/transaction-statement.html"}]},"labels":{"deployment-tool":"cli-firebase"},"createTime":"2026-09-01T16:43:30.703544Z","createUser":{"email":"imehsamuel155@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocKYtNXzkJQ_A-jW2A-bYTQl-r1cIUkr5irtJEIyLk-PtkPJ=mo"},"finalizeTime":"2026-09-01T16:43:51.239995Z","finalizeUser":{"email":"imehsamuel155@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocKYtNXzkJQ_A-jW2A-bYTQl-r1cIUkr5irtJEIyLk-PtkPJ=mo"}},"type":"DEPLOY","releaseTime":"2026-09-01T16:43:51.800Z","releaseUser":{"email":"imehsamuel155@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocKYtNXzkJQ_A-jW2A-bYTQl-r1cIUkr5irtJEIyLk-PtkPJ=mo"}}
+[debug] [2026-09-01T22:43:56.587Z] [hosting] release: {"name":"projects/643486333153/sites/firstsmartwavebanking/channels/live/releases/1788281031800000","version":{"name":"projects/643486333153/sites/firstsmartwavebanking/versions/e1469bd4c829584b","status":"FINALIZED","config":{"rewrites":[{"glob":"/login","path":"/login.html"},{"glob":"/signup","path":"/signup.html"},{"glob":"/admin","path":"/admin.html"},{"glob":"/dashboard","path":"/dashboard.html"},{"glob":"/pin","path":"/pin.html"},{"glob":"/profile","path":"/view-profile.html"},{"glob":"/cards","path":"/bank-cards.html"},{"glob":"/local-transfer","path":"/local-transfer.html"},{"glob":"/international-transfer","path":"/international-transfer.html"},{"glob":"/tic-code","path":"/tic-code.html"},{"glob":"/tax-code","path":"/tax-code.html"},{"glob":"/support","path":"/support.html"},{"glob":"/addmoreprofile","path":"/addmoreprofile.html"},{"glob":"/admin-chat","path":"/admin-chat.html"},{"glob":"/receipt","path":"/transaction-receipt.html"},{"glob":"/deposit","path":"/deposit.html"},{"glob":"/deposit-history","path":"/deposit-history.html"},{"glob":"/settings","path":"/account-settings.html"},{"glob":"/statement","path":"/transaction-statement.html"}]},"labels":{"deployment-tool":"cli-firebase"},"createTime":"2026-09-01T16:43:30.703544Z","createUser":{"email":"imehsamuel155@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocKYtNXzkJQ_A-jW2A-bYTQl-r1cIUkr5irtJEIyLk-PtkPJ=mo"},"finalizeTime":"2026-09-01T16:43:51.239995Z","finalizeUser":{"email":"imehsamuel155@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocKYtNXzkJQ_A-jW2A-bYTQl-r1cIUkr5irtJEIyLk-PtkPJ=mo"}},"type":"DEPLOY","releaseTime":"2026-09-01T16:43:51.800Z","releaseUser":{"email":"imehsamuel155@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocKYtNXzkJQ_A-jW2A-bYTQl-r1cIUkr5irtJEIyLk-PtkPJ=mo"}}
+[info] +  hosting[firstsmartwavebanking]: release complete 
+[info] 
+[info] +  Deploy complete! 
+[info] 
+[info] Project Console: https://console.firebase.google.com/project/firstsmartwavebanking/overview
+[info] Hosting URL: https://firstsmartwavebanking.web.app
+[debug] [2026-09-01T22:44:06.658Z] Error: Timed out.
+    at Timeout._onTimeout (C:\Users\HP\AppData\Roaming\npm\node_modules\firebase-tools\lib\utils.js:296:49)
+    at listOnTimeout (node:internal/timers:635:17)
+    at process.processTimers (node:internal/timers:571:7)
+[error] 
+[error] Error: An unexpected error has occurred.
