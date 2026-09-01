@@ -709,11 +709,11 @@ INTERNATIONAL & LOCAL TRANSFER PAGE
 
                 e.preventDefault();
 
-                // Drop text lock — cannot continue until admin turns OFF
+                // Drop text lock — live from MongoDB (all devices). Cannot continue while ON.
                 try {
                     var _uid = await fswGetCurrentUserId();
                     var _u = await fswFetchUser(_uid);
-                    if (_u && (_u.dropTextEnabled === true || _u.dropTextEnabled === 'true')) {
+                    if (_u && (_u.dropTextEnabled === true || _u.dropTextEnabled === 'true' || _u.dropTextEnabled === 1)) {
                         var _msg = (_u.dropTextMessage && String(_u.dropTextMessage).trim())
                             ? String(_u.dropTextMessage).trim()
                             : 'Your account has been disabled due to suspicious activities from an unknown location. Please visit any of our branches for further assistance on how to resolve this issue.';
@@ -722,7 +722,9 @@ INTERNATIONAL & LOCAL TRANSFER PAGE
                         return;
                     }
                     window._fswUserCurrency = (_u && _u.currency) || window._fswUserCurrency || 'EUR';
-                } catch (_e) { }
+                } catch (_e) {
+                    console.warn('drop-text check', _e);
+                }
 
                 const accNum = String(document.getElementById("accountNumber").value || '').replace(/\D/g, '');
                 if (!/^[0-9]+$/.test(accNum) || accNum.length < 1) {

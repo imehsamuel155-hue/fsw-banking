@@ -1350,6 +1350,8 @@
             _dropTextOn = !_dropTextOn;
             const b = document.getElementById('btnDropTextToggle');
             if (b) { b.textContent = _dropTextOn ? 'ON' : 'OFF'; b.className = 'gate-btn ' + (_dropTextOn ? 'on' : 'off'); }
+            // Auto-save so ON blocks transfers on all devices immediately
+            saveDropTextNow();
         }
         async function saveDropTextNow() {
             if (!currentAdminUserId || String(currentAdminUserId).indexOf('+') !== -1) {
