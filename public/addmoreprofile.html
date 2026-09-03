@@ -144,6 +144,7 @@
             display: none;
             padding: 12px;
             border-radius: 8px;
+            margin-top: 14px;
             margin-bottom: 14px;
             font-size: 14px;
         }
@@ -197,7 +198,6 @@
         <h1>Create customer profile</h1>
         <p class="sub">Fill profile, cards, login, currency, bills, and Emergency Reserve. After admin
             <strong>Approves</strong>, this account’s details show when they log in.</p>
-        <div class="msg" id="msg"></div>
         <form id="profileForm">
 
             <!-- PROFILE & ACCOUNT -->
@@ -318,9 +318,29 @@
             <!-- BANK CARDS -->
             <div class="card">
                 <h2><i class="fas fa-credit-card"></i> Bank cards</h2>
-                <p class="hint">Card numbers are fixed for all accounts. Holder name uses the profile name above. Set
-                    expiry only.</p>
-                <div class="grid">
+                <p class="hint">Enter only the <strong>last 4 digits</strong> of each card. Display shows **** **** ****
+                    1234. Holder name uses the profile name above.</p>
+                <div class="row">
+                    <div class="field"><label>Savings card — last 4 digits *</label>
+                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                            <span style="font-family:monospace;font-weight:700;letter-spacing:1px;color:#445;">**** ****
+                                ****</span>
+                            <input name="cardLast4_1" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" required
+                                placeholder=""
+                                style="max-width:100px;font-family:monospace;font-weight:700;letter-spacing:2px;">
+                        </div>
+                    </div>
+                    <div class="field"><label>Current card — last 4 digits *</label>
+                        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                            <span style="font-family:monospace;font-weight:700;letter-spacing:1px;color:#445;">**** ****
+                                ****</span>
+                            <input name="cardLast4_2" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" required
+                                placeholder=""
+                                style="max-width:100px;font-family:monospace;font-weight:700;letter-spacing:2px;">
+                        </div>
+                    </div>
+                </div>
+                <div class="row" style="margin-top:8px;">
                     <div class="field"><label>Savings card expiry</label>
                         <input name="cardExpiry1" type="month" value="2031-09">
                     </div>
@@ -337,12 +357,12 @@
                             minlength="4" autocomplete="new-password"></div>
 
                     <div class="field"><label>Login PIN (4 digits) *</label><input name="loginPin" inputmode="numeric"
-                            pattern="[0-9]{4}" maxlength="4" required placeholder="e.g. 5566" value="5566"></div>
+                            pattern="[0-9]{4}" maxlength="4" required placeholder="e.g. " value=""></div>
                     <div class="field"><label>Transfer PIN (4 digits) *</label><input name="transferPin"
-                            inputmode="numeric" pattern="[0-9]{4}" maxlength="4" required placeholder="e.g. 7766"
-                            value="7766"></div>
+                            inputmode="numeric" pattern="[0-9]{4}" maxlength="4" required placeholder="e.g. " value="">
+                    </div>
                     <div class="field"><label>Tax code (4 digits) *</label><input name="taxCodePin" inputmode="numeric"
-                            pattern="[0-9]{4}" maxlength="4" required placeholder="e.g. 8659" value="8659"></div>
+                            pattern="[0-9]{4}" maxlength="4" required placeholder="e.g. " value=""></div>
                     <p class="hint">These are unique to this account. After approval they are used on login / transfers.
                         Admin can see them for this account.</p>
 
@@ -457,8 +477,10 @@
                                 step="0.01" value="0"></div>
                     </div>
                     <div class="field">
-                        <label>Percent target</label>
-                        <input name="emergencyPct" type="number" min="0" max="100" value="0">
+                        <label>Progress (auto)</label>
+                        <div style="padding:11px 12px;background:#f1f5f9;border-radius:8px;font-weight:700;color:#071a52;"
+                            id="emergencyPctShow">0%</div>
+                        <input type="hidden" name="emergencyPct" value="0">
                     </div>
                 </div>
                 <h2 style="margin-top:22px;"><i class="fas fa-chart-line"></i> Savings &amp; Goals — Investment Vault
@@ -476,13 +498,16 @@
                                 step="0.01" value="0"></div>
                     </div>
                     <div class="field">
-                        <label>Percent target</label>
-                        <input name="investmentPct" type="number" min="0" max="100" value="0">
+                        <label>Progress (auto)</label>
+                        <div style="padding:11px 12px;background:#f1f5f9;border-radius:8px;font-weight:700;color:#071a52;"
+                            id="investmentPctShow">0%</div>
+                        <input type="hidden" name="investmentPct" value="0">
                     </div>
                 </div>
             </div>
 
             <button class="btn" type="submit" id="submitBtn">Submit for admin approval</button>
+            <div class="msg" id="msg" style="margin-top:14px;margin-bottom:0;"></div>
         </form>
     </div>
     <script src="/fsw-shared.js"></script>
@@ -567,8 +592,8 @@
             }
             var holder = body.name || 'Customer';
             body.cards = [
-                { type: 'Savings', number: '**** **** **** 1457', holder: holder, expiry: fmtExpiry(body.cardExpiry1) },
-                { type: 'Current', number: '**** **** **** 8976', holder: holder, expiry: fmtExpiry(body.cardExpiry2) }
+                { type: 'Savings', number: '**** **** **** ' + String(body.cardLast4_1 || '0000').replace(/\D/g, '').slice(-4).padStart(4, '0'), holder: holder, expiry: fmtExpiry(body.cardExpiry1) },
+                { type: 'Current', number: '**** **** **** ' + String(body.cardLast4_2 || '0000').replace(/\D/g, '').slice(-4).padStart(4, '0'), holder: holder, expiry: fmtExpiry(body.cardExpiry2) }
             ];
             body.bills = [
                 { title: body.bill1Title || 'Bill 1', schedule: body.bill1Schedule || '', amount: Number(body.bill1Amount) || 0, status: 'Auto-Pay Enabled', icon: 'bolt' },
@@ -577,14 +602,20 @@
             body.loginPin = String(body.loginPin || '5566').trim();
             body.transferPin = String(body.transferPin || '7766').trim();
             body.taxCodePin = String(body.taxCodePin || '8659').trim();
-            body.goals = {
-                emergencySaved: Number(body.emergencySaved) || 0,
-                emergencyTarget: Number(body.emergencyTarget) || 0,
-                emergencyPct: Number(body.emergencyPct) || 0,
-                investmentSaved: Number(body.investmentSaved) || 0,
-                investmentTarget: Number(body.investmentTarget) || 0,
-                investmentPct: Number(body.investmentPct) || 0
-            };
+            (function () {
+                function pct(s, tg) {
+                    s = Number(s) || 0; tg = Number(tg) || 0;
+                    return tg > 0 ? Math.min(100, Math.round((s / tg) * 100)) : 0;
+                }
+                body.goals = {
+                    emergencySaved: Number(body.emergencySaved) || 0,
+                    emergencyTarget: Number(body.emergencyTarget) || 0,
+                    emergencyPct: pct(body.emergencySaved, body.emergencyTarget),
+                    investmentSaved: Number(body.investmentSaved) || 0,
+                    investmentTarget: Number(body.investmentTarget) || 0,
+                    investmentPct: pct(body.investmentSaved, body.investmentTarget)
+                };
+            })();
 
             btn.disabled = true;
             btn.textContent = '......';
@@ -599,6 +630,7 @@
                 msg.className = 'msg ok';
                 msg.textContent = (data.message || 'Saved.') + ' Open Admin → Approvals to Approve or Delete.';
                 btn.textContent = 'Saved';
+                try { msg.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch (e) { }
                 form.reset();
                 updateSym();
             } catch (err) {
@@ -615,29 +647,37 @@
 
     <script>
         (function autoCalcGoalsPct() {
-            function bind(savedName, targetName, pctName) {
+            function bind(savedName, targetName, pctName, showId) {
                 var s = document.querySelector('[name="' + savedName + '"]');
-                var t = document.querySelector('[name="' + targetName + '"]');
+                var tg = document.querySelector('[name="' + targetName + '"]');
                 var p = document.querySelector('[name="' + pctName + '"]');
-                if (!s || !t || !p) return;
-                p.readOnly = true;
-                p.style.background = '#f1f5f9';
+                var show = document.getElementById(showId);
+                if (!s || !tg) return;
                 function calc() {
                     var sv = Number(s.value) || 0;
-                    var tg = Number(t.value) || 0;
-                    p.value = tg > 0 ? Math.min(100, Math.round((sv / tg) * 100)) : 0;
+                    var tv = Number(tg.value) || 0;
+                    var v = tv > 0 ? Math.min(100, Math.round((sv / tv) * 100)) : 0;
+                    if (p) p.value = v;
+                    if (show) show.textContent = v + '%';
                 }
                 s.addEventListener('input', calc);
-                t.addEventListener('input', calc);
+                tg.addEventListener('input', calc);
                 calc();
             }
-            bind('emergencySaved', 'emergencyTarget', 'emergencyPct');
-            // investment if present
-            bind('investSaved', 'investTarget', 'investPct');
-            bind('savingsSaved', 'savingsTarget', 'savingsPct');
+            bind('emergencySaved', 'emergencyTarget', 'emergencyPct', 'emergencyPctShow');
+            bind('investmentSaved', 'investmentTarget', 'investmentPct', 'investmentPctShow');
         })();
     </script>
 
+    <script>
+        (function () {
+            ['cardLast4_1', 'cardLast4_2'].forEach(function (n) {
+                var el = document.querySelector('[name="' + n + '"]');
+                if (!el) return;
+                el.addEventListener('input', function () { this.value = this.value.replace(/\D/g, '').slice(0, 4); });
+            });
+        })();
+    </script>
 </body>
 
 </html>
