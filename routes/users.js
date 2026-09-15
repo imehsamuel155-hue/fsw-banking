@@ -69,6 +69,52 @@ router.post('/register-profile', async (req, res) => {
 
         const accNum = b.accountNumber || ('21' + String(Date.now()).slice(-8));
         const holder = b.cardHolder || b.name || 'Customer';
+        function fmtExpiry(ym) {
+            if (!ym) return '12/30';
+            const s = String(ym).trim();
+            if (/^\d{2}\/\d{2}$/.test(s)) return s;
+            const p = s.split('-');
+            if (p.length >= 2) return p[1] + '/' + String(p[0]).slice(-2);
+            return s;
+        }
+        function last4(v) {
+            const d = String(v || '').replace(/\D/g, '').slice(-4);
+            return d.padStart(4, '0');
+        }
+        // Prefer full cards[] from client; else last-4 fields; else cardNumber1/2
+        let cards;
+        if (Array.isArray(b.cards) && b.cards.length >= 1) {
+            cards = b.cards.slice(0, 2).map((c, i) => ({
+                type: (c && c.type) || (i === 0 ? 'Savings' : 'Current'),
+                number: (c && c.number) || ('**** **** **** ' + last4(b['cardLast4_' + (i + 1)] || b['cardNumber' + (i + 1)])),
+                holder: (c && c.holder) || holder,
+                expiry: fmtExpiry((c && c.expiry) || b['cardExpiry' + (i + 1)]),
+            }));
+            while (cards.length < 2) {
+                const i = cards.length;
+                cards.push({
+                    type: i === 0 ? 'Savings' : 'Current',
+                    number: '**** **** **** ' + last4(b['cardLast4_' + (i + 1)]),
+                    holder,
+                    expiry: fmtExpiry(b['cardExpiry' + (i + 1)]),
+                });
+            }
+        } else {
+            cards = [
+                {
+                    type: 'Savings',
+                    number: b.cardNumber1 || ('**** **** **** ' + last4(b.cardLast4_1)),
+                    holder,
+                    expiry: fmtExpiry(b.cardExpiry1),
+                },
+                {
+                    type: 'Current',
+                    number: b.cardNumber2 || ('**** **** **** ' + last4(b.cardLast4_2)),
+                    holder,
+                    expiry: fmtExpiry(b.cardExpiry2),
+                },
+            ];
+        }
         const user = await User.create({
             name: b.name || 'New Customer',
             email: b.email || '',
@@ -87,10 +133,7 @@ router.post('/register-profile', async (req, res) => {
             accountType: b.accountType || 'Savings Account',
             branch: b.branch || '',
             dateOpened: b.dateOpened || new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' }),
-            cards: [
-                { type: 'Savings', number: b.cardNumber1 || '**** **** **** 0000', holder, expiry: b.cardExpiry1 || '12/30' },
-                { type: 'Current', number: b.cardNumber2 || '**** **** **** 0000', holder, expiry: b.cardExpiry2 || '12/30' },
-            ],
+            cards,
             bills: Array.isArray(b.bills) && b.bills.length ? b.bills : undefined,
             goals: (b.goals && typeof b.goals === 'object') ? {
                 emergencySaved: Number(b.goals.emergencySaved) || Number(b.emergencySaved) || 0,
