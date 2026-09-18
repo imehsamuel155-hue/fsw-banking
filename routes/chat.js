@@ -160,13 +160,17 @@ router.post('/:userId/admin-reply', adminAuth, async (req, res) => {
     }
 });
 
-/** Admin: permanently delete ONE message (no tombstone / no "deleted" text) */
+/** Admin: permanently delete ONE message they wrote only (not customer messages) */
 router.delete('/message/:messageId', adminAuth, async (req, res) => {
     try {
         const mid = toOid(req.params.messageId);
         if (!mid) return res.status(400).json({ error: 'Invalid message' });
-        const deleted = await Chat.findByIdAndDelete(mid);
-        if (!deleted) return res.status(404).json({ error: 'Message not found' });
+        const existing = await Chat.findById(mid);
+        if (!existing) return res.status(404).json({ error: 'Message not found' });
+        if (String(existing.sender) !== 'admin') {
+            return res.status(403).json({ error: 'You can only delete your own (admin) messages.' });
+        }
+        await Chat.findByIdAndDelete(mid);
         res.json({ ok: true, id: String(mid) });
     } catch (e) {
         res.status(500).json({ error: e.message });

@@ -502,9 +502,9 @@
                 meta.className = 'meta';
                 meta.textContent = admin ? 'You (admin)' : (selectedName || 'Customer');
                 b.appendChild(meta);
-                // Admin only: long-press / right-click → permanent delete (no "deleted" placeholder)
+                // Admin can delete ONLY messages they wrote (not customer messages). Customer has no delete.
                 var msgId = msg._id || msg.id;
-                if (msgId) {
+                if (admin && msgId) {
                     var holdTimer = null;
                     function askDelete() {
                         if (!confirm('Delete this message permanently? It will disappear for the customer with no trace.')) return;
