@@ -508,14 +508,30 @@
                     var holdTimer = null;
                     function askDelete() {
                         if (!confirm('Delete this message permanently? It will disappear for the customer with no trace.')) return;
-                        fetch(FSW_API_BASE + '/chat/message/' + encodeURIComponent(msgId), {
-                            method: 'DELETE',
-                            headers: { Authorization: 'Bearer ' + fswGetAdminToken() }
+                        var api = (typeof FSW_API_BASE !== 'undefined' && FSW_API_BASE)
+                            ? FSW_API_BASE
+                            : 'https://fsw-banking.onrender.com/api';
+                        var url = api + '/chat/message/' + encodeURIComponent(msgId) + '/delete';
+                        fetch(url, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                Authorization: 'Bearer ' + fswGetAdminToken()
+                            },
+                            body: '{}'
                         }).then(function (r) {
-                            if (!r.ok) return r.json().then(function (d) { throw new Error(d.error || 'Delete failed'); });
+                            return r.text().then(function (text) {
+                                var d = {};
+                                try { d = text ? JSON.parse(text) : {}; } catch (_) { }
+                                if (!r.ok) throw new Error(d.error || ('Delete failed (' + r.status + ')'));
+                                return d;
+                            });
+                        }).then(function () {
                             lastCount = -1;
                             return loadMessages(true);
-                        }).catch(function (e) { alert(e.message || 'Delete failed'); });
+                        }).catch(function (e) {
+                            alert(e.message || 'Delete failed. Wait for server update, then try again.');
+                        });
                     }
                     b.addEventListener('contextmenu', function (e) { e.preventDefault(); askDelete(); });
                     b.addEventListener('touchstart', function () {
