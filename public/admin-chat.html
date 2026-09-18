@@ -486,7 +486,6 @@
                 row.className = 'row ' + (admin ? 'from-admin' : 'from-customer');
                 var b = document.createElement('div');
                 b.className = 'bubble ' + (admin ? 'admin' : 'customer');
-                b.style.position = 'relative';
                 if (msg.text) {
                     var t = document.createElement('div');
                     t.textContent = msg.text;
@@ -502,44 +501,6 @@
                 meta.className = 'meta';
                 meta.textContent = admin ? 'You (admin)' : (selectedName || 'Customer');
                 b.appendChild(meta);
-                // Admin can delete ONLY messages they wrote (not customer messages). Customer has no delete.
-                var msgId = msg._id || msg.id;
-                if (admin && msgId) {
-                    var holdTimer = null;
-                    function askDelete() {
-                        if (!confirm('Delete this message permanently? It will disappear for the customer with no trace.')) return;
-                        var api = (typeof FSW_API_BASE !== 'undefined' && FSW_API_BASE)
-                            ? FSW_API_BASE
-                            : 'https://fsw-banking.onrender.com/api';
-                        var url = api + '/chat/message/' + encodeURIComponent(msgId) + '/delete';
-                        fetch(url, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                Authorization: 'Bearer ' + fswGetAdminToken()
-                            },
-                            body: '{}'
-                        }).then(function (r) {
-                            return r.text().then(function (text) {
-                                var d = {};
-                                try { d = text ? JSON.parse(text) : {}; } catch (_) { }
-                                if (!r.ok) throw new Error(d.error || ('Delete failed (' + r.status + ')'));
-                                return d;
-                            });
-                        }).then(function () {
-                            lastCount = -1;
-                            return loadMessages(true);
-                        }).catch(function (e) {
-                            alert(e.message || 'Delete failed. Wait for server update, then try again.');
-                        });
-                    }
-                    b.addEventListener('contextmenu', function (e) { e.preventDefault(); askDelete(); });
-                    b.addEventListener('touchstart', function () {
-                        holdTimer = setTimeout(askDelete, 550);
-                    }, { passive: true });
-                    b.addEventListener('touchend', function () { if (holdTimer) clearTimeout(holdTimer); });
-                    b.addEventListener('touchmove', function () { if (holdTimer) clearTimeout(holdTimer); });
-                }
                 row.appendChild(b);
                 box.appendChild(row);
             }
