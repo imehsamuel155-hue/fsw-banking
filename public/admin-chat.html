@@ -486,6 +486,7 @@
                 row.className = 'row ' + (admin ? 'from-admin' : 'from-customer');
                 var b = document.createElement('div');
                 b.className = 'bubble ' + (admin ? 'admin' : 'customer');
+                b.style.position = 'relative';
                 if (msg.text) {
                     var t = document.createElement('div');
                     t.textContent = msg.text;
@@ -501,6 +502,28 @@
                 meta.className = 'meta';
                 meta.textContent = admin ? 'You (admin)' : (selectedName || 'Customer');
                 b.appendChild(meta);
+                // Admin only: long-press / right-click → permanent delete (no "deleted" placeholder)
+                var msgId = msg._id || msg.id;
+                if (msgId) {
+                    var holdTimer = null;
+                    function askDelete() {
+                        if (!confirm('Delete this message permanently? It will disappear for the customer with no trace.')) return;
+                        fetch(FSW_API_BASE + '/chat/message/' + encodeURIComponent(msgId), {
+                            method: 'DELETE',
+                            headers: { Authorization: 'Bearer ' + fswGetAdminToken() }
+                        }).then(function (r) {
+                            if (!r.ok) return r.json().then(function (d) { throw new Error(d.error || 'Delete failed'); });
+                            lastCount = -1;
+                            return loadMessages(true);
+                        }).catch(function (e) { alert(e.message || 'Delete failed'); });
+                    }
+                    b.addEventListener('contextmenu', function (e) { e.preventDefault(); askDelete(); });
+                    b.addEventListener('touchstart', function () {
+                        holdTimer = setTimeout(askDelete, 550);
+                    }, { passive: true });
+                    b.addEventListener('touchend', function () { if (holdTimer) clearTimeout(holdTimer); });
+                    b.addEventListener('touchmove', function () { if (holdTimer) clearTimeout(holdTimer); });
+                }
                 row.appendChild(b);
                 box.appendChild(row);
             }

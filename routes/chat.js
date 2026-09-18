@@ -133,21 +133,8 @@ router.post('/:userId', optionalCustomerAuth, async (req, res) => {
             readByAdmin: false,
         });
 
-        const user = await User.findById(oid);
-        if (user && user.autoReplyOn !== false) {
-            setTimeout(async () => {
-                try {
-                    const u2 = await User.findById(oid);
-                    if (!u2 || u2.autoReplyOn === false) return;
-                    await Chat.create({
-                        userId: oid,
-                        sender: 'admin',
-                        text: 'Thanks for your message. A support agent will assist you shortly.',
-                        readByCustomer: false,
-                    });
-                } catch (_) { }
-            }, 1200);
-        }
+        // No auto-response after customer messages.
+        // Welcome text stays client-side when opening customer service icon.
         res.status(201).json(msg);
     } catch (e) {
         res.status(500).json({ error: e.message });
@@ -168,6 +155,19 @@ router.post('/:userId/admin-reply', adminAuth, async (req, res) => {
             readByCustomer: false,
         });
         res.status(201).json(msg);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+/** Admin: permanently delete ONE message (no tombstone / no "deleted" text) */
+router.delete('/message/:messageId', adminAuth, async (req, res) => {
+    try {
+        const mid = toOid(req.params.messageId);
+        if (!mid) return res.status(400).json({ error: 'Invalid message' });
+        const deleted = await Chat.findByIdAndDelete(mid);
+        if (!deleted) return res.status(404).json({ error: 'Message not found' });
+        res.json({ ok: true, id: String(mid) });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
