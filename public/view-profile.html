@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+    <!-- fsw-nopreload: no profile loading screen -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
@@ -28,32 +29,6 @@
             max-width: 100%;
         }
 
-        #profileLoading {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 50vh;
-            padding: 40px 20px;
-            text-align: center;
-            color: #071a52;
-        }
-
-        #profileLoading .spin {
-            width: 42px;
-            height: 42px;
-            border: 3px solid #dbeafe;
-            border-top-color: #0b63ce;
-            border-radius: 50%;
-            animation: fswspin 0.8s linear infinite;
-            margin-bottom: 14px;
-        }
-
-        @keyframes fswspin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
 
         #profileContent {
             transition: opacity .2s;
@@ -471,32 +446,6 @@
             }
         }
 
-        #profileLoading {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 50vh;
-            padding: 40px 20px;
-            text-align: center;
-            color: #071a52;
-        }
-
-        #profileLoading .spin {
-            width: 42px;
-            height: 42px;
-            border: 3px solid #dbeafe;
-            border-top-color: #0b63ce;
-            border-radius: 50%;
-            animation: fswspin 0.8s linear infinite;
-            margin-bottom: 14px;
-        }
-
-        @keyframes fswspin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
 
         #profileContent {
             transition: opacity .2s;
@@ -520,103 +469,97 @@
     <section class="profile-section">
         <div class="profile-card">
 
-            <div class="profile-top">
-                <div id="profileLoading">
-                    <div class="spin"></div>
-                    <p style="font-weight:600;">Please wait</p>
-                    <p style="font-size:13px;color:#666;margin-top:6px;">Loading your profile…</p>
-                </div>
-                <div id="profileContent" style="opacity:0.35;">
-                    <img src="" id="profileImage" alt="Profile">
-                    <h2 id="profileName">…</h2>
-                    <p>Premium Account</p>
-                </div>
-
-                <div class="profile-details">
-                    <div class="detail">
-                        <span>Account Number</span>
-                        <strong id="accountNumber">…</strong>
-                    </div>
-
-                    <div class="detail">
-                        <span>Email</span>
-                        <strong id="email">…</strong>
-                    </div>
-
-                    <div class="detail">
-                        <span>Phone Number</span>
-                        <strong id="phone">…</strong>
-                    </div>
-
-                    <div class="detail">
-                        <span>Gender</span>
-                        <strong id="gender">…</strong>
-                    </div>
-
-                    <div class="detail">
-                        <span>Date of Birth</span>
-                        <strong id="dob">…</strong>
-                    </div>
-
-                    <div class="detail">
-                        <span>Nationality</span>
-                        <strong id="country">…</strong>
-                    </div>
-
-                    <div class="detail">
-                        <span>Residential Address</span>
-                        <strong id="address">…</strong>
-                    </div>
-
-                    <div class="detail">
-                        <span>Currency</span>
-                        <strong id="currency">…</strong>
-                    </div>
-
-                    <div class="detail">
-                        <span>Account Balance</span>
-                        <strong id="balance">—</strong>
-                    </div>
-
-                    <div class="detail">
-                        <span>Account Status</span>
-                        <strong class="status-active" id="accountStatus">Active</strong>
-                    </div>
-
-                    <div class="detail">
-                        <span>Account Type</span>
-                        <strong id="accountType">…</strong>
-                    </div>
-
-                    <div class="detail">
-                        <span>Branch</span>
-                        <strong id="branch">…</strong>
-                    </div>
-
-                    <div class="detail">
-                        <span>Date Opened</span>
-                        <strong id="dateOpened">…</strong>
-                    </div>
-
-                    <div class="detail">
-                        <span>KYC Status</span>
-                        <strong class="status-active" id="kycStatus">Verified</strong>
-                    </div>
-                </div>
-
-                <div class="profile-actions">
-                    <button onclick="window.location.href='/dashboard'">
-                        <i class="fas fa-house"></i>
-                        Dashboard
-                    </button>
-
-                    <button id="customerService">
-                        <i class="fas fa-headset"></i>
-                        Customer Service
-                    </button>
-                </div>
-
+            <div class="profile-top" id="profileContent">
+                <img src="" id="profileImage" alt="Profile">
+                <h2 id="profileName"></h2>
+                <p>Premium Account</p>
             </div>
+
+            <div class="profile-details">
+                <div class="detail">
+                    <span>Account Number</span>
+                    <strong id="accountNumber"></strong>
+                </div>
+
+                <div class="detail">
+                    <span>Email</span>
+                    <strong id="email"></strong>
+                </div>
+
+                <div class="detail">
+                    <span>Phone Number</span>
+                    <strong id="phone"></strong>
+                </div>
+
+                <div class="detail">
+                    <span>Gender</span>
+                    <strong id="gender"></strong>
+                </div>
+
+                <div class="detail">
+                    <span>Date of Birth</span>
+                    <strong id="dob"></strong>
+                </div>
+
+                <div class="detail">
+                    <span>Nationality</span>
+                    <strong id="country"></strong>
+                </div>
+
+                <div class="detail">
+                    <span>Residential Address</span>
+                    <strong id="address"></strong>
+                </div>
+
+                <div class="detail">
+                    <span>Currency</span>
+                    <strong id="currency"></strong>
+                </div>
+
+                <div class="detail">
+                    <span>Account Balance</span>
+                    <strong id="balance"></strong>
+                </div>
+
+                <div class="detail">
+                    <span>Account Status</span>
+                    <strong class="status-active" id="accountStatus">Active</strong>
+                </div>
+
+                <div class="detail">
+                    <span>Account Type</span>
+                    <strong id="accountType"></strong>
+                </div>
+
+                <div class="detail">
+                    <span>Branch</span>
+                    <strong id="branch"></strong>
+                </div>
+
+                <div class="detail">
+                    <span>Date Opened</span>
+                    <strong id="dateOpened"></strong>
+                </div>
+
+                <div class="detail">
+                    <span>KYC Status</span>
+                    <strong class="status-active" id="kycStatus">Verified</strong>
+                </div>
+            </div>
+
+            <div class="profile-actions">
+                <button onclick="window.location.href='/dashboard'">
+                    <i class="fas fa-house"></i>
+                    Dashboard
+                </button>
+
+                <button id="customerService">
+                    <i class="fas fa-headset"></i>
+                    Customer Service
+                </button>
+            </div>
+
+        </div>
     </section>
 
     <!-- Customer Service Popup -->
