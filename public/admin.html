@@ -1126,7 +1126,12 @@
                     const selAttr = (currentAdminUserId && String(currentAdminUserId) === String(u._id)) ? ' selected' : '';
                     return '<option value="' + u._id + '"' + selAttr + '>' + label + '</option>';
                 }).join('');
-                if (!currentAdminUserId && list[0]) currentAdminUserId = list[0]._id;
+                if (!currentAdminUserId && list.length) {
+                    var preferred = list.find(function (u) { return !u.isDemo && u.approved !== false; })
+                        || list.find(function (u) { return !u.isDemo; })
+                        || list[0];
+                    if (preferred) currentAdminUserId = preferred._id;
+                }
                 sel.onchange = async function () {
                     currentAdminUserId = this.value;
                     await loadProfileTab();
@@ -1396,10 +1401,13 @@
 
         async function loadProfileTab() {
             let user;
+            if (!currentAdminUserId) {
+                throw new Error('Select an account from the switch list first.');
+            }
             try {
                 user = await fswFetchUser(currentAdminUserId);
             } catch (e) {
-                user = await fswFetchDemoUser();
+                throw new Error(e.message || 'Could not load this account');
             }
             if (!user || !user._id) throw new Error('No customer account found');
             currentAdminUserId = user._id;
@@ -1453,8 +1461,8 @@
                 document.getElementById('photoPreview').src = ev.target.result;
                 try {
                     if (!currentAdminUserId) {
-                        const u = await fswFetchDemoUser();
-                        currentAdminUserId = u._id;
+                        showToast('Select an account first before uploading a photo.');
+                        return;
                     }
                     await fswUpdateUser(currentAdminUserId, {
                         transferMode: 'tic_then_tax', profileImage: ev.target.result

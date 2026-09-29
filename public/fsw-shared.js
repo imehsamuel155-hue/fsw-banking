@@ -17,12 +17,17 @@ function fswGetToken() { return fswSessionGet(FSW_SESSION_KEYS.token); }
 function fswGetAdminToken() { try { return sessionStorage.getItem(FSW_SESSION_KEYS.adminToken); } catch (e) { return null; } }
 function fswSetLoggedInUser(userId, token, username) {
     // Clear previous account completely so chats/profiles never mix
+    // and old demo/first-account data never flashes on the next login
     try {
         localStorage.removeItem(FSW_SESSION_KEYS.userId);
         localStorage.removeItem(FSW_SESSION_KEYS.token);
         localStorage.removeItem('fsw_username');
         localStorage.removeItem('fsw_user_name');
+        localStorage.removeItem('fsw_user');
+        localStorage.removeItem('fsw_balance');
         sessionStorage.removeItem('fsw_pin_ok');
+        sessionStorage.removeItem('fsw_user');
+        sessionStorage.removeItem('fsw_balance');
     } catch (e) { }
     const id = String(userId == null ? '' : userId).trim();
     if (!id || id === 'null' || id === 'undefined') throw new Error('Invalid login user id');
@@ -41,7 +46,11 @@ function fswLogout() {
     try {
         localStorage.removeItem('fsw_username');
         localStorage.removeItem('fsw_user_name');
+        localStorage.removeItem('fsw_user');
+        localStorage.removeItem('fsw_balance');
         sessionStorage.removeItem('fsw_pin_ok');
+        sessionStorage.removeItem('fsw_user');
+        sessionStorage.removeItem('fsw_balance');
     } catch (e) { }
     window.location.href = '/';
 }
@@ -111,6 +120,10 @@ async function fswFetchUser(userId) {
     let id = userId;
     if (!id || id === 'null' || id === 'undefined') {
         id = await fswGetCurrentUserId();
+    }
+    // Never fall back to demo / first account — only the logged-in (or admin-selected) id
+    if (!id || id === 'null' || id === 'undefined') {
+        throw new Error('Not logged in');
     }
     const res = await fetch(FSW_API_BASE + '/users/' + id + '?_=' + Date.now(), {
         cache: 'no-store',
@@ -198,17 +211,6 @@ async function fswApplyDashboard() {
 async function fswApplyProfile() {
     try {
         if (!fswRequireAuth()) return;
-        const overlay = document.getElementById('profileLoading');
-        const content = document.getElementById('profileContent');
-        if (overlay) overlay.style.display = 'flex';
-        if (content) content.style.opacity = '0.35';
-        // clear stale hardcoded text
-        ['profileName', 'accountNumber', 'email', 'phone', 'gender', 'dob', 'country', 'address',
-            'currency', 'balance', 'accountStatus', 'accountType', 'branch', 'dateOpened', 'kycStatus'
-        ].forEach(function (id) {
-            const el = document.getElementById(id);
-            if (el) el.textContent = '…';
-        });
         const user = await fswFetchUser();
         const textMap = {
             profileName: 'name', accountNumber: 'accountNumber', email: 'email', phone: 'phone',
@@ -235,14 +237,8 @@ async function fswApplyProfile() {
             fswApplyStatusEl(kyc, user.kycStatus === 'Verified' ? 'Active' : (user.kycStatus || 'Pending'));
             kyc.textContent = user.kycStatus || 'Verified';
         }
-        if (overlay) overlay.style.display = 'none';
-        if (content) content.style.opacity = '1';
         return user;
     } catch (err) {
-        const overlay = document.getElementById('profileLoading');
-        if (overlay) {
-            overlay.innerHTML = '<div style="text-align:center;padding:24px;"><p style="color:#a00;">Could not load profile.</p><p style="font-size:13px;color:#666;">' + (err.message || '') + '</p></div>';
-        }
         if (String(err.message).includes('Not logged in')) window.location.replace('/');
     }
 }
