@@ -1164,7 +1164,7 @@
                 if (!res.ok) throw new Error(list.error || 'Failed');
                 sel.innerHTML = list.map(u => {
                     const label = (u.name || 'User') + (u.username ? ' @' + u.username : '') +
-                        (u.isDemo ? ' (demo)' : '') +
+                        '' +
                         (u.approved === false ? ' [pending]' : '');
                     const selAttr = (currentAdminUserId && String(currentAdminUserId) === String(u._id)) ? ' selected' : '';
                     return '<option value="' + u._id + '"' + selAttr + '>' + label + '</option>';

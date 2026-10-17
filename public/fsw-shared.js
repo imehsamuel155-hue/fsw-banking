@@ -105,9 +105,7 @@ async function fswAdminVerifyPin(pin) {
 function fswAdminLogout() { try { sessionStorage.removeItem(FSW_SESSION_KEYS.adminToken); } catch (e) { } }
 
 async function fswFetchDemoUser() {
-    const res = await fetch(FSW_API_BASE + '/users/demo');
-    if (!res.ok) throw new Error('Could not load demo account — is the backend running?');
-    return res.json();
+    throw new Error('Demo account removed — log in with an approved profile');
 }
 
 async function fswGetCurrentUserId() {
@@ -258,8 +256,10 @@ async function fswApplyProfile() {
         if (balanceEl) balanceEl.textContent = fswFormatMoney(user.balance, user.currency);
         const imgEl = document.getElementById('profileImage');
         if (imgEl) {
-            imgEl.src = user.profileImage || ('https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(user.name || 'U'));
-            imgEl.onerror = function () { this.src = 'https://api.dicebear.com/7.x/initials/svg?seed=U'; };
+            imgEl.alt = '';
+            const fallback = 'https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(user.name || 'U');
+            imgEl.onerror = function () { this.onerror = null; this.src = fallback; this.alt = ''; };
+            imgEl.src = user.profileImage || fallback;
         }
         fswApplyStatusEl(document.getElementById('accountStatus'), user.status || 'Active');
         const kyc = document.getElementById('kycStatus');

@@ -18,25 +18,21 @@ function adminAuth(req, res, next) {
     }
 }
 
+/** Demo accounts removed — do not create or return Feng / demo data */
 router.get('/demo', async (req, res) => {
+    res.status(404).json({ error: 'Demo account removed. Use a real approved profile.' });
+});
+
+/** One-shot: permanently delete all isDemo users from the database */
+router.post('/purge-demo', adminAuth, async (req, res) => {
     try {
-        let user = await User.findOne({ isDemo: true });
-        if (!user) {
-            user = await User.create({
-                name: 'Feng Harrson', email: 'demo@firstsmartwave.com', isDemo: true,
-                approved: true, approvalStatus: 'approved',
-                accountNumber: '2100000100', balance: 2500, currency: 'EUR',
-                cards: [
-                    { type: 'Savings', number: '**** **** **** 1457', holder: 'Feng Harrson', expiry: '09/31' },
-                    { type: 'Current', number: '**** **** **** 8976', holder: 'Feng Harrson', expiry: '11/31' },
-                ],
-            });
-        } else if (!user.approved) {
-            user.approved = true;
-            user.approvalStatus = 'approved';
-            await user.save();
+        const demos = await User.find({ isDemo: true }).select('_id');
+        const ids = demos.map((d) => d._id);
+        if (ids.length) {
+            await Chat.deleteMany({ userId: { $in: ids } });
+            await User.deleteMany({ isDemo: true });
         }
-        res.json(user);
+        res.json({ ok: true, deleted: ids.length });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
@@ -259,7 +255,6 @@ router.delete('/:id', adminAuth, async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
         if (!user) return res.status(404).json({ error: 'User not found' });
-        if (user.isDemo) return res.status(400).json({ error: 'Cannot delete the demo account' });
         await Chat.deleteMany({ userId: user._id });
         await User.findByIdAndDelete(req.params.id);
         res.json({ ok: true, deleted: req.params.id });
@@ -272,7 +267,20 @@ router.get('/:id', async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
         if (!user) return res.status(404).json({ error: 'User not found' });
-        res.json(user);
+
+        // Non-demo accounts: never show old demo name on cards
+        const obj = user.toObject();
+        if (!obj.isDemo && Array.isArray(obj.cards) && obj.name) {
+            obj.cards = obj.cards.map((c, i) => {
+                const card = c && typeof c === 'object' ? { ...c } : {};
+                if (!card.holder || card.holder === 'Feng Harrson') {
+                    card.holder = obj.name;
+                }
+                if (!card.type) card.type = i === 0 ? 'Savings' : 'Current';
+                return card;
+            });
+        }
+        res.json(obj);
     } catch (e) {
         res.status(500).json({ error: e.message });
     }

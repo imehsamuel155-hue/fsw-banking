@@ -55,34 +55,6 @@ function meta(req) {
     };
 }
 
-async function ensureDemo(s) {
-    let user = await User.findOne({ isDemo: true });
-    if (!user) {
-        user = await User.create({
-            name: 'Feng Harrson',
-            email: 'demo@firstsmartwave.com',
-            username: s.customerUsername,
-            password: s.customerPassword,
-            accountNumber: '2100000100',
-            balance: 2500,
-            currency: 'EUR',
-            isDemo: true,
-            approved: true,
-            approvalStatus: 'approved',
-            phone: '+1 202 555 0123',
-            gender: 'Male',
-            dob: '12 January 1994',
-            nationality: 'United States',
-            address: '24 Wall Street, New York, USA',
-            cards: [
-                { type: 'Savings', number: '**** **** **** 4587', holder: 'Feng Harrson', expiry: '09/31' },
-                { type: 'Current', number: '**** **** **** 7812', holder: 'Feng Harrson', expiry: '11/31' },
-            ],
-        });
-    }
-    return user;
-}
-
 router.post('/login', async (req, res) => {
     try {
         const username = String(req.body.username || '').trim();
@@ -99,24 +71,11 @@ router.post('/login', async (req, res) => {
             });
         }
 
-        // 1) Global / demo credentials from SiteSettings
-        if (username === String(s.customerUsername) && password === String(s.customerPassword)) {
-            await LoginLog.create({ type: 'customer', username, success: true, ...m });
-            const user = await ensureDemo(s);
-            if (!user.approved) {
-                user.approved = true;
-                user.approvalStatus = 'approved';
-                await user.save();
-            }
-            const token = jwt.sign({ id: user._id, role: 'customer' }, JWT_SECRET, { expiresIn: '7d' });
-            return res.json({ userId: String(user._id), token, name: user.name, username: user.username || username });
-        }
-
-        // 2) Profile created via /addmoreprofile (must be approved)
+        // Real accounts only (no auto-created demo / Feng Harrson)
         const allUsers = await User.find({ isDemo: { $ne: true } });
         const user = allUsers.find(u => String(u.username || '').toLowerCase() === username.toLowerCase());
         if (user && String(user.password) === password) {
-            if (!user.approved && !user.isDemo) {
+            if (!user.approved) {
                 await LoginLog.create({ type: 'customer', username, success: false, ...m });
                 return res.status(403).json({ error: 'Account pending admin approval. Please wait.' });
             }

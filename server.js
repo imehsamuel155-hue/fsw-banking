@@ -100,10 +100,30 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/firstsmar
     .then(async () => {
         console.log('MongoDB connected');
         await ensureSiteSettings();
+        // Remove legacy demo / Feng Harrson accounts so they never load on the site
+        try {
+            const User = require('./models/User');
+            const Chat = require('./models/Chat');
+            const demos = await User.find({
+                $or: [
+                    { isDemo: true },
+                    { email: 'demo@firstsmartwave.com' },
+                    { name: 'Feng Harrson' },
+                ],
+            }).select('_id');
+            if (demos.length) {
+                const ids = demos.map((d) => d._id);
+                await Chat.deleteMany({ userId: { $in: ids } });
+                await User.deleteMany({ _id: { $in: ids } });
+                console.log('Purged demo accounts:', ids.length);
+            }
+        } catch (e) {
+            console.warn('Demo purge skipped:', e.message);
+        }
         app.listen(PORT, () => {
             console.log('http://localhost:' + PORT);
-            console.log('Customer: customer / pass1234');
-            console.log('Admin:    admin / admin123  | PIN 4422');
+            console.log('Admin: admin / admin123 | PIN 4422');
+            console.log('Customers: use accounts from addmoreprofile (approved)');
         });
     })
     .catch((err) => {
