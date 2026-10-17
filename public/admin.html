@@ -851,8 +851,8 @@
                     </div>
                     <div class="field-row">
                         <div class="field"><label>Reference (optional)</label><input type="text" id="tx_ref"></div>
-                        <div class="field"><label>Display date (optional)</label><input type="text" id="tx_date"
-                                placeholder="e.g. 2026-10-16 14:00"></div>
+                        <div class="field"><label>Display date &amp; time (optional)</label><input type="datetime-local"
+                                id="tx_date" style="min-height:42px;width:100%;"></div>
                         <div class="field"><label>Charge</label><input type="number" id="tx_charge" step="0.01" min="0"
                                 value="0"></div>
                     </div>
@@ -1520,7 +1520,7 @@
                         '<br><span style="color:#64748b;font-size:12px;">' + (t.amount != null ? t.amount : '—') + ' ' + (t.currency || '') +
                         ' · ' + st + (t.manual ? ' · manual' : '') + '</span></div>' +
                         '<div style="display:flex;gap:6px;">' +
-                        '<button type="button" class="btn btn-ghost btn-sm" data-tx-del="' + t._id + '" style="padding:6px 10px;font-size:12px;cursor:pointer;">Delete</button>' +
+                        '<button type="button" data-tx-del="' + t._id + '" style="padding:8px 12px;font-size:12px;cursor:pointer;background:#fee2e2;color:#b91c1c;border:1px solid #fecaca;border-radius:8px;font-weight:700;">Delete</button>' +
                         '</div></div>';
                 }).join('');
                 listEl.querySelectorAll('[data-tx-del]').forEach(function (btn) {
@@ -1566,7 +1566,7 @@
                 country: document.getElementById('tx_country').value.trim(),
                 purpose: document.getElementById('tx_purpose').value.trim(),
                 reference: document.getElementById('tx_ref').value.trim(),
-                displayDate: document.getElementById('tx_date').value.trim(),
+                displayDate: (function () { var v = (document.getElementById('tx_date').value || '').trim(); if (!v) return ''; try { var d = new Date(v); if (!isNaN(d.getTime())) return d.toLocaleString(); } catch (e) { } return v; })(),
                 bankCharge: Number(document.getElementById('tx_charge').value) || 0,
                 status: 'completed'
             };
