@@ -240,6 +240,94 @@ WELCOME
 
         }
 
+        /* Live market ticker */
+        .market-ticker-wrap {
+            padding: 6px 0 4px;
+            margin: 0 0 4px;
+            overflow: hidden;
+            width: 100%;
+        }
+
+        .market-ticker-track {
+            display: flex;
+            gap: 12px;
+            width: max-content;
+            animation: marketTickerScroll 45s linear infinite;
+            padding: 4px 8%;
+        }
+
+        .market-ticker-wrap:hover .market-ticker-track {
+            animation-play-state: paused;
+        }
+
+        @keyframes marketTickerScroll {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        .market-chip {
+            flex: 0 0 auto;
+            min-width: 148px;
+            background: #fff;
+            border: 1px solid #e8eef5;
+            border-radius: 14px;
+            padding: 12px 14px;
+            box-shadow: 0 6px 18px rgba(7, 26, 82, 0.06);
+        }
+
+        .market-chip-top {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #334155;
+            margin-bottom: 6px;
+        }
+
+        .market-chip-top .dot {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 800;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .market-chip-price {
+            font-size: 17px;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.02em;
+        }
+
+        .market-chip-chg {
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 3px;
+        }
+
+        .market-chip-chg.up {
+            color: #059669;
+        }
+
+        .market-chip-chg.down {
+            color: #dc2626;
+        }
+
+        .market-chip-chg.flat {
+            color: #64748b;
+        }
+
         /*======================================
 ACCOUNT CARD & EYE ICON
 ======================================*/
@@ -357,41 +445,58 @@ ACCOUNT CARD & EYE ICON
 
         }
 
-        /* Account & Name Details */
+        /* Profile photo left + account/name right */
         .card-details-top-left {
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
 
-            margin-bottom: 20px;
+        .dash-profile-link {
+            display: block;
+            flex-shrink: 0;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, .85);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .25);
+            text-decoration: none;
+            background: rgba(255, 255, 255, .2);
+        }
 
-            text-align: left;
+        .dash-profile-link img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
 
+        .card-text-right {
+            text-align: right;
+            min-width: 0;
+            flex: 1;
         }
 
         .card-acc-number {
-
-            font-size: 16px;
-
+            font-size: 15px;
             font-weight: 600;
-
-            letter-spacing: 1.2px;
-
+            letter-spacing: 1px;
             margin-bottom: 4px;
-
             color: #e0e9f8;
-
         }
 
         .card-holder-name {
-
-            font-size: 15px;
-
+            font-size: 14px;
             font-weight: 700;
-
             text-transform: uppercase;
-
             letter-spacing: 1px;
-
             color: #ffffff;
-
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .balance-card h4 {
@@ -735,6 +840,87 @@ RECENT ACTIVITY
 
             color: #666;
 
+        }
+
+        .recent-activity-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+
+        .recent-activity-head h2 {
+            margin: 0;
+        }
+
+        .see-more-tx {
+            color: #0b63ce;
+            font-weight: 700;
+            font-size: 14px;
+            text-decoration: none;
+        }
+
+        .tx-preview-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 28px;
+        }
+
+        .tx-preview-item {
+            background: #fff;
+            border-radius: 14px;
+            padding: 14px 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, .06);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: inherit;
+            border: 1px solid #eef2f7;
+        }
+
+        .tx-preview-item:active {
+            opacity: 0.92;
+        }
+
+        .tx-preview-left {
+            min-width: 0;
+        }
+
+        .tx-preview-name {
+            font-weight: 700;
+            color: #071a52;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .tx-preview-meta {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .tx-preview-amt {
+            font-weight: 800;
+            color: #b91c1c;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .tx-preview-empty {
+            background: #fff;
+            border-radius: 14px;
+            padding: 18px 16px;
+            color: #64748b;
+            font-size: 14px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, .05);
+            margin-bottom: 28px;
         }
 
         /*======================================
@@ -1558,18 +1744,10 @@ SCHEDULED PAYMENTS
 
     </section>
 
-    <!-- ================= FINANCIAL ANALYTICS SUMMARY ================= -->
-
-
-
-
-
-
-
-
-
-
-    </section>
+    <!-- ================= LIVE MARKET TICKER ================= -->
+    <div class="market-ticker-wrap" aria-label="Live market rates">
+        <div class="market-ticker-track" id="marketTickerTrack"></div>
+    </div>
 
     <!-- ================= ACCOUNT CARD ================= -->
 
@@ -1582,10 +1760,15 @@ SCHEDULED PAYMENTS
                 <div class="card-chip-inner"></div>
             </div>
 
-            <!-- Account Number & Name -->
+            <!-- Profile photo (left) + Account & Name (right) -->
             <div class="card-details-top-left">
-                <div class="card-acc-number" id="dashAccountNumber">Acc: —</div>
-                <div class="card-holder-name" id="dashAccountName">—</div>
+                <a href="/profile" class="dash-profile-link" id="dashProfileLink" title="My Profile">
+                    <img id="dashProfileImg" src="" alt="Profile">
+                </a>
+                <div class="card-text-right">
+                    <div class="card-acc-number" id="dashAccountNumber"></div>
+                    <div class="card-holder-name" id="dashAccountName"></div>
+                </div>
             </div>
 
             <h4>
@@ -1600,7 +1783,7 @@ SCHEDULED PAYMENTS
 
                     <span id="currencySymbol"></span>
 
-                    <span id="accountBalance">…</span>
+                    <span id="accountBalance"></span>
 
                 </h1>
 
@@ -1618,19 +1801,24 @@ SCHEDULED PAYMENTS
                 <i class="fas fa-clock"></i>
                 <span id="liveTime"></span>
                 <span id="dashAccountStatus" class="status-pill status-active"
-                    style="margin-left:10px;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;">—</span>
+                    style="margin-left:10px;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;"></span>
             </div>
 
             <p>
 
                 Account Status:
-                <span class="active">
+                <span class="active" id="dashStatusLabel">
 
                     Active
 
                 </span>
 
             </p>
+
+            <a href="/statement" id="dashBankStatements"
+                style="display:inline-flex;align-items:center;gap:8px;margin-top:12px;padding:8px 14px;border-radius:20px;background:rgba(255,255,255,.18);color:#fff;text-decoration:none;font-size:13px;font-weight:700;border:1px solid rgba(255,255,255,.35);">
+                <i class="fas fa-file-invoice-dollar"></i> Bank Statements
+            </a>
 
         </div>
 
@@ -1814,11 +2002,13 @@ SCHEDULED PAYMENTS
 
     <section class="recent-activity">
 
-        <h2>
-
-            Recent Activity
-
-        </h2>
+        <div class="recent-activity-head">
+            <h2>Recent Activity</h2>
+            <a class="see-more-tx" href="/statement">See more →</a>
+        </div>
+        <div id="recentTxPreview" class="tx-preview-list">
+            <div class="tx-preview-empty">Loading recent transfers…</div>
+        </div>
 
         <!-- ================= SCHEDULED BILLS & AUTO-PAY ================= -->
         <section class="scheduled-payments">
@@ -2148,42 +2338,204 @@ SCHEDULED PAYMENTS
 
         let isBalanceVisible = true;
 
-        (async function () {
-            const user = await fswApplyDashboard();
-            if (user) {
-                actualBalance = user.balance;
-                try {
-                    const g = user.goals || {};
-                    const fills = document.querySelectorAll('.progress-bar-fill');
-                    const footers = document.querySelectorAll('.goal-footer');
-                    const headers = document.querySelectorAll('.goal-header span');
-                    const emPct = (g.emergencyPct != null ? g.emergencyPct : 0);
-                    const invPct = (g.investmentPct != null ? g.investmentPct : 0);
-                    if (fills[0]) fills[0].style.width = emPct + '%';
-                    if (fills[1]) fills[1].style.width = invPct + '%';
-                    if (headers[0]) headers[0].textContent = emPct + '% Target';
-                    if (headers[1]) headers[1].textContent = invPct + '% Target';
-                    if (footers[0]) footers[0].innerHTML = '<span>Saved: ' + fswFormatMoney(g.emergencySaved != null ? g.emergencySaved : 0, user.currency) + '</span><span>Goal: ' + fswFormatMoney(g.emergencyTarget != null ? g.emergencyTarget : 0, user.currency) + '</span>';
-                    if (footers[1]) footers[1].innerHTML = '<span>Saved: ' + fswFormatMoney(g.investmentSaved != null ? g.investmentSaved : 0, user.currency) + '</span><span>Goal: ' + fswFormatMoney(g.investmentTarget != null ? g.investmentTarget : 0, user.currency) + '</span>';
-                    // Scheduled bills from profile
+        async function loadDash() {
+            try {
+                const user = await fswApplyDashboard();
+                if (user) {
+                    actualBalance = user.balance != null ? user.balance : 0;
                     try {
-                        const bills = user.bills || [];
-                        const b0 = bills[0], b1 = bills[1];
-                        if (b0) {
-                            const t1 = document.getElementById('bill1Title'); if (t1) t1.textContent = b0.title || '';
-                            const s1 = document.getElementById('bill1Schedule'); if (s1) s1.textContent = b0.schedule || '';
-                            const a1 = document.getElementById('bill1Amount'); if (a1) a1.textContent = fswFormatMoney(b0.amount || 0, user.currency);
-                            const st1 = document.getElementById('bill1Status'); if (st1) st1.textContent = b0.status || 'Auto-Pay Enabled';
-                        }
-                        if (b1) {
-                            const t2 = document.getElementById('bill2Title'); if (t2) t2.textContent = b1.title || '';
-                            const s2 = document.getElementById('bill2Schedule'); if (s2) s2.textContent = b1.schedule || '';
-                            const a2 = document.getElementById('bill2Amount'); if (a2) a2.textContent = fswFormatMoney(b1.amount || 0, user.currency);
-                            const st2 = document.getElementById('bill2Status'); if (st2) st2.textContent = b1.status || 'Auto-Pay Enabled';
-                        }
-                    } catch (be) { }
-                } catch (e) { }
+                        const g = user.goals || {};
+                        const fills = document.querySelectorAll('.progress-bar-fill');
+                        const footers = document.querySelectorAll('.goal-footer');
+                        const headers = document.querySelectorAll('.goal-header span');
+                        const emPct = (g.emergencyPct != null ? g.emergencyPct : 0);
+                        const invPct = (g.investmentPct != null ? g.investmentPct : 0);
+                        if (fills[0]) fills[0].style.width = emPct + '%';
+                        if (fills[1]) fills[1].style.width = invPct + '%';
+                        if (headers[0]) headers[0].textContent = emPct + '% Target';
+                        if (headers[1]) headers[1].textContent = invPct + '% Target';
+                        if (footers[0]) footers[0].innerHTML = '<span>Saved: ' + fswFormatMoney(g.emergencySaved != null ? g.emergencySaved : 0, user.currency) + '</span><span>Goal: ' + fswFormatMoney(g.emergencyTarget != null ? g.emergencyTarget : 0, user.currency) + '</span>';
+                        if (footers[1]) footers[1].innerHTML = '<span>Saved: ' + fswFormatMoney(g.investmentSaved != null ? g.investmentSaved : 0, user.currency) + '</span><span>Goal: ' + fswFormatMoney(g.investmentTarget != null ? g.investmentTarget : 0, user.currency) + '</span>';
+                        try {
+                            const bills = user.bills || [];
+                            const b0 = bills[0], b1 = bills[1];
+                            if (b0) {
+                                const t1 = document.getElementById('bill1Title'); if (t1) t1.textContent = b0.title || '';
+                                const s1 = document.getElementById('bill1Schedule'); if (s1) s1.textContent = b0.schedule || '';
+                                const a1 = document.getElementById('bill1Amount'); if (a1) a1.textContent = fswFormatMoney(b0.amount || 0, user.currency);
+                                const st1 = document.getElementById('bill1Status'); if (st1) st1.textContent = b0.status || 'Auto-Pay Enabled';
+                            }
+                            if (b1) {
+                                const t2 = document.getElementById('bill2Title'); if (t2) t2.textContent = b1.title || '';
+                                const s2 = document.getElementById('bill2Schedule'); if (s2) s2.textContent = b1.schedule || '';
+                                const a2 = document.getElementById('bill2Amount'); if (a2) a2.textContent = fswFormatMoney(b1.amount || 0, user.currency);
+                                const st2 = document.getElementById('bill2Status'); if (st2) st2.textContent = b1.status || 'Auto-Pay Enabled';
+                            }
+                        } catch (be) { }
+                    } catch (e) { }
+                    try { await loadRecentTxPreview(user); } catch (te) { }
+                }
+            } catch (err) {
+                console.warn('Dashboard load failed', err);
             }
+        }
+
+        async function loadRecentTxPreview(user) {
+            var box = document.getElementById('recentTxPreview');
+            if (!box) return;
+            var uid = user && user._id ? user._id : (typeof fswGetCurrentUserId === 'function' ? await fswGetCurrentUserId() : null);
+            if (!uid) {
+                box.innerHTML = '<div class="tx-preview-empty">Log in to see transfers.</div>';
+                return;
+            }
+            try {
+                var res = await fetch(FSW_API_BASE + '/transfers/history/' + encodeURIComponent(uid) + '?_=' + Date.now(), { cache: 'no-store' });
+                if (!res.ok) throw new Error('fail');
+                var list = await res.json();
+                if (!Array.isArray(list) || !list.length) {
+                    box.innerHTML = '<div class="tx-preview-empty">No recent transfers yet. Completed local/international transfers and admin-added history will show here.</div>';
+                    return;
+                }
+                var top = list.slice(0, 2);
+                box.innerHTML = top.map(function (t) {
+                    var name = t.recipientName || (t.type === 'international' ? 'International transfer' : 'Local transfer');
+                    var typ = t.type === 'international' ? 'International' : 'Local';
+                    var when = '';
+                    try {
+                        when = t.displayDate || new Date(t.createdAt).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+                    } catch (e) { when = ''; }
+                    var amt = (typeof fswFormatMoney === 'function')
+                        ? fswFormatMoney(t.amount || 0, t.currency || (user && user.currency) || '')
+                        : String(t.amount || 0);
+                    var href = t._id ? ('/receipt?id=' + encodeURIComponent(t._id)) : '/statement';
+                    return '<a class="tx-preview-item" href="' + href + '">' +
+                        '<div class="tx-preview-left"><div class="tx-preview-name">' + name + '</div>' +
+                        '<div class="tx-preview-meta">' + typ + (when ? ' · ' + when : '') + '</div></div>' +
+                        '<div class="tx-preview-amt">− ' + amt + '</div></a>';
+                }).join('');
+            } catch (e) {
+                box.innerHTML = '<div class="tx-preview-empty">Could not load recent activity. <a href="/statement">Open statements</a></div>';
+            }
+        }
+
+        loadDash();
+        window.addEventListener('pageshow', function () { loadDash(); });
+
+        /* ---- Live market ticker (forex / indices / crypto) ---- */
+        (function initMarketTicker() {
+            var track = document.getElementById('marketTickerTrack');
+            if (!track) return;
+
+            var PAIRS = [
+                { id: 'EURUSD', label: 'EUR to USD', base: 'EUR', quote: 'USD', color: '#1d4ed8', icon: '€$' },
+                { id: 'GBPUSD', label: 'GBP to USD', base: 'GBP', quote: 'USD', color: '#7c3aed', icon: '£$' },
+                { id: 'USDJPY', label: 'USD to JPY', base: 'USD', quote: 'JPY', color: '#0f766e', icon: '$¥' },
+                { id: 'USDCHF', label: 'USD to CHF', base: 'USD', quote: 'CHF', color: '#b45309', icon: '₣' },
+                { id: 'AUDUSD', label: 'AUD to USD', base: 'AUD', quote: 'USD', color: '#0369a1', icon: 'A$' },
+                { id: 'USDCAD', label: 'USD to CAD', base: 'USD', quote: 'CAD', color: '#be123c', icon: 'C$' },
+                { id: 'NZDUSD', label: 'NZD to USD', base: 'NZD', quote: 'USD', color: '#15803d', icon: 'N$' },
+                { id: 'EURGBP', label: 'EUR to GBP', base: 'EUR', quote: 'GBP', color: '#4338ca', icon: '€£' },
+                { id: 'BTC', label: 'BTC / USD', color: '#f59e0b', icon: '₿', kind: 'crypto' },
+                { id: 'ETH', label: 'ETH / USD', color: '#6366f1', icon: 'Ξ', kind: 'crypto' },
+                { id: 'US100', label: 'US 100', color: '#2563eb', icon: '100', kind: 'index', seed: 29196 },
+                { id: 'US30', label: 'US 30', color: '#0ea5e9', icon: '30', kind: 'index', seed: 39850 },
+                { id: 'XAU', label: 'Gold XAU', color: '#ca8a04', icon: 'Au', kind: 'metal', seed: 2650 },
+            ];
+
+            var lastPrices = {};
+
+            function fmt(n, digits) {
+                if (n == null || isNaN(n)) return '—';
+                var d = digits != null ? digits : (n >= 100 ? 1 : (n >= 10 ? 3 : 5));
+                try {
+                    return Number(n).toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d });
+                } catch (e) {
+                    return Number(n).toFixed(d);
+                }
+            }
+
+            function chipHtml(p, price, chg) {
+                var up = chg > 0.00001;
+                var down = chg < -0.00001;
+                var cls = up ? 'up' : (down ? 'down' : 'flat');
+                var sign = up ? '+' : '';
+                var pct = (price && price !== 0) ? (chg / Math.abs(price - chg || price)) * 100 : 0;
+                if (!isFinite(pct)) pct = 0;
+                return '<div class="market-chip" data-id="' + p.id + '">' +
+                    '<div class="market-chip-top"><span class="dot" style="background:' + p.color + '">' + p.icon + '</span>' + p.label + '</div>' +
+                    '<div class="market-chip-price">' + fmt(price, p.kind === 'crypto' || p.kind === 'index' || p.kind === 'metal' ? 1 : (price > 50 ? 2 : 5)) + '</div>' +
+                    '<div class="market-chip-chg ' + cls + '">' + sign + fmt(Math.abs(chg), p.kind === 'index' ? 1 : 5) +
+                    ' (' + sign + Math.abs(pct).toFixed(2) + '%)</div></div>';
+            }
+
+            function render(rows) {
+                var html = rows.map(function (r) { return chipHtml(r.p, r.price, r.chg); }).join('');
+                track.innerHTML = html + html;
+            }
+
+            function wobble(seed) {
+                var n = (Math.sin(Date.now() / 12000 + seed) + Math.sin(Date.now() / 7000 + seed * 1.3)) * 0.5;
+                return n;
+            }
+
+            async function loadRates() {
+                var rows = [];
+                var fxMap = {};
+                try {
+                    var r = await fetch('https://api.frankfurter.app/latest?from=USD', { cache: 'no-store' });
+                    if (r.ok) {
+                        var data = await r.json();
+                        fxMap = data.rates || {};
+                        fxMap.USD = 1;
+                    }
+                } catch (e) { }
+
+                function fx(base, quote) {
+                    if (!Object.keys(fxMap).length) return null;
+                    var ub = base === 'USD' ? 1 : fxMap[base];
+                    var uq = quote === 'USD' ? 1 : fxMap[quote];
+                    if (!ub || !uq) return null;
+                    // rate base/quote = (USD per base)^{-1} * (USD per quote) wait
+                    // frankfurter: rates are quote per 1 USD when from=USD
+                    // base/quote = (1/ub for base in USD terms)... USDJPY = fxMap.JPY
+                    // EURUSD = 1/fxMap.EUR
+                    if (base === 'USD') return uq;
+                    if (quote === 'USD') return 1 / ub;
+                    return uq / ub;
+                }
+
+                for (var i = 0; i < PAIRS.length; i++) {
+                    var p = PAIRS[i];
+                    var price = null;
+                    if (p.kind === 'crypto') {
+                        try {
+                            var cr = await fetch('https://api.coinbase.com/v2/prices/' + p.id + '-USD/spot', { cache: 'no-store' });
+                            if (cr.ok) {
+                                var cj = await cr.json();
+                                price = parseFloat(cj.data && cj.data.amount);
+                            }
+                        } catch (e) { }
+                        if (price == null) price = p.id === 'BTC' ? 64000 : 3200;
+                    } else if (p.kind === 'index' || p.kind === 'metal') {
+                        var base = p.seed || 1000;
+                        price = base * (1 + wobble(i + 1) * 0.004);
+                    } else {
+                        price = fx(p.base, p.quote);
+                        if (price == null) {
+                            var fallback = { EURUSD: 1.08, GBPUSD: 1.27, USDJPY: 149.5, USDCHF: 0.88, AUDUSD: 0.66, USDCAD: 1.36, NZDUSD: 0.60, EURGBP: 0.85 };
+                            price = fallback[p.id] || 1;
+                        }
+                    }
+                    var prev = lastPrices[p.id];
+                    var chg = prev != null ? (price - prev) : price * (wobble(i + 2) * 0.002);
+                    lastPrices[p.id] = price;
+                    rows.push({ p: p, price: price, chg: chg });
+                }
+                render(rows);
+            }
+
+            loadRates();
+            setInterval(loadRates, 60000);
         })();
 
         const csIcon = document.getElementById('customerIcon');
