@@ -2464,6 +2464,7 @@ SCHEDULED PAYMENTS
             }
         }
 
+        try { if (typeof fswEarlyHydrate === "function") fswEarlyHydrate(); } catch (e) { }
         loadDash();
         window.addEventListener('pageshow', function () { loadDash(); try { var tr = document.getElementById('marketTickerTrack'); if (tr) { tr.style.animation = 'none'; void tr.offsetWidth; tr.style.animation = ''; } } catch (e) { } });
         document.addEventListener('visibilitychange', function () { if (!document.hidden) { try { var tr = document.getElementById('marketTickerTrack'); if (tr) { tr.style.animation = 'none'; void tr.offsetWidth; tr.style.animation = ''; } } catch (e) { } } });
