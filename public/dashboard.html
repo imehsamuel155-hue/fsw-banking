@@ -240,33 +240,53 @@ WELCOME
 
         }
 
-        /* Live market ticker */
+        /* Live market ticker — iOS Safari friendly */
         .market-ticker-wrap {
-            padding: 6px 0 4px;
-            margin: 0 0 4px;
+            padding: 8px 0 6px;
+            margin: 0 0 6px;
             overflow: hidden;
             width: 100%;
+            -webkit-transform: translateZ(0);
+            transform: translateZ(0);
+            min-height: 92px;
         }
 
         .market-ticker-track {
+            display: -webkit-box;
+            display: -webkit-flex;
             display: flex;
             gap: 12px;
+            width: -webkit-max-content;
             width: max-content;
-            animation: marketTickerScroll 45s linear infinite;
-            padding: 4px 8%;
+            padding: 4px 16px;
+            -webkit-animation: marketTickerScroll 50s linear infinite;
+            animation: marketTickerScroll 50s linear infinite;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            will-change: transform;
         }
 
-        .market-ticker-wrap:hover .market-ticker-track {
-            animation-play-state: paused;
+        @-webkit-keyframes marketTickerScroll {
+            0% {
+                -webkit-transform: translate3d(0, 0, 0);
+                transform: translate3d(0, 0, 0);
+            }
+
+            100% {
+                -webkit-transform: translate3d(-50%, 0, 0);
+                transform: translate3d(-50%, 0, 0);
+            }
         }
 
         @keyframes marketTickerScroll {
             0% {
-                transform: translateX(0);
+                -webkit-transform: translate3d(0, 0, 0);
+                transform: translate3d(0, 0, 0);
             }
 
             100% {
-                transform: translateX(-50%);
+                -webkit-transform: translate3d(-50%, 0, 0);
+                transform: translate3d(-50%, 0, 0);
             }
         }
 
@@ -2448,25 +2468,25 @@ SCHEDULED PAYMENTS
         window.addEventListener('pageshow', function () { loadDash(); try { var tr = document.getElementById('marketTickerTrack'); if (tr) { tr.style.animation = 'none'; void tr.offsetWidth; tr.style.animation = ''; } } catch (e) { } });
         document.addEventListener('visibilitychange', function () { if (!document.hidden) { try { var tr = document.getElementById('marketTickerTrack'); if (tr) { tr.style.animation = 'none'; void tr.offsetWidth; tr.style.animation = ''; } } catch (e) { } } });
 
-        /* ---- Live market ticker (forex / indices / crypto) ---- */
+        /* ---- Live market ticker (forex / indices / crypto) — works Android + iPhone ---- */
         (function initMarketTicker() {
             var track = document.getElementById('marketTickerTrack');
             if (!track) return;
 
             var PAIRS = [
-                { id: 'EURUSD', label: 'EUR to USD', base: 'EUR', quote: 'USD', color: '#1d4ed8', icon: '€$' },
-                { id: 'GBPUSD', label: 'GBP to USD', base: 'GBP', quote: 'USD', color: '#7c3aed', icon: '£$' },
-                { id: 'USDJPY', label: 'USD to JPY', base: 'USD', quote: 'JPY', color: '#0f766e', icon: '$¥' },
-                { id: 'USDCHF', label: 'USD to CHF', base: 'USD', quote: 'CHF', color: '#b45309', icon: '₣' },
-                { id: 'AUDUSD', label: 'AUD to USD', base: 'AUD', quote: 'USD', color: '#0369a1', icon: 'A$' },
-                { id: 'USDCAD', label: 'USD to CAD', base: 'USD', quote: 'CAD', color: '#be123c', icon: 'C$' },
-                { id: 'NZDUSD', label: 'NZD to USD', base: 'NZD', quote: 'USD', color: '#15803d', icon: 'N$' },
-                { id: 'EURGBP', label: 'EUR to GBP', base: 'EUR', quote: 'GBP', color: '#4338ca', icon: '€£' },
-                { id: 'BTC', label: 'BTC / USD', color: '#f59e0b', icon: '₿', kind: 'crypto' },
-                { id: 'ETH', label: 'ETH / USD', color: '#6366f1', icon: 'Ξ', kind: 'crypto' },
-                { id: 'US100', label: 'US 100', color: '#2563eb', icon: '100', kind: 'index', seed: 29196 },
-                { id: 'US30', label: 'US 30', color: '#0ea5e9', icon: '30', kind: 'index', seed: 39850 },
-                { id: 'XAU', label: 'Gold XAU', color: '#ca8a04', icon: 'Au', kind: 'metal', seed: 2650 },
+                { id: 'EURUSD', label: 'EUR to USD', base: 'EUR', quote: 'USD', color: '#1d4ed8', icon: '€$', fb: 1.08 },
+                { id: 'GBPUSD', label: 'GBP to USD', base: 'GBP', quote: 'USD', color: '#7c3aed', icon: '£$', fb: 1.27 },
+                { id: 'USDJPY', label: 'USD to JPY', base: 'USD', quote: 'JPY', color: '#0f766e', icon: '$¥', fb: 149.5 },
+                { id: 'USDCHF', label: 'USD to CHF', base: 'USD', quote: 'CHF', color: '#b45309', icon: '₣', fb: 0.88 },
+                { id: 'AUDUSD', label: 'AUD to USD', base: 'AUD', quote: 'USD', color: '#0369a1', icon: 'A$', fb: 0.66 },
+                { id: 'USDCAD', label: 'USD to CAD', base: 'USD', quote: 'CAD', color: '#be123c', icon: 'C$', fb: 1.36 },
+                { id: 'NZDUSD', label: 'NZD to USD', base: 'NZD', quote: 'USD', color: '#15803d', icon: 'N$', fb: 0.60 },
+                { id: 'EURGBP', label: 'EUR to GBP', base: 'EUR', quote: 'GBP', color: '#4338ca', icon: '€£', fb: 0.85 },
+                { id: 'BTC', label: 'BTC / USD', color: '#f59e0b', icon: '₿', kind: 'crypto', fb: 64000 },
+                { id: 'ETH', label: 'ETH / USD', color: '#6366f1', icon: 'Ξ', kind: 'crypto', fb: 3200 },
+                { id: 'US100', label: 'US 100', color: '#2563eb', icon: '100', kind: 'index', fb: 29196 },
+                { id: 'US30', label: 'US 30', color: '#0ea5e9', icon: '30', kind: 'index', fb: 39850 },
+                { id: 'XAU', label: 'Gold XAU', color: '#ca8a04', icon: 'Au', kind: 'metal', fb: 2650 },
             ];
 
             var lastPrices = {};
@@ -2488,17 +2508,20 @@ SCHEDULED PAYMENTS
                 if (p.id === 'XAU') return 'XAUUSD';
                 return p.id;
             }
+
             function chipHtml(p, price, chg) {
                 var up = chg > 0.00001;
                 var down = chg < -0.00001;
                 var cls = up ? 'up' : (down ? 'down' : 'flat');
                 var sign = up ? '+' : '';
-                var pct = (price && price !== 0) ? (chg / Math.abs(price - chg || price)) * 100 : 0;
+                var baseForPct = Math.abs((price || 0) - (chg || 0)) || Math.abs(price) || 1;
+                var pct = (chg / baseForPct) * 100;
                 if (!isFinite(pct)) pct = 0;
+                var digits = (p.kind === 'crypto' || p.kind === 'index' || p.kind === 'metal') ? 1 : (price > 50 ? 2 : 5);
                 var href = 'https://www.tradingview.com/symbols/' + encodeURIComponent(tvSymbol(p)) + '/';
-                return '<a class="market-chip" data-id="' + p.id + '" href="' + href + '" target="_blank" rel="noopener noreferrer">' +
+                return '<a class="market-chip" href="' + href + '" target="_blank" rel="noopener noreferrer">' +
                     '<div class="market-chip-top"><span class="dot" style="background:' + p.color + '">' + p.icon + '</span>' + p.label + '</div>' +
-                    '<div class="market-chip-price">' + fmt(price, p.kind === 'crypto' || p.kind === 'index' || p.kind === 'metal' ? 1 : (price > 50 ? 2 : 5)) + '</div>' +
+                    '<div class="market-chip-price">' + fmt(price, digits) + '</div>' +
                     '<div class="market-chip-chg ' + cls + '">' + sign + fmt(Math.abs(chg), p.kind === 'index' ? 1 : 5) +
                     ' (' + sign + Math.abs(pct).toFixed(2) + '%)</div></a>';
             }
@@ -2506,18 +2529,41 @@ SCHEDULED PAYMENTS
             function render(rows) {
                 var html = rows.map(function (r) { return chipHtml(r.p, r.price, r.chg); }).join('');
                 track.innerHTML = html + html;
+                // restart CSS animation (iOS)
+                track.style.webkitAnimation = 'none';
+                track.style.animation = 'none';
+                try { void track.offsetWidth; } catch (e) { }
+                track.style.webkitAnimation = '';
+                track.style.animation = '';
             }
 
             function wobble(seed) {
-                var n = (Math.sin(Date.now() / 12000 + seed) + Math.sin(Date.now() / 7000 + seed * 1.3)) * 0.5;
-                return n;
+                return (Math.sin(Date.now() / 12000 + seed) + Math.sin(Date.now() / 7000 + seed * 1.3)) * 0.5;
             }
+
+            function fallbackRows() {
+                return PAIRS.map(function (p, i) {
+                    var price = p.fb || 1;
+                    var chg = price * (wobble(i + 1) * 0.002);
+                    lastPrices[p.id] = price;
+                    return { p: p, price: price, chg: chg };
+                });
+            }
+
+            // Paint immediately so iPhone always shows something even if APIs fail
+            render(fallbackRows());
 
             async function loadRates() {
                 var rows = [];
                 var fxMap = {};
                 try {
-                    var r = await fetch('https://api.frankfurter.app/latest?from=USD', { cache: 'no-store' });
+                    var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+                    var timer = controller ? setTimeout(function () { try { controller.abort(); } catch (e) { } }, 8000) : null;
+                    var r = await fetch('https://api.frankfurter.app/latest?from=USD', {
+                        cache: 'no-store',
+                        signal: controller ? controller.signal : undefined
+                    });
+                    if (timer) clearTimeout(timer);
                     if (r.ok) {
                         var data = await r.json();
                         fxMap = data.rates || {};
@@ -2530,10 +2576,6 @@ SCHEDULED PAYMENTS
                     var ub = base === 'USD' ? 1 : fxMap[base];
                     var uq = quote === 'USD' ? 1 : fxMap[quote];
                     if (!ub || !uq) return null;
-                    // rate base/quote = (USD per base)^{-1} * (USD per quote) wait
-                    // frankfurter: rates are quote per 1 USD when from=USD
-                    // base/quote = (1/ub for base in USD terms)... USDJPY = fxMap.JPY
-                    // EURUSD = 1/fxMap.EUR
                     if (base === 'USD') return uq;
                     if (quote === 'USD') return 1 / ub;
                     return uq / ub;
@@ -2550,16 +2592,12 @@ SCHEDULED PAYMENTS
                                 price = parseFloat(cj.data && cj.data.amount);
                             }
                         } catch (e) { }
-                        if (price == null) price = p.id === 'BTC' ? 64000 : 3200;
+                        if (price == null || isNaN(price)) price = p.fb;
                     } else if (p.kind === 'index' || p.kind === 'metal') {
-                        var base = p.seed || 1000;
-                        price = base * (1 + wobble(i + 1) * 0.004);
+                        price = (p.fb || 1000) * (1 + wobble(i + 1) * 0.004);
                     } else {
                         price = fx(p.base, p.quote);
-                        if (price == null) {
-                            var fallback = { EURUSD: 1.08, GBPUSD: 1.27, USDJPY: 149.5, USDCHF: 0.88, AUDUSD: 0.66, USDCAD: 1.36, NZDUSD: 0.60, EURGBP: 0.85 };
-                            price = fallback[p.id] || 1;
-                        }
+                        if (price == null || isNaN(price)) price = p.fb;
                     }
                     var prev = lastPrices[p.id];
                     var chg = prev != null ? (price - prev) : price * (wobble(i + 2) * 0.002);
@@ -2569,7 +2607,8 @@ SCHEDULED PAYMENTS
                 render(rows);
             }
 
-            loadRates();
+            // delay network a tick so first paint is not blocked on iOS
+            setTimeout(function () { loadRates(); }, 300);
             setInterval(loadRates, 60000);
         })();
 
