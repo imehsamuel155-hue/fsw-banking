@@ -125,12 +125,26 @@ async function fswFetchUser(userId) {
     if (!id || id === 'null' || id === 'undefined') {
         throw new Error('Not logged in');
     }
-    const res = await fetch(FSW_API_BASE + '/users/' + id + '?_=' + Date.now(), {
+    const res = await fetch(FSW_API_BASE + '/users/' + encodeURIComponent(id) + '?_=' + Date.now(), {
         cache: 'no-store',
-        headers: { 'Cache-Control': 'no-cache' },
+        headers: { 'Cache-Control': 'no-cache', Pragma: 'no-cache' },
     });
-    if (!res.ok) throw new Error((await res.json()).error || 'Could not load user');
-    return res.json();
+    if (!res.ok) {
+        let err = 'Could not load user';
+        try { err = (await res.json()).error || err; } catch (_) { }
+        throw new Error(err);
+    }
+    const user = await res.json();
+    // Safety: customer session must match this id (never swap in demo payload)
+    try {
+        const sessionId = fswSessionGet(FSW_SESSION_KEYS.userId);
+        if (sessionId && user && user._id && String(user._id) !== String(sessionId) && !userId) {
+            throw new Error('Session mismatch — log in again');
+        }
+    } catch (e) {
+        if (String(e.message).includes('Session mismatch')) throw e;
+    }
+    return user;
 }
 async function fswUpdateUser(userId, updates) {
     const res = await fetch(FSW_API_BASE + '/users/' + userId, {
@@ -164,17 +178,25 @@ async function fswApplyDashboard() {
     try {
         if (!fswRequireAuth()) return;
         const user = await fswFetchUser();
+        if (!user) return;
         const nameEl = document.getElementById('welcomeName');
         if (nameEl) nameEl.textContent = 'Welcome Back, ' + (user.name || '').split(' ')[0];
         const balEl = document.getElementById('accountBalance');
-        if (balEl) balEl.textContent = Number(user.balance).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        if (balEl) balEl.textContent = Number(user.balance != null ? user.balance : 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         const sym = document.getElementById('currencySymbol');
         if (sym) sym.textContent = fswCurrencySymbol(user.currency);
         const acctNumEl = document.getElementById('dashAccountNumber');
-        if (acctNumEl) acctNumEl.textContent = 'Acc: ' + user.accountNumber;
+        if (acctNumEl) acctNumEl.textContent = 'Acc: ' + (user.accountNumber || '—');
         const acctNameEl = document.getElementById('dashAccountName');
-        if (acctNameEl) acctNameEl.textContent = user.name;
-        fswApplyStatusEl(document.getElementById('dashAccountStatus'), user.status);
+        if (acctNameEl) acctNameEl.textContent = user.name || '—';
+        const dashImg = document.getElementById('dashProfileImg');
+        if (dashImg) {
+            dashImg.src = user.profileImage || ('https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(user.name || 'U'));
+            dashImg.alt = user.name || 'Profile';
+        }
+        fswApplyStatusEl(document.getElementById('dashAccountStatus'), user.status || 'Active');
+        const statusLabel = document.getElementById('dashStatusLabel');
+        if (statusLabel) statusLabel.textContent = user.status || 'Active';
         // Goals + bills on dashboard when present
         try {
             const g = user.goals || {};

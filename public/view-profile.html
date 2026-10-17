@@ -168,18 +168,19 @@
         .profile-card {
             width: 100%;
             max-width: 900px;
-            background: #fff;
-            border-radius: 18px;
-            overflow: hidden;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+            background: transparent;
+            border-radius: 0;
+            overflow: visible;
+            box-shadow: none;
+            border: none;
         }
 
         .profile-top {
-            background: #ffffff;
-            border-bottom: 1px solid #e2e8f0;
+            background: transparent;
+            border-bottom: 1px solid #e8eef5;
             color: #0f172a;
             text-align: center;
-            padding: 40px 20px;
+            padding: 28px 12px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -208,7 +209,8 @@
         }
 
         .profile-details {
-            padding: 35px;
+            padding: 12px 8px 24px;
+            background: transparent;
         }
 
         .detail {
@@ -547,18 +549,6 @@
                 </div>
             </div>
 
-            <div class="profile-actions">
-                <button onclick="window.location.href='/dashboard'">
-                    <i class="fas fa-house"></i>
-                    Dashboard
-                </button>
-
-                <button id="customerService">
-                    <i class="fas fa-headset"></i>
-                    Customer Service
-                </button>
-            </div>
-
         </div>
     </section>
 
@@ -614,7 +604,6 @@
     <script>if (!fswRequireAuth()) { }</script>
     <script>
         fswApplyProfile();
-        document.getElementById('customerService')?.addEventListener('click', () => location.href = '/support');
     </script>
     <script src="/script.js"></script>
 
