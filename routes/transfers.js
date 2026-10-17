@@ -14,6 +14,17 @@ async function settings() {
     return s;
 }
 
+/**
+ * Live MongoDB flags on the user:
+ * - transferPinEnabled → Transfer pin (7766)
+ * - taxCodeEnabled → Tax code (8659)
+ *
+ * pin ON, tax OFF  → pin → receipt
+ * tax ON, pin OFF  → tax only → receipt
+ * both ON          → pin → tax → receipt
+ * both OFF         → complete immediately → receipt
+ */
+
 function dropTextBlocked(user) {
     if (!user) return null;
     const on = user.dropTextEnabled === true || user.dropTextEnabled === 'true';
@@ -28,9 +39,9 @@ function resolveNextGate(user) {
     const pinOn = user.transferPinEnabled !== false && user.transferPinEnabled !== 'false';
     const taxOn = user.taxCodeEnabled === true || user.taxCodeEnabled === 'true';
     if (taxOn && !pinOn) return 'tax';
-    if (pinOn && taxOn) return 'tic';
+    if (pinOn && taxOn) return 'tic'; // then tax after pin
     if (pinOn) return 'tic';
-    return 'receipt';
+    return 'receipt'; // neither — finish without codes
 }
 
 async function completeTransfer(t, user) {
@@ -83,6 +94,7 @@ router.post('/', async (req, res) => {
         });
         const nextGate = resolveNextGate(user);
 
+        // Neither pin nor tax → complete now and deduct balance
         if (nextGate === 'receipt') {
             const result = await completeTransfer(t, user);
             const obj = result.transfer.toObject();
@@ -169,6 +181,7 @@ router.post('/:id/verify-tax', async (req, res) => {
     }
 });
 
+/** Complete without codes (both gates off) or after server already completed */
 router.post('/:id/complete', async (req, res) => {
     try {
         const t = await Transfer.findById(req.params.id);
@@ -186,6 +199,106 @@ router.get('/user/:userId', async (req, res) => {
     try {
         const list = await Transfer.find({ userId: req.params.userId }).sort({ createdAt: -1 });
         res.json(list);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+/** Customer or admin: completed history only (for statement page) */
+router.get('/history/:userId', async (req, res) => {
+    try {
+        const list = await Transfer.find({
+            userId: req.params.userId,
+            status: 'completed',
+        }).sort({ createdAt: -1 }).limit(200);
+        res.json(list);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+const jwt = require('jsonwebtoken');
+const JWT_SECRET = process.env.JWT_SECRET || 'fsw_secret_change_me_in_production';
+function adminAuth(req, res, next) {
+    const h = req.headers.authorization || '';
+    const token = h.startsWith('Bearer ') ? h.slice(7) : null;
+    if (!token) return res.status(401).json({ error: 'Admin token required' });
+    try {
+        const d = jwt.verify(token, JWT_SECRET);
+        if (d.role !== 'admin') return res.status(403).json({ error: 'Admin only' });
+        req.admin = d;
+        next();
+    } catch {
+        return res.status(401).json({ error: 'Invalid admin token' });
+    }
+}
+
+/** Admin: create a completed transfer row for a profile (shows on customer history) */
+router.post('/admin/:userId', adminAuth, async (req, res) => {
+    try {
+        const user = await User.findById(req.params.userId);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        const b = req.body || {};
+        const amount = Number(b.amount);
+        if (!amount || amount <= 0) return res.status(400).json({ error: 'Valid amount required' });
+        const type = b.type === 'international' ? 'international' : 'local';
+        const t = await Transfer.create({
+            userId: user._id,
+            type,
+            recipientName: b.recipientName || '',
+            recipientBank: b.recipientBank || '',
+            recipientAccountNumber: b.recipientAccountNumber || '',
+            iban: b.iban || '',
+            swift: b.swift || '',
+            country: b.country || '',
+            currency: b.currency || user.currency || 'USD',
+            amount,
+            bankCharge: Number(b.bankCharge) || 0,
+            purpose: b.purpose || '',
+            description: b.description || '',
+            status: 'completed',
+            pinVerified: true,
+            manual: true,
+            reference: b.reference || ('FSW' + Date.now()),
+            displayDate: b.displayDate || '',
+        });
+        res.status(201).json(t);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+/** Admin: update a transfer row */
+router.put('/admin/item/:id', adminAuth, async (req, res) => {
+    try {
+        const t = await Transfer.findById(req.params.id);
+        if (!t) return res.status(404).json({ error: 'Not found' });
+        const b = req.body || {};
+        const fields = [
+            'type', 'recipientName', 'recipientBank', 'recipientAccountNumber',
+            'iban', 'swift', 'country', 'currency', 'amount', 'bankCharge',
+            'purpose', 'description', 'status', 'reference', 'displayDate',
+        ];
+        fields.forEach((f) => {
+            if (b[f] !== undefined) t[f] = b[f];
+        });
+        if (b.amount !== undefined) t.amount = Number(b.amount);
+        if (b.bankCharge !== undefined) t.bankCharge = Number(b.bankCharge);
+        if (b.type === 'international' || b.type === 'local') t.type = b.type;
+        t.manual = true;
+        await t.save();
+        res.json(t);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
+/** Admin: delete a transfer row permanently */
+router.delete('/admin/item/:id', adminAuth, async (req, res) => {
+    try {
+        const t = await Transfer.findByIdAndDelete(req.params.id);
+        if (!t) return res.status(404).json({ error: 'Not found' });
+        res.json({ ok: true });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }

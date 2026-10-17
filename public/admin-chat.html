@@ -520,6 +520,7 @@
                 box.scrollTop = box.scrollHeight;
             }
 
+            var sending = false;
             async function send(text, image) {
                 text = (text || '').trim();
                 if (!text && !image) return;
@@ -528,12 +529,31 @@
                     openNav();
                     return;
                 }
+                if (sending) {
+                    alert('Please wait — previous message is still sending.');
+                    return;
+                }
+                sending = true;
+                var btn = document.getElementById('sendBtn');
+                var prev = btn ? btn.textContent : '';
+                if (btn) {
+                    btn.disabled = true;
+                    btn.textContent = 'Please wait…';
+                }
                 try {
                     await fswSendAdminReply(selectedId, text, image || '');
                     document.getElementById('chatInput').value = '';
                     await loadMessages(true);
                     await loadConvs();
-                } catch (e) { alert(e.message || 'Send failed'); }
+                } catch (e) {
+                    alert(e.message || 'Send failed');
+                } finally {
+                    sending = false;
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.textContent = prev || 'Send';
+                    }
+                }
             }
 
             document.getElementById('sendBtn').onclick = function () { send(document.getElementById('chatInput').value); };
@@ -543,6 +563,11 @@
             document.getElementById('chatImage').onchange = function (e) {
                 var f = e.target.files && e.target.files[0];
                 if (!f) return;
+                if (sending) {
+                    alert('Please wait — previous message is still sending.');
+                    e.target.value = '';
+                    return;
+                }
                 var r = new FileReader();
                 r.onload = function () { send('', r.result); };
                 r.readAsDataURL(f);

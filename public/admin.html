@@ -820,6 +820,49 @@
                             maxlength="12" style="background:#fff;font-weight:700;border:1px solid #c5d4f0;"></div>
                 </div>
 
+                <div id="txHistoryAdminSection"
+                    style="margin:20px 0;padding:16px;border:1px solid #c5d4f0;border-radius:12px;background:#f8fafc;">
+                    <h3 style="margin:0 0 8px;color:#071a52;font-size:15px;">Transaction history (this account only)
+                    </h3>
+                    <p style="font-size:12.5px;color:#666;margin:0 0 12px;">Add or edit rows for <b>this switched
+                            profile</b>. Completed local/international transfers also appear automatically. Customer
+                        sees them on Transaction Statement.</p>
+                    <div class="field-row">
+                        <div class="field"><label>Type</label>
+                            <select id="tx_type">
+                                <option value="local">Local</option>
+                                <option value="international">International</option>
+                            </select>
+                        </div>
+                        <div class="field"><label>Amount</label><input type="number" id="tx_amount" step="0.01" min="0">
+                        </div>
+                        <div class="field"><label>Currency</label><input type="text" id="tx_currency"
+                                placeholder="USD / EUR / …"></div>
+                    </div>
+                    <div class="field-row">
+                        <div class="field"><label>Recipient name</label><input type="text" id="tx_name"></div>
+                        <div class="field"><label>Bank</label><input type="text" id="tx_bank"></div>
+                        <div class="field"><label>Account / IBAN</label><input type="text" id="tx_account"></div>
+                    </div>
+                    <div class="field-row">
+                        <div class="field"><label>SWIFT (intl)</label><input type="text" id="tx_swift"></div>
+                        <div class="field"><label>Country (intl)</label><input type="text" id="tx_country"></div>
+                        <div class="field"><label>Purpose</label><input type="text" id="tx_purpose"></div>
+                    </div>
+                    <div class="field-row">
+                        <div class="field"><label>Reference (optional)</label><input type="text" id="tx_ref"></div>
+                        <div class="field"><label>Display date (optional)</label><input type="text" id="tx_date"
+                                placeholder="e.g. 2026-10-16 14:00"></div>
+                        <div class="field"><label>Charge</label><input type="number" id="tx_charge" step="0.01" min="0"
+                                value="0"></div>
+                    </div>
+                    <button type="button" class="btn btn-primary" id="txAddBtn"
+                        style="margin-top:8px;padding:10px 16px;border:0;border-radius:8px;background:#071a52;color:#fff;font-weight:700;cursor:pointer;">Add
+                        to history</button>
+                    <p id="txAdminHint" style="font-size:12px;color:#166534;margin:8px 0 0;"></p>
+                    <div id="txAdminList" style="margin-top:14px;max-height:280px;overflow:auto;font-size:13px;"></div>
+                </div>
+
                 <h3 style="margin:18px 0 10px;color:#071a52;font-size:15px;">Login for this account only</h3>
                 <p style="font-size:12.5px;color:#666;margin:0 0 10px;">Username and password are permanent (cannot be
                     changed). Shown for the selected account only.</p>
@@ -1450,8 +1493,110 @@
             document.getElementById('currencySuggestions').innerHTML = Object.keys(FSW_CURRENCIES).map(code =>
                 `<option value="${code}">`
             ).join('');
+            try { await loadTxAdminList(); } catch (e) { /* ignore */ }
             return user;
         }
+
+        async function loadTxAdminList() {
+            const listEl = document.getElementById('txAdminList');
+            if (!listEl || !currentAdminUserId) return;
+            listEl.innerHTML = '<p style="color:#666;">Loading history…</p>';
+            try {
+                const res = await fetch(FSW_API_BASE + '/transfers/user/' + encodeURIComponent(currentAdminUserId) + '?_=' + Date.now(), {
+                    headers: { Authorization: 'Bearer ' + fswGetAdminToken() },
+                    cache: 'no-store'
+                });
+                if (!res.ok) throw new Error('Could not load transfers');
+                const list = await res.json();
+                if (!Array.isArray(list) || !list.length) {
+                    listEl.innerHTML = '<p style="color:#64748b;">No transactions for this account yet.</p>';
+                    return;
+                }
+                listEl.innerHTML = list.map(function (t) {
+                    const typ = t.type === 'international' ? 'INTL' : 'LOCAL';
+                    const st = t.status || '';
+                    return '<div style="display:flex;justify-content:space-between;gap:8px;align-items:center;padding:10px;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:8px;background:#fff;flex-wrap:wrap;">' +
+                        '<div style="flex:1;min-width:140px;"><b>' + (t.recipientName || 'Transfer') + '</b> · ' + typ +
+                        '<br><span style="color:#64748b;font-size:12px;">' + (t.amount != null ? t.amount : '—') + ' ' + (t.currency || '') +
+                        ' · ' + st + (t.manual ? ' · manual' : '') + '</span></div>' +
+                        '<div style="display:flex;gap:6px;">' +
+                        '<button type="button" class="btn btn-ghost btn-sm" data-tx-del="' + t._id + '" style="padding:6px 10px;font-size:12px;cursor:pointer;">Delete</button>' +
+                        '</div></div>';
+                }).join('');
+                listEl.querySelectorAll('[data-tx-del]').forEach(function (btn) {
+                    btn.onclick = async function () {
+                        if (!confirm('Delete this transaction permanently?')) return;
+                        try {
+                            const r = await fetch(FSW_API_BASE + '/transfers/admin/item/' + btn.getAttribute('data-tx-del'), {
+                                method: 'DELETE',
+                                headers: { Authorization: 'Bearer ' + fswGetAdminToken() }
+                            });
+                            if (!r.ok) throw new Error('Delete failed');
+                            showToast('Transaction deleted.');
+                            await loadTxAdminList();
+                        } catch (err) { showToast(err.message || 'Delete failed'); }
+                    };
+                });
+            } catch (e) {
+                listEl.innerHTML = '<p style="color:#b91c1c;">' + (e.message || 'Failed') + '</p>';
+            }
+        }
+
+        document.getElementById('txAddBtn')?.addEventListener('click', async function () {
+            if (!currentAdminUserId) {
+                showToast('Select an account first.');
+                return;
+            }
+            const btn = document.getElementById('txAddBtn');
+            const hint = document.getElementById('txAdminHint');
+            const amount = Number(document.getElementById('tx_amount').value);
+            if (!amount || amount <= 0) {
+                showToast('Enter a valid amount.');
+                return;
+            }
+            const body = {
+                type: document.getElementById('tx_type').value || 'local',
+                amount: amount,
+                currency: document.getElementById('tx_currency').value.trim() || 'USD',
+                recipientName: document.getElementById('tx_name').value.trim(),
+                recipientBank: document.getElementById('tx_bank').value.trim(),
+                recipientAccountNumber: document.getElementById('tx_account').value.trim(),
+                iban: document.getElementById('tx_account').value.trim(),
+                swift: document.getElementById('tx_swift').value.trim(),
+                country: document.getElementById('tx_country').value.trim(),
+                purpose: document.getElementById('tx_purpose').value.trim(),
+                reference: document.getElementById('tx_ref').value.trim(),
+                displayDate: document.getElementById('tx_date').value.trim(),
+                bankCharge: Number(document.getElementById('tx_charge').value) || 0,
+                status: 'completed'
+            };
+            if (btn) { btn.disabled = true; btn.textContent = 'Please wait…'; }
+            if (hint) hint.textContent = 'Saving…';
+            try {
+                const res = await fetch(FSW_API_BASE + '/transfers/admin/' + encodeURIComponent(currentAdminUserId), {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: 'Bearer ' + fswGetAdminToken()
+                    },
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json().catch(function () { return {}; });
+                if (!res.ok) throw new Error(data.error || 'Save failed');
+                if (hint) hint.textContent = 'Saved — visible on customer statement.';
+                showToast('Transaction added to this profile.');
+                ['tx_amount', 'tx_name', 'tx_bank', 'tx_account', 'tx_swift', 'tx_country', 'tx_purpose', 'tx_ref', 'tx_date'].forEach(function (id) {
+                    const el = document.getElementById(id);
+                    if (el) el.value = '';
+                });
+                await loadTxAdminList();
+            } catch (e) {
+                if (hint) hint.textContent = '';
+                showToast(e.message || 'Could not add');
+            } finally {
+                if (btn) { btn.disabled = false; btn.textContent = 'Add to history'; }
+            }
+        });
 
         document.getElementById('photoInput').addEventListener('change', async function (e) {
             const file = e.target.files[0];
@@ -1662,22 +1807,53 @@
 
         document.getElementById('adminChatSend').addEventListener('click', sendAdminReply);
         document.getElementById('adminChatInput').addEventListener('keydown', e => { if (e.key === 'Enter') sendAdminReply(); });
+        let adminChatSending = false;
         async function sendAdminReply() {
             const input = document.getElementById('adminChatInput');
             const text = input.value.trim();
             if (!text) return;
+            if (adminChatSending) {
+                showToast('Please wait — previous message still sending…');
+                return;
+            }
+            adminChatSending = true;
+            const btn = document.getElementById('adminChatSend');
+            const prev = btn ? btn.textContent : '';
+            if (btn) { btn.disabled = true; btn.textContent = 'Please wait…'; }
             input.value = '';
-            try { await fswSendAdminReply(currentAdminUserId, text); renderChat(); }
-            catch (err) { showToast('Could not send: ' + err.message); }
+            try {
+                await fswSendAdminReply(currentAdminUserId, text);
+                await renderChat();
+            } catch (err) {
+                showToast('Could not send: ' + err.message);
+            } finally {
+                adminChatSending = false;
+                if (btn) { btn.disabled = false; btn.textContent = prev || 'Send'; }
+            }
         }
 
         document.getElementById('adminImageInput').addEventListener('change', function (e) {
             const file = e.target.files[0];
             if (!file) return;
+            if (adminChatSending) {
+                showToast('Please wait — previous message still sending…');
+                e.target.value = '';
+                return;
+            }
             const reader = new FileReader();
             reader.onload = async function (ev) {
-                try { await fswSendAdminReply(currentAdminUserId, '', ev.target.result); renderChat(); }
-                catch (err) { showToast('Could not send image: ' + err.message); }
+                adminChatSending = true;
+                const btn = document.getElementById('adminChatSend');
+                if (btn) { btn.disabled = true; btn.textContent = 'Please wait…'; }
+                try {
+                    await fswSendAdminReply(currentAdminUserId, '', ev.target.result);
+                    await renderChat();
+                } catch (err) {
+                    showToast('Could not send image: ' + err.message);
+                } finally {
+                    adminChatSending = false;
+                    if (btn) { btn.disabled = false; btn.textContent = 'Send'; }
+                }
             };
             reader.readAsDataURL(file);
         });

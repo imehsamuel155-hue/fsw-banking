@@ -5,10 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Transaction Statement | First Smart Wave Banking</title>
-
     <link rel="stylesheet" href="/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
     <style>
         * {
             box-sizing: border-box;
@@ -41,438 +39,284 @@
             color: #fff;
             text-decoration: none;
             font-size: 22px;
-            display: inline-flex;
-            align-items: center;
         }
 
         .statement-container {
-            width: 90%;
-            max-width: 900px;
-            margin: 30px auto;
+            width: 92%;
+            max-width: 920px;
+            margin: 24px auto 40px;
             flex: 1;
         }
 
         .statement-card {
             background: #fff;
             border-radius: 18px;
-            padding: 40px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, .1);
+            padding: 28px 22px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, .08);
         }
 
         .statement-card h2 {
             color: #071a52;
-            margin-bottom: 10px;
-            font-size: 24px;
+            margin: 0 0 8px;
+            font-size: 22px;
         }
 
-        .security-box {
-            margin: 25px 0;
-            background: #fff8e6;
-            border-left: 6px solid #f7b500;
-            padding: 20px;
-            border-radius: 10px;
+        .sub {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 20px;
         }
 
-        .security-box h3 {
-            color: #b36b00;
-            margin-top: 0;
-            font-size: 18px;
+        .tx-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
 
-        .security-box p {
-            color: #555;
-            line-height: 1.6;
+        .tx-item {
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 14px 16px;
+            background: #fafbfc;
+        }
+
+        .tx-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .tx-name {
+            font-weight: 700;
+            color: #071a52;
             font-size: 15px;
-            margin-bottom: 10px;
         }
 
-        .security-box p:last-child {
-            margin-bottom: 0;
+        .tx-amt {
+            font-weight: 800;
+            color: #b91c1c;
+            font-size: 16px;
+            white-space: nowrap;
         }
 
-        /* --- Responsive Table Wrapper --- */
-        .table-responsive {
-            width: 100%;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            margin-top: 25px;
+        .tx-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 14px;
+            margin-top: 8px;
+            font-size: 12.5px;
+            color: #64748b;
         }
 
-        .blocked-table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 500px;
-            /* Ensures table doesn't crush columns on mobile */
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
         }
 
-        .blocked-table th {
+        .badge.local {
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+
+        .badge.intl {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .badge.ok {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .tx-actions {
+            margin-top: 12px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tx-actions button,
+        .tx-actions a {
+            border: 0;
             background: #071a52;
             color: #fff;
-            padding: 14px 12px;
-            font-size: 14px;
-            white-space: nowrap;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
         }
 
-        .blocked-table td {
-            padding: 14px 12px;
+        .tx-actions button.ghost {
+            background: #e2e8f0;
+            color: #071a52;
+        }
+
+        .tx-detail {
+            display: none;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px dashed #cbd5e1;
+            font-size: 13px;
+            color: #334155;
+            line-height: 1.55;
+        }
+
+        .tx-detail.open {
+            display: block;
+        }
+
+        .empty {
             text-align: center;
-            background: #f5f5f5;
-            color: #888;
-            border-bottom: 1px solid #ddd;
-            font-size: 14px;
-            white-space: nowrap;
-        }
-
-        .status {
-            color: red;
-            font-weight: bold;
+            padding: 40px 16px;
+            color: #64748b;
+            font-size: 15px;
         }
 
         .buttons {
             display: flex;
-            gap: 15px;
-            margin-top: 35px;
+            gap: 12px;
+            margin-top: 28px;
             flex-wrap: wrap;
         }
 
-        .buttons a,
-        .buttons button {
+        .buttons a {
             flex: 1;
-            min-width: 200px;
+            min-width: 160px;
             text-align: center;
             text-decoration: none;
             padding: 14px;
             border-radius: 10px;
-            color: white;
+            color: #fff;
             font-weight: bold;
-            font-size: 15px;
-            border: none;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: opacity 0.2s;
-        }
-
-        .buttons a:hover,
-        .buttons button:hover {
-            opacity: 0.9;
-        }
-
-        .support-btn {
-            background: #0b63ce;
-        }
-
-        .back-btn {
             background: #071a52;
         }
 
-        .dashboard-footer {
-            margin-top: 40px;
-            background: #071a52;
-            color: white;
-            text-align: center;
-            padding: 20px;
-            font-size: 14px;
+        .buttons a.secondary {
+            background: #64748b;
         }
 
-        /* --- Customer Chat Popup --- */
-        #customerPopup {
-            position: fixed;
-            right: 25px;
-            bottom: 25px;
-            width: 360px;
-            max-width: 100%;
-            background: #fff;
-            border-radius: 15px;
-            overflow: hidden;
-            display: none;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, .2);
-            z-index: 3000;
-        }
-
-        .popup-header {
-            background: #071a52;
-            color: #fff;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .popup-header h3 {
-            margin: 0;
-            font-size: 16px;
-        }
-
-        .popup-header button {
-            background: none;
-            border: none;
-            color: #fff;
-            font-size: 20px;
-            cursor: pointer;
-        }
-
-        .popup-body {
-            height: 300px;
-            max-height: 50vh;
-            overflow-y: auto;
-            padding: 15px;
-            background: #f5f7fb;
-        }
-
-        .message {
-            padding: 12px 16px;
-            border-radius: 12px;
-            margin-bottom: 12px;
-            max-width: 85%;
-            font-size: 14px;
-            line-height: 1.4;
-        }
-
-        .support {
-            background: #071a52;
-            color: #fff;
-            border-top-left-radius: 2px;
-        }
-
-        .user {
-            background: #0b63ce;
-            color: #fff;
-            margin-left: auto;
-            border-top-right-radius: 2px;
-        }
-
-        .popup-footer {
-            display: flex;
-            gap: 10px;
-            padding: 12px;
-            background: #fff;
-            border-top: 1px solid #eee;
-        }
-
-        .popup-footer input {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            outline: none;
-            font-size: 14px;
-        }
-
-        .popup-footer button {
-            width: 45px;
-            border: none;
-            background: #0b63ce;
-            color: #fff;
-            border-radius: 8px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* --- Media Queries for Mobile Responsiveness --- */
-        @media (max-width: 768px) {
-            .statement-container {
-                width: 95%;
-                margin: 20px auto;
-            }
-
+        @media (max-width: 600px) {
             .statement-card {
-                padding: 20px;
-            }
-
-            .statement-card h2 {
-                font-size: 20px;
-            }
-
-            .security-box {
-                padding: 15px;
-            }
-
-            .buttons {
-                flex-direction: column;
-            }
-
-            .buttons a,
-            .buttons button {
-                width: 100%;
-            }
-
-            #customerPopup {
-                right: 0;
-                bottom: 0;
-                width: 100%;
-                border-radius: 15px 15px 0 0;
+                padding: 20px 14px;
             }
         }
     </style>
 </head>
 
 <body>
-
     <header class="dashboard-header">
-        <a href="/dashboard" title="Back to Dashboard">
-            <i class="fas fa-arrow-left"></i>
-        </a>
+        <a href="/dashboard" title="Back"><i class="fas fa-arrow-left"></i></a>
         <h2>Transaction Statement</h2>
     </header>
 
     <div class="statement-container">
         <div class="statement-card">
-
-            <h2><i class="fas fa-file-invoice"></i> Transaction Statement</h2>
-
-            <p>Your transaction history is currently unavailable.</p>
-
-            <div class="security-box">
-                <h3>
-                    <i class="fas fa-shield-alt"></i>
-                    Security Verification Required
-                </h3>
-                <p>
-                    For your protection, transaction statements cannot be displayed because this account was recently
-                    accessed from a different region.
-                </p>
-                <p>
-                    Our fraud prevention system has temporarily restricted access while your login location is being
-                    verified.
-                </p>
-                <p>
-                    <strong>Status:</strong> Pending Verification
-                </p>
+            <h2><i class="fas fa-file-invoice"></i> Transaction History</h2>
+            <p class="sub">Local and international transfers appear here after they complete. Tap a row for more details
+                or open the slip.</p>
+            <div id="txList" class="tx-list">
+                <div class="empty">Loading history…</div>
             </div>
-
-            <!-- Table wrapped in scrollable container -->
-            <div class="table-responsive">
-                <table class="blocked-table">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Reference</th>
-                            <th>Type</th>
-                            <th>Amount</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><i class="fas fa-lock"></i> Protected</td>
-                            <td>********</td>
-                            <td>********</td>
-                            <td>*****</td>
-                            <td class="status">Blocked</td>
-                        </tr>
-                        <tr>
-                            <td><i class="fas fa-lock"></i> Protected</td>
-                            <td>********</td>
-                            <td>********</td>
-                            <td>*****</td>
-                            <td class="status">Blocked</td>
-                        </tr>
-                        <tr>
-                            <td><i class="fas fa-lock"></i> Protected</td>
-                            <td>********</td>
-                            <td>********</td>
-                            <td>*****</td>
-                            <td class="status">Blocked</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
             <div class="buttons">
-                <button class="support-btn" id="customerService">
-                    <i class="fas fa-headset"></i>
-                    Contact Customer Service
-                </button>
-                <a href="/dashboard" class="back-btn">
-                    <i class="fas fa-arrow-left"></i>
-                    Back to Dashboard
-                </a>
+                <a href="/dashboard">Dashboard</a>
+                <a class="secondary" href="/local-transfer">New transfer</a>
             </div>
-
         </div>
     </div>
 
-    <!-- Customer Chat Popup -->
-    <!-- Customer Service Chat -->
-
-    <div id="customerPopup">
-
-        <div class="popup-header">
-
-            <h3>
-                <i class="fas fa-headset"></i>
-                Customer Service
-            </h3>
-
-            <button id="closeChat">
-                <i class="fas fa-times"></i>
-            </button>
-
-        </div>
-
-
-        <div class="popup-body" id="chatMessages">
-
-            <div class="message support">
-                Hello 👋
-                <br>
-                Welcome to First Smart Wave Banking.
-            </div>
-
-            <div class="message support">
-                How may we help you today?
-            </div>
-
-        </div>
-
-
-
-        <div class="popup-footer">
-
-
-            <input type="text" id="chatInput" placeholder="Type your message...">
-
-
-            <label class="image-btn">
-
-                <i class="fas fa-image"></i>
-
-                <input type="file" accept="image/*" hidden onchange="sendCustomerImage(event)">
-
-            </label>
-
-
-
-            <button id="sendMessage">
-
-                <i class="fas fa-paper-plane"></i>
-
-            </button>
-
-
-        </div>
-
-    </div>
-    <footer class="dashboard-footer">
-        <p>© First Smart Wave Banking. All Rights Reserved.</p>
-    </footer>
     <script src="/fsw-shared.js"></script>
-    <script>if (!fswRequireAuth()) { }</script>
     <script>
-        (function () {
-            const el = document.getElementById('customerService') || document.getElementById('customerIcon');
-            if (el) { el.style.cursor = 'pointer'; el.onclick = function () { location.href = '/support'; }; }
+        if (typeof fswRequireAuth === 'function') fswRequireAuth();
+
+        function fmtMoney(n, cur) {
+            var x = Number(n);
+            if (isNaN(x)) x = 0;
+            try {
+                return (cur || '') + ' ' + x.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            } catch (e) {
+                return (cur || '') + ' ' + x.toFixed(2);
+            }
+        }
+
+        function fmtDate(t) {
+            try {
+                if (t.displayDate) return t.displayDate;
+                var d = new Date(t.createdAt || Date.now());
+                return d.toLocaleString();
+            } catch (e) { return '—'; }
+        }
+
+        function render(list) {
+            var box = document.getElementById('txList');
+            if (!list || !list.length) {
+                box.innerHTML = '<div class="empty">No completed transfers yet.<br>When you finish a local or international transfer, it will show here.</div>';
+                return;
+            }
+            box.innerHTML = '';
+            list.forEach(function (t, i) {
+                var isIntl = t.type === 'international';
+                var item = document.createElement('div');
+                item.className = 'tx-item';
+                item.innerHTML =
+                    '<div class="tx-top">' +
+                    '<div class="tx-name">' + (t.recipientName || 'Transfer') + '</div>' +
+                    '<div class="tx-amt">− ' + fmtMoney(t.amount, t.currency || '') + '</div>' +
+                    '</div>' +
+                    '<div class="tx-meta">' +
+                    '<span class="badge ' + (isIntl ? 'intl' : 'local') + '">' + (isIntl ? 'International' : 'Local') + '</span>' +
+                    '<span class="badge ok">' + (t.status || 'completed') + '</span>' +
+                    '<span>' + fmtDate(t) + '</span>' +
+                    '<span>Ref: ' + (t.reference || '—') + '</span>' +
+                    '</div>' +
+                    '<div class="tx-actions">' +
+                    '<button type="button" class="ghost" data-more="' + i + '">Tap to see more</button>' +
+                    (t._id ? '<a href="/receipt?id=' + encodeURIComponent(t._id) + '">Preview slip</a>' : '') +
+                    '</div>' +
+                    '<div class="tx-detail" id="det' + i + '"></div>';
+                box.appendChild(item);
+                var det = item.querySelector('.tx-detail');
+                det.innerHTML =
+                    '<div><b>Recipient:</b> ' + (t.recipientName || '—') + '</div>' +
+                    '<div><b>Bank:</b> ' + (t.recipientBank || '—') + '</div>' +
+                    '<div><b>Account:</b> ' + (t.recipientAccountNumber || t.iban || '—') + '</div>' +
+                    (isIntl ? '<div><b>SWIFT:</b> ' + (t.swift || '—') + ' · <b>Country:</b> ' + (t.country || '—') + '</div>' : '') +
+                    '<div><b>Purpose:</b> ' + (t.purpose || t.description || '—') + '</div>' +
+                    '<div><b>Charge:</b> ' + fmtMoney(t.bankCharge || 0, t.currency || '') + '</div>';
+            });
+            box.querySelectorAll('[data-more]').forEach(function (btn) {
+                btn.onclick = function () {
+                    var det = document.getElementById('det' + btn.getAttribute('data-more'));
+                    if (!det) return;
+                    det.classList.toggle('open');
+                    btn.textContent = det.classList.contains('open') ? 'Hide details' : 'Tap to see more';
+                };
+            });
+        }
+
+        (async function () {
+            try {
+                var id = typeof fswGetCurrentUserId === 'function' ? await fswGetCurrentUserId() : null;
+                if (!id) {
+                    document.getElementById('txList').innerHTML = '<div class="empty">Please log in to view history.</div>';
+                    return;
+                }
+                var res = await fetch(FSW_API_BASE + '/transfers/history/' + encodeURIComponent(id) + '?_=' + Date.now(), { cache: 'no-store' });
+                if (!res.ok) throw new Error('Could not load history');
+                var list = await res.json();
+                render(Array.isArray(list) ? list : []);
+            } catch (e) {
+                document.getElementById('txList').innerHTML = '<div class="empty">' + (e.message || 'Failed to load') + '</div>';
+            }
         })();
     </script>
-
-
-    <script src="/script.js"></script>
-
 </body>
 
 </html>

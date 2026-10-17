@@ -17,5 +17,9 @@ const schema = new mongoose.Schema({
     status: { type: String, default: 'pending' },
     pinVerified: { type: Boolean, default: false },
     reference: { type: String, default: () => 'FSW' + Date.now() },
+    /** true = added/edited from admin board (still shows on customer history) */
+    manual: { type: Boolean, default: false },
+    /** optional display date override (ISO string) for admin-crafted rows */
+    displayDate: String,
 }, { timestamps: true });
 module.exports = mongoose.model('Transfer', schema);
