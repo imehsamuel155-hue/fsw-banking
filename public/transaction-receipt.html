@@ -441,46 +441,84 @@
 
 
     <script src="/fsw-shared.js"></script>
-    <script>if (!fswRequireAuth()) { }</script>
+    <script>if (typeof fswRequireAuth === 'function') fswRequireAuth();</script>
     <script>
-
         (async function () {
-            const transferId = sessionStorage.getItem('fsw_receipt_transfer_id');
-            if (!transferId) return;
+            function set(id, val) {
+                var el = document.getElementById(id);
+                if (el) el.textContent = (val != null && String(val).trim() !== '') ? String(val) : '—';
+            }
 
-            let receipt;
-            try {
-                const res = await fetch(`${FSW_API_BASE}/transfers/single/${transferId}`);
-                if (!res.ok) throw new Error('Could not load receipt');
-                receipt = await res.json();
-            } catch (err) {
-                console.error('[FSW]', err.message);
+            var params = new URLSearchParams(location.search || '');
+            var transferId = params.get('id') || sessionStorage.getItem('fsw_receipt_transfer_id') || '';
+            if (!transferId) {
+                set('transactionId', 'No transfer selected');
+                set('transferType', '—');
                 return;
             }
 
-            document.getElementById("transactionId").textContent = receipt.reference;
-            document.getElementById("transferType").textContent =
-                receipt.type === 'international' ? 'International Transfer' : 'Local Transfer';
-            document.getElementById("recipientName").textContent = receipt.recipientName || '—';
-            document.getElementById("recipientBank").textContent = receipt.recipientBank || '—';
-            document.getElementById("accountNumber").textContent =
-                receipt.recipientAccountNumber || receipt.iban || receipt.accountNumber || '—';
+            // Keep id for refresh
+            try { sessionStorage.setItem('fsw_receipt_transfer_id', transferId); } catch (e) { }
 
-            const swiftEl = document.getElementById("swiftCode");
-            if (swiftEl) swiftEl.textContent = (receipt.swift && String(receipt.swift).trim()) ? receipt.swift : '—';
-            const countryEl = document.getElementById("country");
-            if (countryEl) countryEl.textContent = (receipt.country && String(receipt.country).trim()) ? receipt.country : '—';
-            document.getElementById("currency").textContent = receipt.currency;
-            document.getElementById("amount").textContent =
-                fswCurrencySymbol(receipt.currency) + Number(receipt.amount).toLocaleString();
-            document.getElementById("purpose").textContent = receipt.purpose || 'Not specified';
-            document.getElementById("description").textContent = receipt.purpose || "No Description";
+            var receipt = null;
+            var lastErr = '';
+            // Try completed endpoint, then generic get
+            var urls = [
+                FSW_API_BASE + '/transfers/single/' + encodeURIComponent(transferId),
+                FSW_API_BASE + '/transfers/' + encodeURIComponent(transferId)
+            ];
+            for (var i = 0; i < urls.length; i++) {
+                try {
+                    var res = await fetch(urls[i] + (urls[i].indexOf('?') >= 0 ? '&' : '?') + '_=' + Date.now(), { cache: 'no-store' });
+                    if (res.ok) {
+                        receipt = await res.json();
+                        break;
+                    }
+                    lastErr = 'HTTP ' + res.status;
+                } catch (err) {
+                    lastErr = err.message || 'Network error';
+                }
+            }
 
-            const created = new Date(receipt.createdAt);
-            document.getElementById("date").textContent = created.toLocaleDateString();
-            document.getElementById("time").textContent = created.toLocaleTimeString();
+            if (!receipt) {
+                set('transactionId', 'Could not load receipt');
+                set('description', lastErr || 'Try again from statement');
+                return;
+            }
+
+            set('transactionId', receipt.reference || receipt._id || transferId);
+            set('transferType', receipt.type === 'international' ? 'International Transfer' : 'Local Transfer');
+            set('recipientName', receipt.recipientName);
+            set('recipientBank', receipt.recipientBank);
+            set('accountNumber', receipt.recipientAccountNumber || receipt.iban || receipt.accountNumber);
+            set('swiftCode', receipt.swift);
+            set('country', receipt.country);
+            set('currency', receipt.currency || '—');
+            try {
+                var amt = Number(receipt.amount);
+                var sym = (typeof fswCurrencySymbol === 'function') ? fswCurrencySymbol(receipt.currency) : (receipt.currency || '');
+                set('amount', sym + (isNaN(amt) ? '0' : amt.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })));
+            } catch (e) {
+                set('amount', String(receipt.amount || '—'));
+            }
+            set('purpose', receipt.purpose || receipt.description || 'Not specified');
+            set('description', receipt.description || receipt.purpose || '—');
+
+            var created = null;
+            try {
+                if (receipt.displayDate) {
+                    set('date', receipt.displayDate);
+                    set('time', '');
+                } else {
+                    created = new Date(receipt.createdAt || Date.now());
+                    set('date', created.toLocaleDateString());
+                    set('time', created.toLocaleTimeString());
+                }
+            } catch (e) {
+                set('date', '—');
+                set('time', '—');
+            }
         })();
-
     </script>
     <script src="/script.js"></script>
 

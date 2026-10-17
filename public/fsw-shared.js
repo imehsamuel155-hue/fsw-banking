@@ -191,8 +191,17 @@ async function fswApplyDashboard() {
         if (acctNameEl) acctNameEl.textContent = user.name || '—';
         const dashImg = document.getElementById('dashProfileImg');
         if (dashImg) {
-            dashImg.src = user.profileImage || ('https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(user.name || 'U'));
-            dashImg.alt = user.name || 'Profile';
+            dashImg.alt = '';
+            const fallback = 'https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(user.name || 'U');
+            const src = user.profileImage || fallback;
+            if (user.profileImage) {
+                const pre = new Image();
+                pre.onload = function () { dashImg.src = src; };
+                pre.onerror = function () { dashImg.src = fallback; };
+                pre.src = user.profileImage;
+            } else {
+                dashImg.src = fallback;
+            }
         }
         fswApplyStatusEl(document.getElementById('dashAccountStatus'), user.status || 'Active');
         const statusLabel = document.getElementById('dashStatusLabel');
