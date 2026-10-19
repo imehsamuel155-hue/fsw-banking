@@ -118,6 +118,30 @@
             border-bottom-right-radius: 4px;
         }
 
+        .chat-text {
+            margin: 0;
+        }
+
+        .chat-msg-actions {
+            margin-top: 6px;
+        }
+
+        .chat-copy-btn {
+            border: 0;
+            border-radius: 8px;
+            padding: 3px 10px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            background: rgba(0, 0, 0, .08);
+            color: inherit;
+        }
+
+        .bubble.customer .chat-copy-btn {
+            background: rgba(255, 255, 255, .22);
+            color: #fff;
+        }
+
         .bubble .meta {
             font-size: 10px;
             opacity: 0.65;
@@ -268,8 +292,27 @@
 
                 if (msg.text) {
                     var t = document.createElement('div');
+                    t.className = 'chat-text';
                     t.textContent = msg.text;
                     bubble.appendChild(t);
+                    var actions = document.createElement('div');
+                    actions.className = 'chat-msg-actions';
+                    var copyBtn = document.createElement('button');
+                    copyBtn.type = 'button';
+                    copyBtn.className = 'chat-copy-btn';
+                    copyBtn.textContent = 'Copy';
+                    copyBtn.onclick = function () {
+                        if (typeof fswCopyChatText === 'function') fswCopyChatText(msg.text, copyBtn);
+                        else {
+                            try {
+                                navigator.clipboard.writeText(msg.text);
+                                copyBtn.textContent = 'Copied';
+                                setTimeout(function () { copyBtn.textContent = 'Copy'; }, 1200);
+                            } catch (e) { }
+                        }
+                    };
+                    actions.appendChild(copyBtn);
+                    bubble.appendChild(actions);
                 }
                 if (msg.image) {
                     var im = document.createElement('img');

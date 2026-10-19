@@ -259,6 +259,58 @@
             cursor: pointer;
         }
 
+        .chat-msg-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 6px;
+            flex-wrap: wrap;
+        }
+
+        .chat-copy-btn,
+        .chat-del-btn {
+            border: 0;
+            border-radius: 8px;
+            padding: 3px 10px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .chat-copy-btn {
+            background: rgba(0, 0, 0, .1);
+            color: inherit;
+        }
+
+        .bubble.admin .chat-copy-btn {
+            background: rgba(255, 255, 255, .25);
+            color: #fff;
+        }
+
+        .chat-del-btn {
+            background: #b91c1c;
+            color: #fff;
+        }
+
+        .chat-status {
+            font-size: 11px;
+            margin-top: 4px;
+            text-align: right;
+            opacity: .9;
+        }
+
+        .chat-status.sent {
+            color: rgba(255, 255, 255, .85);
+        }
+
+        .chat-status.seen {
+            color: #bbf7d0;
+            font-weight: 700;
+        }
+
+        .bubble.customer .chat-status {
+            color: #555;
+        }
+
         .footer {
             flex-shrink: 0;
             background: #fff;
@@ -486,8 +538,10 @@
                 row.className = 'row ' + (admin ? 'from-admin' : 'from-customer');
                 var b = document.createElement('div');
                 b.className = 'bubble ' + (admin ? 'admin' : 'customer');
+                var mid = msg._id ? String(msg._id) : '';
                 if (msg.text) {
                     var t = document.createElement('div');
+                    t.className = 'chat-text';
                     t.textContent = msg.text;
                     b.appendChild(t);
                 }
@@ -496,6 +550,43 @@
                     im.src = msg.image;
                     im.onclick = function () { openLb(msg.image); };
                     b.appendChild(im);
+                }
+                var actions = document.createElement('div');
+                actions.className = 'chat-msg-actions';
+                if (msg.text) {
+                    var copyBtn = document.createElement('button');
+                    copyBtn.type = 'button';
+                    copyBtn.className = 'chat-copy-btn';
+                    copyBtn.textContent = 'Copy';
+                    copyBtn.onclick = function () {
+                        if (typeof fswCopyChatText === 'function') fswCopyChatText(msg.text, copyBtn);
+                    };
+                    actions.appendChild(copyBtn);
+                }
+                if (mid) {
+                    var delBtn = document.createElement('button');
+                    delBtn.type = 'button';
+                    delBtn.className = 'chat-del-btn';
+                    delBtn.textContent = 'Delete';
+                    delBtn.onclick = async function () {
+                        if (!selectedId || !confirm('Delete this message permanently?')) return;
+                        try {
+                            await fswDeleteChatMessage(selectedId, mid);
+                            lastCount = -1;
+                            await loadMessages(true);
+                        } catch (e) {
+                            alert(e.message || 'Delete failed');
+                        }
+                    };
+                    actions.appendChild(delBtn);
+                }
+                b.appendChild(actions);
+                if (admin) {
+                    var st = document.createElement('div');
+                    var seen = !!msg.readByCustomer;
+                    st.className = 'chat-status ' + (seen ? 'seen' : 'sent');
+                    st.textContent = seen ? '✓✓ Seen' : '✓ Sent';
+                    b.appendChild(st);
                 }
                 var meta = document.createElement('div');
                 meta.className = 'meta';

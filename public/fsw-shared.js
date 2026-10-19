@@ -16,25 +16,59 @@ function fswSessionRemove(k) { try { localStorage.removeItem(k); } catch (e) { }
 function fswGetToken() { return fswSessionGet(FSW_SESSION_KEYS.token); }
 function fswGetAdminToken() { try { return sessionStorage.getItem(FSW_SESSION_KEYS.adminToken); } catch (e) { return null; } }
 function fswSetLoggedInUser(userId, token, username) {
-    // Clear previous account completely so chats/profiles never mix
-    // and old demo/first-account data never flashes on the next login
-    try {
-        localStorage.removeItem(FSW_SESSION_KEYS.userId);
-        localStorage.removeItem(FSW_SESSION_KEYS.token);
-        localStorage.removeItem('fsw_username');
-        localStorage.removeItem('fsw_user_name');
-        localStorage.removeItem('fsw_user');
-        localStorage.removeItem('fsw_balance');
-        sessionStorage.removeItem('fsw_pin_ok');
-        sessionStorage.removeItem('fsw_user');
-        sessionStorage.removeItem('fsw_balance');
-    } catch (e) { }
     const id = String(userId == null ? '' : userId).trim();
     if (!id || id === 'null' || id === 'undefined') throw new Error('Invalid login user id');
+    const prev = fswSessionGet(FSW_SESSION_KEYS.userId);
+    // Only wipe cached profile when switching to a different account
+    if (prev && String(prev) !== id) {
+        try {
+            localStorage.removeItem('fsw_user_name');
+            localStorage.removeItem('fsw_user');
+            localStorage.removeItem('fsw_balance');
+            sessionStorage.removeItem('fsw_user');
+            sessionStorage.removeItem('fsw_balance');
+            sessionStorage.removeItem('fsw_pin_ok');
+        } catch (e) { }
+    }
     fswSessionSet(FSW_SESSION_KEYS.userId, id);
     fswSessionSet(FSW_SESSION_KEYS.token, String(token || ''));
     if (username) {
         try { localStorage.setItem('fsw_username', String(username)); } catch (e) { }
+    }
+}
+
+/** Load full user into cache before dashboard/cards/profile (avoids blank UI) */
+async function fswPrefetchAndCache() {
+    try {
+        const user = await fswFetchUser();
+        if (user) fswCacheUser(user);
+        return user;
+    } catch (e) {
+        return fswGetCachedUser();
+    }
+}
+
+/** Instant paint as soon as this file loads — no wait for page scripts */
+function fswEarlyHydrate() {
+    try {
+        const u = fswGetCachedUser();
+        if (!u) return;
+        if (document.getElementById('accountBalance') || document.getElementById('dashAccountName')) {
+            fswPaintDashboard(u);
+        }
+        if (document.getElementById('profileImage') || document.getElementById('profileName')) {
+            fswPaintProfile(u);
+        }
+        if (document.querySelector('.bank-card')) {
+            fswPaintCards(u);
+        }
+    } catch (e) { }
+}
+if (typeof document !== 'undefined') {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', fswEarlyHydrate);
+    } else {
+        fswEarlyHydrate();
     }
 }
 function fswGetUsername() {
@@ -114,6 +148,34 @@ async function fswGetCurrentUserId() {
     throw new Error('Not logged in');
 }
 
+/** Cached full profile for instant paint (no blank / dashes while API loads) */
+function fswCacheUser(user) {
+    if (!user || !user._id) return;
+    try {
+        const json = JSON.stringify(user);
+        localStorage.setItem('fsw_user', json);
+        localStorage.setItem('fsw_user_name', user.name || '');
+        localStorage.setItem('fsw_balance', String(user.balance != null ? user.balance : ''));
+        sessionStorage.setItem('fsw_user', json);
+        sessionStorage.setItem('fsw_balance', String(user.balance != null ? user.balance : ''));
+    } catch (e) { }
+}
+function fswGetCachedUser() {
+    try {
+        const sessionId = fswSessionGet(FSW_SESSION_KEYS.userId);
+        if (!sessionId) return null;
+        const raw = sessionStorage.getItem('fsw_user') || localStorage.getItem('fsw_user');
+        if (!raw) return null;
+        const u = JSON.parse(raw);
+        if (!u || !u._id) return null;
+        // Only use cache if it matches this login
+        if (String(u._id) !== String(sessionId)) return null;
+        return u;
+    } catch (e) {
+        return null;
+    }
+}
+
 async function fswFetchUser(userId) {
     let id = userId;
     if (!id || id === 'null' || id === 'undefined') {
@@ -130,6 +192,11 @@ async function fswFetchUser(userId) {
     if (!res.ok) {
         let err = 'Could not load user';
         try { err = (await res.json()).error || err; } catch (_) { }
+        // Prefer last good cache over empty UI
+        if (!userId) {
+            const cached = fswGetCachedUser();
+            if (cached) return cached;
+        }
         throw new Error(err);
     }
     const user = await res.json();
@@ -142,6 +209,7 @@ async function fswFetchUser(userId) {
     } catch (e) {
         if (String(e.message).includes('Session mismatch')) throw e;
     }
+    if (!userId) fswCacheUser(user);
     return user;
 }
 async function fswUpdateUser(userId, updates) {
@@ -172,38 +240,39 @@ function fswApplyStatusEl(el, status) {
     else if (s === 'status-inactive') { el.style.background = '#fef3c7'; el.style.color = '#b45309'; }
     else { el.style.background = '#fee2e2'; el.style.color = '#b91c1c'; }
 }
+function fswPaintDashboard(user) {
+    if (!user) return;
+    const nameEl = document.getElementById('welcomeName');
+    if (nameEl) nameEl.textContent = 'Welcome Back, ' + (user.name || '').split(' ')[0];
+    const balEl = document.getElementById('accountBalance');
+    if (balEl) balEl.textContent = Number(user.balance != null ? user.balance : 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const sym = document.getElementById('currencySymbol');
+    if (sym) sym.textContent = fswCurrencySymbol(user.currency);
+    const acctNumEl = document.getElementById('dashAccountNumber');
+    if (acctNumEl) acctNumEl.textContent = 'Acc: ' + (user.accountNumber || '');
+    const acctNameEl = document.getElementById('dashAccountName');
+    if (acctNameEl) acctNameEl.textContent = user.name || '';
+    const dashImg = document.getElementById('dashProfileImg');
+    if (dashImg) {
+        dashImg.alt = '';
+        const fallback = 'https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(user.name || 'U');
+        dashImg.onerror = function () { this.onerror = null; this.src = fallback; };
+        dashImg.src = user.profileImage || fallback;
+    }
+    fswApplyStatusEl(document.getElementById('dashAccountStatus'), user.status || 'Active');
+    const statusLabel = document.getElementById('dashStatusLabel');
+    if (statusLabel) statusLabel.textContent = user.status || 'Active';
+}
+
 async function fswApplyDashboard() {
     try {
         if (!fswRequireAuth()) return;
+        // Instant paint from last session cache (no blank / dashes)
+        const cached = fswGetCachedUser();
+        if (cached) fswPaintDashboard(cached);
         const user = await fswFetchUser();
         if (!user) return;
-        const nameEl = document.getElementById('welcomeName');
-        if (nameEl) nameEl.textContent = 'Welcome Back, ' + (user.name || '').split(' ')[0];
-        const balEl = document.getElementById('accountBalance');
-        if (balEl) balEl.textContent = Number(user.balance != null ? user.balance : 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        const sym = document.getElementById('currencySymbol');
-        if (sym) sym.textContent = fswCurrencySymbol(user.currency);
-        const acctNumEl = document.getElementById('dashAccountNumber');
-        if (acctNumEl) acctNumEl.textContent = 'Acc: ' + (user.accountNumber || '—');
-        const acctNameEl = document.getElementById('dashAccountName');
-        if (acctNameEl) acctNameEl.textContent = user.name || '—';
-        const dashImg = document.getElementById('dashProfileImg');
-        if (dashImg) {
-            dashImg.alt = '';
-            const fallback = 'https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(user.name || 'U');
-            const src = user.profileImage || fallback;
-            if (user.profileImage) {
-                const pre = new Image();
-                pre.onload = function () { dashImg.src = src; };
-                pre.onerror = function () { dashImg.src = fallback; };
-                pre.src = user.profileImage;
-            } else {
-                dashImg.src = fallback;
-            }
-        }
-        fswApplyStatusEl(document.getElementById('dashAccountStatus'), user.status || 'Active');
-        const statusLabel = document.getElementById('dashStatusLabel');
-        if (statusLabel) statusLabel.textContent = user.status || 'Active';
+        fswPaintDashboard(user);
         // Goals + bills on dashboard when present
         try {
             const g = user.goals || {};
@@ -237,37 +306,88 @@ async function fswApplyDashboard() {
         if (String(err.message).includes('Not logged in')) window.location.replace('/');
     }
 }
+function fswPaintProfile(user) {
+    if (!user) return;
+    const textMap = {
+        profileName: 'name', accountNumber: 'accountNumber', email: 'email', phone: 'phone',
+        gender: 'gender', dob: 'dob', country: 'nationality', address: 'address',
+        accountType: 'accountType', branch: 'branch', dateOpened: 'dateOpened',
+    };
+    Object.keys(textMap).forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) {
+            const v = user[textMap[id]];
+            el.textContent = (v != null && String(v).trim() !== '') ? String(v) : '';
+        }
+    });
+    const currencyEl = document.getElementById('currency');
+    if (currencyEl) currencyEl.textContent = (user.currency || 'EUR') + ' (' + fswCurrencySymbol(user.currency) + ')';
+    const balanceEl = document.getElementById('balance');
+    if (balanceEl) balanceEl.textContent = fswFormatMoney(user.balance != null ? user.balance : 0, user.currency);
+    const imgEl = document.getElementById('profileImage');
+    if (imgEl) {
+        imgEl.alt = '';
+        const fallback = 'https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(user.name || 'U');
+        imgEl.onerror = function () { this.onerror = null; this.src = fallback; this.alt = ''; };
+        imgEl.src = user.profileImage || fallback;
+    }
+    fswApplyStatusEl(document.getElementById('accountStatus'), user.status || 'Active');
+    const kyc = document.getElementById('kycStatus');
+    if (kyc) {
+        kyc.textContent = user.kycStatus || 'Verified';
+        fswApplyStatusEl(kyc, user.kycStatus === 'Verified' ? 'Active' : (user.kycStatus || 'Pending'));
+        kyc.textContent = user.kycStatus || 'Verified';
+    }
+}
+
+function fswDefaultCards(user) {
+    const last4 = String(user.accountNumber || '0000').replace(/\D/g, '').slice(-4) || '0000';
+    const name = user.name || '';
+    return [
+        { type: 'Savings', number: '**** **** **** ' + last4, holder: name, expiry: user.cards && user.cards[0] && user.cards[0].expiry ? user.cards[0].expiry : '12/28' },
+        { type: 'Current', number: '**** **** **** ' + last4, holder: name, expiry: user.cards && user.cards[1] && user.cards[1].expiry ? user.cards[1].expiry : '12/28' },
+    ];
+}
+
+function fswPaintCards(user) {
+    if (!user) return;
+    const defaults = fswDefaultCards(user);
+    const cards = (user.cards && user.cards.length) ? user.cards : defaults;
+    const name = user.name || '';
+    const last4 = String(user.accountNumber || '').replace(/\D/g, '').slice(-4) || '0000';
+    document.querySelectorAll('.bank-card').forEach((cardEl, i) => {
+        const data = cards[i] || defaults[i] || defaults[0] || {};
+        const numberEl = cardEl.querySelector('h2');
+        const bottomDivs = cardEl.querySelectorAll('.card-bottom > div');
+        let num = (data.number && String(data.number).replace(/-/g, '').trim()) || '';
+        if (!num || /----|\.\.\.|—/.test(num)) num = '**** **** **** ' + last4;
+        if (numberEl) numberEl.textContent = num;
+        if (bottomDivs[0]) {
+            const p = bottomDivs[0].querySelector('p');
+            if (p) {
+                const h = (data.holder && data.holder !== '—' && data.holder !== '-') ? data.holder : name;
+                p.textContent = h || name || '';
+            }
+        }
+        if (bottomDivs[1]) {
+            const p = bottomDivs[1].querySelector('p');
+            if (p) {
+                const exp = (data.expiry && data.expiry !== '—' && data.expiry !== '-') ? data.expiry : (defaults[i] && defaults[i].expiry) || '12/28';
+                p.textContent = exp;
+            }
+        }
+        const typeEl = cardEl.querySelector('.card-type, .type, small.card-type, .card-brand span');
+        if (typeEl && data.type) typeEl.textContent = data.type;
+    });
+}
+
 async function fswApplyProfile() {
     try {
         if (!fswRequireAuth()) return;
+        const cached = fswGetCachedUser();
+        if (cached) fswPaintProfile(cached);
         const user = await fswFetchUser();
-        const textMap = {
-            profileName: 'name', accountNumber: 'accountNumber', email: 'email', phone: 'phone',
-            gender: 'gender', dob: 'dob', country: 'nationality', address: 'address',
-            accountType: 'accountType', branch: 'branch', dateOpened: 'dateOpened',
-        };
-        Object.keys(textMap).forEach((id) => {
-            const el = document.getElementById(id);
-            if (el) el.textContent = user[textMap[id]] || '—';
-        });
-        const currencyEl = document.getElementById('currency');
-        if (currencyEl) currencyEl.textContent = (user.currency || 'EUR') + ' (' + fswCurrencySymbol(user.currency) + ')';
-        const balanceEl = document.getElementById('balance');
-        if (balanceEl) balanceEl.textContent = fswFormatMoney(user.balance, user.currency);
-        const imgEl = document.getElementById('profileImage');
-        if (imgEl) {
-            imgEl.alt = '';
-            const fallback = 'https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(user.name || 'U');
-            imgEl.onerror = function () { this.onerror = null; this.src = fallback; this.alt = ''; };
-            imgEl.src = user.profileImage || fallback;
-        }
-        fswApplyStatusEl(document.getElementById('accountStatus'), user.status || 'Active');
-        const kyc = document.getElementById('kycStatus');
-        if (kyc) {
-            kyc.textContent = user.kycStatus || 'Verified';
-            fswApplyStatusEl(kyc, user.kycStatus === 'Verified' ? 'Active' : (user.kycStatus || 'Pending'));
-            kyc.textContent = user.kycStatus || 'Verified';
-        }
+        fswPaintProfile(user);
         return user;
     } catch (err) {
         if (String(err.message).includes('Not logged in')) window.location.replace('/');
@@ -276,29 +396,10 @@ async function fswApplyProfile() {
 async function fswApplyCards() {
     try {
         if (!fswRequireAuth()) return;
+        const cached = fswGetCachedUser();
+        if (cached) fswPaintCards(cached);
         const user = await fswFetchUser();
-        document.querySelectorAll('.bank-card').forEach((cardEl, i) => {
-            const data = (user.cards && user.cards[i]) ? user.cards[i] : null;
-            const numberEl = cardEl.querySelector('h2');
-            const bottomDivs = cardEl.querySelectorAll('.card-bottom > div');
-            if (data) {
-                if (numberEl) numberEl.textContent = data.number || '**** **** **** ----';
-                if (bottomDivs[0]) {
-                    const p = bottomDivs[0].querySelector('p');
-                    if (p) p.textContent = data.holder || user.name || '—';
-                }
-                if (bottomDivs[1]) {
-                    const p = bottomDivs[1].querySelector('p');
-                    if (p) p.textContent = data.expiry || '—';
-                }
-                const typeEl = cardEl.querySelector('.card-type, .type, small.card-type');
-                if (typeEl && data.type) typeEl.textContent = data.type;
-            } else {
-                if (numberEl) numberEl.textContent = '**** **** **** ----';
-                if (bottomDivs[0]) { const p = bottomDivs[0].querySelector('p'); if (p) p.textContent = user.name || '—'; }
-                if (bottomDivs[1]) { const p = bottomDivs[1].querySelector('p'); if (p) p.textContent = '—'; }
-            }
-        });
+        fswPaintCards(user);
         return user;
     } catch (err) {
         if (String(err.message).includes('Not logged in')) window.location.replace('/');
@@ -365,6 +466,56 @@ async function fswClearChat(userId) {
     if (!res.ok) throw new Error('Could not clear chat');
     return res.json();
 }
+/** Admin: delete one chat message (no “deleted” placeholder) */
+async function fswDeleteChatMessage(userId, msgId) {
+    if (!userId || !msgId) throw new Error('Missing message');
+    const res = await fetch(
+        FSW_API_BASE + '/chat/' + encodeURIComponent(userId) + '/messages/' + encodeURIComponent(msgId),
+        { method: 'DELETE', headers: { Authorization: 'Bearer ' + fswGetAdminToken() } }
+    );
+    if (!res.ok) {
+        let err = 'Could not delete message';
+        try { err = (await res.json()).error || err; } catch (e) { }
+        throw new Error(err);
+    }
+    return res.json();
+}
+function fswCopyChatText(text, btn) {
+    var t = String(text || '');
+    if (!t) return;
+    function done() {
+        if (btn) {
+            var prev = btn.textContent;
+            btn.textContent = 'Copied';
+            setTimeout(function () { btn.textContent = prev || 'Copy'; }, 1200);
+        }
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(t).then(done).catch(function () {
+            try {
+                var ta = document.createElement('textarea');
+                ta.value = t;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                done();
+            } catch (e) { }
+        });
+    } else {
+        try {
+            var ta = document.createElement('textarea');
+            ta.value = t;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            done();
+        } catch (e) { }
+    }
+}
+window.fswCopyChatText = fswCopyChatText;
+window.fswDeleteChatMessage = fswDeleteChatMessage;
 
 function fswInitChatWidget(ids) {
     const icon = document.getElementById(ids.icon);
