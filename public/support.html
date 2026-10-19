@@ -253,7 +253,7 @@
         <button type="button" class="x" id="lbClose">&times;</button>
         <img id="lbImg" src="" alt="Preview">
     </div>
-    <script src="/fsw-shared.js"></script>
+    <script src="/fsw-shared.js?v=seencopy2"></script>
     <script>
         (function () {
             if (typeof fswRequireAuth === 'function' && !fswRequireAuth()) return;
@@ -426,7 +426,7 @@
             };
 
             loadChat(true);
-            setInterval(function () { loadChat(false); }, 2500);
+            setInterval(function () { loadChat(false); }, 1000);
         })();
     </script>
 </body>

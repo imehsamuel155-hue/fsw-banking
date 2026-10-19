@@ -923,8 +923,6 @@
                     <div class="field"><label>Password</label><input type="text" id="f_password" readonly
                             autocomplete="off" style="background:#f1f5f9;color:#64748b"></div>
                 </div>
-                <p style="font-size:12px;color:#888;margin:0 0 12px;">Shared for every account — Login PIN <b>5566</b> ·
-                    Transfer pin <b>7766</b> · Tax <b>8659</b> (not editable here).</p>
                 <button class="btn btn-gold btn-block" id="saveProfileBtn">Save changes</button>
             </div>
 
@@ -1052,60 +1050,47 @@
                     <button type="button" class="btn btn-gold" id="saveLoginLockBtn" style="margin-top:12px;">Save lock
                         setting</button>
                 </div>
-            </div><!-- /adminCredBox -->
-            <h3 style="margin-bottom:12px;color:#071a52;">Shared codes (all accounts)</h3>
-            <p style="font-size:13px;color:#666;margin:0 0 12px;">Every customer uses the same login PIN, TIC, and tax
-                code. Username &amp; password are edited per account on the <b>Profile</b> tab when you switch the
-                selected user.</p>
-            <div class="field-row">
-                <div class="field"><label>Login PIN (all accounts)</label><input type="text" id="sec_custPin"
-                        value="5566" readonly style="background:#f0f4ff;font-weight:700;"></div>
-                <div class="field"><label>Transfer pin (7766)</label><input type="text" id="sec_tic" value="7766"
-                        readonly style="background:#f0f4ff;font-weight:700;"></div>
+                <!-- legacy hidden fields so old JS does not break -->
+                <input type="hidden" id="sec_custPin" value="5566">
+                <input type="hidden" id="sec_tic" value="7766">
+                <input type="hidden" id="sec_tax" value="8659">
+                <input type="hidden" id="sec_custUser" value="">
+                <input type="hidden" id="sec_custPass" value="">
+                <button class="btn btn-gold btn-block" id="saveSecurityBtn" style="margin-top:12px;display:none;">Save
+                    security settings</button>
             </div>
-            <div class="field-row">
-                <div class="field"><label>Tax code</label><input type="text" id="sec_tax" value="8659" readonly
-                        style="background:#f0f4ff;font-weight:700;"></div>
+
+            <div class="tab-panel active" id="tab-approvals">
+                <h3 style="margin-bottom:8px;color:#071a52;">Account approvals</h3>
+                <p style="font-size:13px;color:#666;margin-bottom:12px;">
+                    Accounts from <a href="/addmoreprofile" target="_blank">/addmoreprofile</a>.
+                    Pending cannot log in until approved. You can permanently delete any non-demo account.
+                </p>
+                <div id="approvalsList">
+                    <p class="chat-empty">Loading…</p>
+                </div>
             </div>
-            <p style="font-size:12px;color:#888;margin-top:8px;">These cannot be changed per user. Demo fixed: PIN
-                <b>5566</b> · Transfer pin <b>7766</b> · Tax <b>8659</b>.</p>
-            <!-- legacy hidden fields so old JS does not break -->
-            <input type="hidden" id="sec_custUser" value="">
-            <input type="hidden" id="sec_custPass" value="">
-            <button class="btn btn-gold btn-block" id="saveSecurityBtn" style="margin-top:12px;display:none;">Save
-                security settings</button>
+
+            <div class="tab-panel" id="tab-activity">
+                <h3 style="margin-bottom:12px;color:#071a52;">Recent login attempts</h3>
+                <p style="font-size:13px;color:#666;margin-bottom:14px;">Time, date, username, success/fail, location.
+                </p>
+                <div id="loginLogList" style="max-height:480px;overflow-y:auto;"></div>
+                <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+                    <button class="btn btn-ghost btn-sm" id="refreshLogsBtn">Refresh</button>
+                    <button class="btn btn-danger btn-sm" id="clearLogsBtn">Delete all login logs</button>
+                </div>
+            </div>
+
+
+
         </div>
-
-        <div class="tab-panel active" id="tab-approvals">
-            <h3 style="margin-bottom:8px;color:#071a52;">Account approvals</h3>
-            <p style="font-size:13px;color:#666;margin-bottom:12px;">
-                Accounts from <a href="/addmoreprofile" target="_blank">/addmoreprofile</a>.
-                Pending cannot log in until approved. You can permanently delete any non-demo account.
-            </p>
-            <div id="approvalsList">
-                <p class="chat-empty">Loading…</p>
-            </div>
-        </div>
-
-        <div class="tab-panel" id="tab-activity">
-            <h3 style="margin-bottom:12px;color:#071a52;">Recent login attempts</h3>
-            <p style="font-size:13px;color:#666;margin-bottom:14px;">Time, date, username, success/fail, location.</p>
-            <div id="loginLogList" style="max-height:480px;overflow-y:auto;"></div>
-            <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
-                <button class="btn btn-ghost btn-sm" id="refreshLogsBtn">Refresh</button>
-                <button class="btn btn-danger btn-sm" id="clearLogsBtn">Delete all login logs</button>
-            </div>
-        </div>
-
-
-
-    </div>
     </div>
 
 
     <div class="toast" id="toast"></div>
 
-    <script src="/fsw-shared.js"></script>
+    <script src="/fsw-shared.js?v=seencopy2"></script>
     <script>
         const ADMIN_SESSION_KEY = 'youradminimeh';
         const ADMIN_PIN = '4422'; // verified server-side
@@ -1862,14 +1847,28 @@
                 });
             });
 
-            let lastCount = (await fswGetChatAsAdmin(currentAdminUserId)).length;
+            function chatFp(msgs) {
+                return (msgs || []).map(m => String(m._id || '') + ':' + (m.readByCustomer ? '1' : '0')).join('|');
+            }
+            let lastCount = 0;
+            let lastFp = '';
+            try {
+                const initMsgs = await fswGetChatAsAdmin(currentAdminUserId);
+                lastCount = initMsgs.length;
+                lastFp = chatFp(initMsgs);
+            } catch (e) { }
             if (chatPollInterval) clearInterval(chatPollInterval);
             chatPollInterval = setInterval(async () => {
                 try {
                     const msgs = await fswGetChatAsAdmin(currentAdminUserId);
-                    if (msgs.length !== lastCount) { lastCount = msgs.length; renderChat(); }
+                    const fp = chatFp(msgs);
+                    if (msgs.length !== lastCount || fp !== lastFp) {
+                        lastCount = msgs.length;
+                        lastFp = fp;
+                        renderChat();
+                    }
                 } catch (e) { /* silent — will retry next tick */ }
-            }, 2500);
+            }, 1000);
         }
 
         document.getElementById('autoReplyToggle').addEventListener('change', async function () {
@@ -2182,13 +2181,19 @@
                 var pin = (document.getElementById('sec_settingsPinTry') || {}).value || '';
                 btn.textContent = '......';
                 try {
-                    var tok = (typeof fswGetAdminToken === 'function') ? fswGetAdminToken() : localStorage.getItem('fsw_adminToken');
-                    var base = (typeof fswApiBase === 'function') ? fswApiBase() : (location.origin + '/api');
-                    var res = await fetch(base + '/settings', { headers: { Authorization: 'Bearer ' + tok } });
-                    var s = await res.json();
-                    var expected = String((s && s.settingsPin) || '7799');
+                    var expected = '7799';
+                    if (typeof fswGetSettings === 'function') {
+                        var s = await fswGetSettings();
+                        expected = String((s && s.settingsPin) || '7799');
+                    } else if (typeof FSW_API_BASE !== 'undefined') {
+                        var tok = (typeof fswGetAdminToken === 'function') ? fswGetAdminToken() : localStorage.getItem('fsw_adminToken');
+                        var res = await fetch(FSW_API_BASE + '/settings', { headers: { Authorization: 'Bearer ' + tok } });
+                        if (!res.ok) throw new Error('Could not load settings');
+                        var s2 = await res.json();
+                        expected = String((s2 && s2.settingsPin) || '7799');
+                    }
                     if (String(pin).trim() !== expected) {
-                        if (msg) msg.textContent = 'Wrong PIN';
+                        if (msg) { msg.style.color = '#b45309'; msg.textContent = 'Wrong PIN'; }
                         btn.textContent = 'Unlock';
                         return;
                     }
@@ -2197,7 +2202,7 @@
                     if (msg) { msg.style.color = '#166534'; msg.textContent = 'Unlocked — you can change admin login'; }
                     btn.textContent = 'Unlocked';
                 } catch (e) {
-                    if (msg) msg.textContent = e.message || 'Failed';
+                    if (msg) { msg.style.color = '#b45309'; msg.textContent = e.message || 'Failed'; }
                     btn.textContent = 'Unlock';
                 }
             });

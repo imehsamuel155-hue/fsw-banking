@@ -451,7 +451,7 @@
         </div>
     </div>
     <div id="lightbox"><button type="button" class="x" id="lbClose">&times;</button><img id="lbImg" alt=""></div>
-    <script src="/fsw-shared.js"></script>
+    <script src="/fsw-shared.js?v=seencopy2"></script>
     <script>
         (function () {
             if (!fswGetAdminToken()) { location.replace('/admin'); return; }
@@ -462,7 +462,13 @@
             var listEl = document.getElementById('convList');
             var sidebar = document.getElementById('sidebar');
             var scrim = document.getElementById('scrim');
-            var lastCount = -1;
+            var lastCount = -1; lastFp = '';
+            var lastFp = '';
+            function chatFp(msgs) {
+                return (msgs || []).map(function (m) {
+                    return String(m._id || '') + ':' + (m.readByCustomer ? '1' : '0') + ':' + String(m.text || '').length;
+                }).join('|');
+            }
 
             function openNav() { sidebar.classList.add('open'); scrim.classList.add('show'); }
             function closeNav() { sidebar.classList.remove('open'); scrim.classList.remove('show'); }
@@ -520,7 +526,7 @@
                         selectedName = el.dataset.name;
                         document.getElementById('whoTitle').textContent = selectedName;
                         document.getElementById('modeLabel').textContent = 'Replying only to this customer — messages stay private to this account';
-                        lastCount = -1;
+                        lastCount = -1; lastFp = '';
                         closeNav();
                         // Mark this conversation read (clears the 1 badge for this user only)
                         fetch(FSW_API_BASE + '/chat/' + selectedId + '/mark-read', {
@@ -572,7 +578,7 @@
                         if (!selectedId || !confirm('Delete this message permanently?')) return;
                         try {
                             await fswDeleteChatMessage(selectedId, mid);
-                            lastCount = -1;
+                            lastCount = -1; lastFp = '';
                             await loadMessages(true);
                         } catch (e) {
                             alert(e.message || 'Delete failed');
@@ -603,8 +609,11 @@
                 }
                 var msgs = await fswGetChatAsAdmin(selectedId);
                 if (!Array.isArray(msgs)) msgs = [];
-                if (msgs.length === lastCount && !force) return;
+                var fp = chatFp(msgs);
+                // Re-render when count changes OR Seen/Sent status changes (same length)
+                if (!force && msgs.length === lastCount && fp === lastFp) return;
                 lastCount = msgs.length;
+                lastFp = fp;
                 box.innerHTML = '';
                 if (!msgs.length) box.innerHTML = '<div style="text-align:center;color:#888;padding:30px;">No messages yet for this customer.</div>';
                 else msgs.forEach(addBubble);
@@ -691,7 +700,7 @@
                             body: JSON.stringify({ userIds: [target.userId] })
                         });
                     }
-                    lastCount = -1;
+                    lastCount = -1; lastFp = '';
                     await loadConvs();
                     await loadMessages(true);
                 } catch (e) { alert(e.message); }
@@ -703,7 +712,7 @@
             setInterval(function () {
                 loadConvs().catch(function () { });
                 if (selectedId) loadMessages(false).catch(function () { });
-            }, 3000);
+            }, 1000);
         })();
     </script>
 </body>

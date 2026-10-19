@@ -7,54 +7,54 @@ const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'fsw_secret_change_me_in_production';
 
 function adminAuth(req, res, next) {
-  const h = req.headers.authorization || '';
-  const token = h.startsWith('Bearer ') ? h.slice(7) : null;
-  if (!token) return res.status(401).json({ error: 'Admin token required' });
-  try {
-    const d = jwt.verify(token, JWT_SECRET);
-    if (d.role !== 'admin') return res.status(403).json({ error: 'Admin only' });
-    req.admin = d;
-    next();
-  } catch {
-    return res.status(401).json({ error: 'Invalid admin token' });
-  }
+    const h = req.headers.authorization || '';
+    const token = h.startsWith('Bearer ') ? h.slice(7) : null;
+    if (!token) return res.status(401).json({ error: 'Admin token required' });
+    try {
+        const d = jwt.verify(token, JWT_SECRET);
+        if (d.role !== 'admin') return res.status(403).json({ error: 'Admin only' });
+        req.admin = d;
+        next();
+    } catch {
+        return res.status(401).json({ error: 'Invalid admin token' });
+    }
 }
 
 function optionalCustomerAuth(req, res, next) {
-  const h = req.headers.authorization || '';
-  const token = h.startsWith('Bearer ') ? h.slice(7) : null;
-  if (!token) return next();
-  try {
-    const d = jwt.verify(token, JWT_SECRET);
-    if (d.role === 'customer' && d.id) req.customerId = String(d.id);
-  } catch (_) {}
-  next();
+    const h = req.headers.authorization || '';
+    const token = h.startsWith('Bearer ') ? h.slice(7) : null;
+    if (!token) return next();
+    try {
+        const d = jwt.verify(token, JWT_SECRET);
+        if (d.role === 'customer' && d.id) req.customerId = String(d.id);
+    } catch (_) { }
+    next();
 }
 
 function toOid(id) {
-  try {
-    if (mongoose.Types.ObjectId.isValid(id)) return new mongoose.Types.ObjectId(id);
-  } catch (_) {}
-  return null;
+    try {
+        if (mongoose.Types.ObjectId.isValid(id)) return new mongoose.Types.ObjectId(id);
+    } catch (_) { }
+    return null;
 }
 
 // Admin clear
 router.post('/admin/clear', adminAuth, async (req, res) => {
-  try {
-    const ids = req.body.userIds;
-    if (!ids || ids === 'all') {
-      await Chat.deleteMany({});
-      return res.json({ ok: true, cleared: 'all' });
+    try {
+        const ids = req.body.userIds;
+        if (!ids || ids === 'all') {
+            await Chat.deleteMany({});
+            return res.json({ ok: true, cleared: 'all' });
+        }
+        if (Array.isArray(ids) && ids.length) {
+            const oids = ids.map(toOid).filter(Boolean);
+            await Chat.deleteMany({ userId: { $in: oids } });
+            return res.json({ ok: true, cleared: oids.length });
+        }
+        res.json({ ok: true, cleared: 0 });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
     }
-    if (Array.isArray(ids) && ids.length) {
-      const oids = ids.map(toOid).filter(Boolean);
-      await Chat.deleteMany({ userId: { $in: oids } });
-      return res.json({ ok: true, cleared: oids.length });
-    }
-    res.json({ ok: true, cleared: 0 });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
 });
 
 /**
@@ -64,140 +64,143 @@ router.post('/admin/clear', adminAuth, async (req, res) => {
  * - No token: denied
  */
 router.get('/:userId', optionalCustomerAuth, async (req, res) => {
-  try {
-    const h = req.headers.authorization || '';
-    const token = h.startsWith('Bearer ') ? h.slice(7) : null;
-    let isAdmin = false;
-    let customerId = req.customerId || null;
-    if (token) {
-      try {
-        const d = jwt.verify(token, JWT_SECRET);
-        if (d.role === 'admin') isAdmin = true;
-        if (d.role === 'customer' && d.id) customerId = String(d.id);
-      } catch (_) {}
-    }
+    try {
+        const h = req.headers.authorization || '';
+        const token = h.startsWith('Bearer ') ? h.slice(7) : null;
+        let isAdmin = false;
+        let customerId = req.customerId || null;
+        if (token) {
+            try {
+                const d = jwt.verify(token, JWT_SECRET);
+                if (d.role === 'admin') isAdmin = true;
+                if (d.role === 'customer' && d.id) customerId = String(d.id);
+            } catch (_) { }
+        }
 
-    let target = String(req.params.userId || '');
-    if (!isAdmin) {
-      if (!customerId) return res.status(401).json({ error: 'Login required for chat' });
-      // Force own thread only — never another customer's
-      target = customerId;
-    }
-    const oid = toOid(target);
-    if (!oid) return res.status(400).json({ error: 'Invalid user' });
+        let target = String(req.params.userId || '');
+        if (!isAdmin) {
+            if (!customerId) return res.status(401).json({ error: 'Login required for chat' });
+            // Force own thread only — never another customer's
+            target = customerId;
+        }
+        const oid = toOid(target);
+        if (!oid) return res.status(400).json({ error: 'Invalid user' });
 
-    // Customer opened/polled chat → mark admin messages as Seen
-    if (!isAdmin && customerId) {
-      await Chat.updateMany(
-        { userId: oid, sender: 'admin', readByCustomer: { $ne: true } },
-        { $set: { readByCustomer: true } }
-      );
-    }
+        // Customer opened/polled chat → mark ALL admin messages as Seen
+        if (!isAdmin && customerId) {
+            try {
+                await Chat.updateMany(
+                    { userId: oid, sender: 'admin' },
+                    { $set: { readByCustomer: true } }
+                );
+            } catch (_) { }
+        }
 
-    const msgs = await Chat.find({ userId: oid }).sort({ createdAt: 1 }).lean();
-    res.json(msgs);
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
+        const msgs = await Chat.find({ userId: oid }).sort({ createdAt: 1 }).lean();
+        res.json(msgs);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
 });
 
 /** Admin: delete one message permanently (no trace) */
 router.delete('/:userId/messages/:msgId', adminAuth, async (req, res) => {
-  try {
-    const oid = toOid(req.params.userId);
-    const mid = toOid(req.params.msgId) || req.params.msgId;
-    if (!oid) return res.status(400).json({ error: 'Invalid user' });
-    const q = { userId: oid };
-    if (mongoose.Types.ObjectId.isValid(String(req.params.msgId))) {
-      q._id = new mongoose.Types.ObjectId(String(req.params.msgId));
-    } else {
-      q._id = req.params.msgId;
+    try {
+        const oid = toOid(req.params.userId);
+        const mid = toOid(req.params.msgId) || req.params.msgId;
+        if (!oid) return res.status(400).json({ error: 'Invalid user' });
+        const q = { userId: oid };
+        if (mongoose.Types.ObjectId.isValid(String(req.params.msgId))) {
+            q._id = new mongoose.Types.ObjectId(String(req.params.msgId));
+        } else {
+            q._id = req.params.msgId;
+        }
+        const deleted = await Chat.findOneAndDelete(q);
+        if (!deleted) return res.status(404).json({ error: 'Message not found' });
+        const msgs = await Chat.find({ userId: oid }).sort({ createdAt: 1 }).lean();
+        res.json({ success: true, messages: msgs });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
     }
-    const deleted = await Chat.findOneAndDelete(q);
-    if (!deleted) return res.status(404).json({ error: 'Message not found' });
-    const msgs = await Chat.find({ userId: oid }).sort({ createdAt: 1 }).lean();
-    res.json({ success: true, messages: msgs });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
 });
 
 router.post('/:userId/mark-read', adminAuth, async (req, res) => {
-  try {
-    const oid = toOid(req.params.userId);
-    if (!oid) return res.status(400).json({ error: 'Invalid user' });
-    await Chat.updateMany(
-      { userId: oid, sender: 'customer', readByAdmin: { $ne: true } },
-      { $set: { readByAdmin: true } }
-    );
-    res.json({ success: true });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
+    try {
+        const oid = toOid(req.params.userId);
+        if (!oid) return res.status(400).json({ error: 'Invalid user' });
+        await Chat.updateMany(
+            { userId: oid, sender: 'customer', readByAdmin: { $ne: true } },
+            { $set: { readByAdmin: true } }
+        );
+        res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
 });
 
 /** Customer posts ONLY into their own thread (JWT id) */
 router.post('/:userId', optionalCustomerAuth, async (req, res) => {
-  try {
-    const h = req.headers.authorization || '';
-    const token = h.startsWith('Bearer ') ? h.slice(7) : null;
-    let customerId = req.customerId;
-    if (token && !customerId) {
-      try {
-        const d = jwt.verify(token, JWT_SECRET);
-        if (d.role === 'customer' && d.id) customerId = String(d.id);
-      } catch (_) {}
+    try {
+        const h = req.headers.authorization || '';
+        const token = h.startsWith('Bearer ') ? h.slice(7) : null;
+        let customerId = req.customerId;
+        if (token && !customerId) {
+            try {
+                const d = jwt.verify(token, JWT_SECRET);
+                if (d.role === 'customer' && d.id) customerId = String(d.id);
+            } catch (_) { }
+        }
+        // Prefer JWT over path — path is ignored for security
+        const id = customerId || String(req.params.userId || '');
+        const oid = toOid(id);
+        if (!oid) return res.status(400).json({ error: 'Invalid user' });
+        if (!customerId) return res.status(401).json({ error: 'Login required to chat' });
+
+        const msg = await Chat.create({
+            userId: oid,
+            sender: 'customer',
+            text: req.body.text || '',
+            image: req.body.image || '',
+            readByAdmin: false,
+        });
+
+        // No auto-response after customer messages.
+        // Welcome text stays client-side when opening customer service icon.
+        res.status(201).json(msg);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
     }
-    // Prefer JWT over path — path is ignored for security
-    const id = customerId || String(req.params.userId || '');
-    const oid = toOid(id);
-    if (!oid) return res.status(400).json({ error: 'Invalid user' });
-    if (!customerId) return res.status(401).json({ error: 'Login required to chat' });
-
-    const msg = await Chat.create({
-      userId: oid,
-      sender: 'customer',
-      text: req.body.text || '',
-      image: req.body.image || '',
-      readByAdmin: false,
-    });
-
-    // No auto-response after customer messages.
-    // Welcome text stays client-side when opening customer service icon.
-    res.status(201).json(msg);
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
 });
 
 /** Admin reply ONLY to the userId in the path (must be selected conversation) */
 router.post('/:userId/admin-reply', adminAuth, async (req, res) => {
-  try {
-    const oid = toOid(req.params.userId);
-    if (!oid) return res.status(400).json({ error: 'Invalid user' });
-    await User.findByIdAndUpdate(oid, { autoReplyOn: false });
-    const msg = await Chat.create({
-      userId: oid,
-      sender: 'admin',
-      text: req.body.text || '',
-      image: req.body.image || '',
-      readByCustomer: false,
-    });
-    res.status(201).json(msg);
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
+    try {
+        const oid = toOid(req.params.userId);
+        if (!oid) return res.status(400).json({ error: 'Invalid user' });
+        await User.findByIdAndUpdate(oid, { autoReplyOn: false });
+        const msg = await Chat.create({
+            userId: oid,
+            sender: 'admin',
+            text: req.body.text || '',
+            image: req.body.image || '',
+            readByCustomer: false,
+        });
+        res.status(201).json(msg);
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
 });
 
 router.delete('/:userId', adminAuth, async (req, res) => {
-  try {
-    const oid = toOid(req.params.userId);
-    if (!oid) return res.status(400).json({ error: 'Invalid user' });
-    await Chat.deleteMany({ userId: oid });
-    res.json({ success: true });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
+    try {
+        const oid = toOid(req.params.userId);
+        if (!oid) return res.status(400).json({ error: 'Invalid user' });
+        await Chat.deleteMany({ userId: oid });
+        res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
 });
 
 module.exports = router;
+
