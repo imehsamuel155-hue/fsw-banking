@@ -197,7 +197,8 @@
     <div class="wrap">
         <h1>Create customer profile</h1>
         <p class="sub">Fill profile, cards, login, currency, bills, and Emergency Reserve. After admin
-            <strong>Approves</strong>, this account’s details show when they log in.</p>
+            <strong>Approves</strong>, this account’s details show when they log in.
+        </p>
         <form id="profileForm">
 
             <!-- PROFILE & ACCOUNT -->
@@ -551,7 +552,7 @@
             try {
                 if (typeof FSW_API_BASE === 'string' && FSW_API_BASE.indexOf('http') === 0) return FSW_API_BASE;
             } catch (e) { }
-            return 'https://fsw-banking.onrender.com/api';
+            return 'https://fsw-banking-1.onrender.com';
         }
 
         var form = document.getElementById('profileForm');

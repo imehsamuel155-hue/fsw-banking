@@ -1,5 +1,9 @@
 {
-    "projects": {
-        "default": "firstsmartwavebanking"
-    }
+  "projects": {
+    "default": "firstsmartwavebanking",
+    "dault": "firstsmartwavebanking",
+    "dau": "firstsmartwavebanking"
+  },
+  "targets": {},
+  "etags": {}
 }
