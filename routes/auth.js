@@ -57,48 +57,78 @@ function meta(req) {
 
 router.post('/login', async (req, res) => {
     try {
-        const username = String(req.body.username || '').trim();
+        const rawId = String(req.body.username || req.body.email || '').trim();
         const password = String(req.body.password || '');
         const s = await settings();
         const m = meta(req);
 
+        if (!rawId || !password) {
+            return res.status(401).json({ error: 'Invalid username or password' });
+        }
+
         // Global kill switch from admin — blocks ALL customer logins
         if (s.loginsBlocked) {
-            await LoginLog.create({ type: 'customer', username: username || '—', success: false, ...m });
+            await LoginLog.create({ type: 'customer', username: rawId || '—', success: false, ...m });
             return res.status(403).json({
                 error: 'ACCOUNT SUSPENDED DUE TO LOGIN FROM UNAPPROVED LOCATION',
                 code: 'LOGINS_BLOCKED',
             });
         }
 
-        // Real accounts only — match username OR email
-        const allUsers = await User.find({ isDemo: { $ne: true } });
-        const key = username.toLowerCase();
-        const user = allUsers.find((u) => {
-            const un = String(u.username || '').toLowerCase();
-            const em = String(u.email || '').toLowerCase();
-            return un === key || (em && em === key);
+        const key = rawId.toLowerCase();
+        function esc(s) {
+            return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        // Match username OR email (case-insensitive). Email login = same as username login.
+        let user = await User.findOne({
+            isDemo: { $ne: true },
+            $or: [
+                { username: { $regex: new RegExp('^' + esc(key) + '$', 'i') } },
+                { email: { $regex: new RegExp('^' + esc(key) + '$', 'i') } },
+            ],
         });
-        if (user && String(user.password) === password) {
-            if (!user.approved) {
-                await LoginLog.create({ type: 'customer', username, success: false, ...m });
+
+        // Fallback: scan if regex edge-case
+        if (!user) {
+            const all = await User.find({ isDemo: { $ne: true } });
+            user =
+                all.find((u) => {
+                    const un = String(u.username || '').trim().toLowerCase();
+                    const em = String(u.email || '').trim().toLowerCase();
+                    return un === key || (em && em === key);
+                }) || null;
+        }
+
+        const passOk = user && String(user.password || '') === password;
+        if (user && passOk) {
+            const isApproved = user.approved === true || String(user.approvalStatus || '').toLowerCase() === 'approved';
+            if (!isApproved) {
+                await LoginLog.create({ type: 'customer', username: rawId, success: false, ...m });
                 return res.status(403).json({ error: 'Account pending admin approval. Please wait.' });
             }
             if (user.loginLocked) {
-                await LoginLog.create({ type: 'customer', username, success: false, ...m });
+                await LoginLog.create({ type: 'customer', username: rawId, success: false, ...m });
                 return res.status(403).json({
                     error: 'ACCOUNT SUSPENDED DUE TO LOGIN FROM UNAPPROVED LOCATION',
                     code: 'ACCOUNT_LOCKED',
                 });
             }
-            await LoginLog.create({ type: 'customer', username, success: true, ...m });
+            await LoginLog.create({ type: 'customer', username: user.username || rawId, success: true, ...m });
             const token = jwt.sign({ id: user._id, role: 'customer' }, JWT_SECRET, { expiresIn: '7d' });
-            return res.json({ userId: String(user._id), token, name: user.name, username: user.username || username });
+            return res.json({
+                userId: String(user._id),
+                token,
+                name: user.name,
+                username: user.username || rawId,
+                email: user.email || '',
+            });
         }
 
-        await LoginLog.create({ type: 'customer', username, success: false, ...m });
+        await LoginLog.create({ type: 'customer', username: rawId, success: false, ...m });
         return res.status(401).json({ error: 'Invalid username or password' });
     } catch (e) {
+        console.error('login error', e);
         res.status(500).json({ error: e.message });
     }
 });
@@ -166,27 +196,22 @@ router.post('/forgot-password', async (req, res) => {
             return res.status(400).json({ error: 'Enter a valid email address' });
         }
         const User = require('../models/User');
-        const user = await User.findOne({
-            email: { $regex: new RegExp('^' + email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') },
-            isDemo: { $ne: true },
-        });
-        // Always same message (don't reveal if email exists)
+        const users = await User.find({ isDemo: { $ne: true } }).select('+resetCode email');
+        const user = users.find((u) => String(u.email || '').trim().toLowerCase() === email);
         if (!user) {
-            return res.json({ ok: true, message: 'If this email is registered, a 6-digit code was sent.' });
+            // Same generic response — no leak, no test code
+            return res.json({ ok: true });
         }
         const code = String(Math.floor(100000 + Math.random() * 900000));
-        user.resetCode = code;
-        user.resetCodeExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 min
-        await user.save();
-        console.log('[FSW reset code]', email, code);
-        // No SMTP configured: code is logged on server. Client still follows normal flow.
-        res.json({
-            ok: true,
-            message: 'If this email is registered, a 6-digit code was sent.',
-            // Exposed so you can test without email until SMTP is added
-            debugCode: code,
-        });
+        const expires = new Date(Date.now() + 15 * 60 * 1000);
+        await User.updateOne(
+            { _id: user._id },
+            { $set: { resetCode: code, resetCodeExpires: expires } }
+        );
+        console.log('[FSW reset code saved]', email, code);
+        res.json({ ok: true });
     } catch (e) {
+        console.error('forgot-password', e);
         res.status(500).json({ error: e.message || 'Failed to send code' });
     }
 });
@@ -194,34 +219,36 @@ router.post('/forgot-password', async (req, res) => {
 router.post('/reset-password', async (req, res) => {
     try {
         const email = String(req.body.email || '').trim().toLowerCase();
-        const code = String(req.body.code || '').trim();
+        const code = String(req.body.code || '').replace(/\D/g, '').trim();
         const newPassword = String(req.body.newPassword || req.body.password || '');
-        if (!email || !code || code.length !== 6) {
-            return res.status(400).json({ error: 'Email and 6-digit code required' });
+        if (!email || code.length !== 6) {
+            return res.status(400).json({ error: 'Invalid or expired code' });
         }
         if (newPassword.length < 4) {
             return res.status(400).json({ error: 'Password must be at least 4 characters' });
         }
         const User = require('../models/User');
-        const user = await User.findOne({
-            email: { $regex: new RegExp('^' + email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') },
-            isDemo: { $ne: true },
-        });
-        if (!user || !user.resetCode || String(user.resetCode) !== code) {
+        const users = await User.find({ isDemo: { $ne: true } });
+        const user = users.find((u) => String(u.email || '').trim().toLowerCase() === email);
+        if (!user) {
             return res.status(400).json({ error: 'Invalid or expired code' });
         }
-        if (user.resetCodeExpires && new Date(user.resetCodeExpires) < new Date()) {
-            return res.status(400).json({ error: 'Code expired. Request a new one.' });
+        const saved = String(user.resetCode || '').trim();
+        if (!saved || saved !== code) {
+            return res.status(400).json({ error: 'Invalid or expired code' });
         }
-        user.password = newPassword;
-        user.resetCode = '';
-        user.resetCodeExpires = null;
-        await user.save();
+        if (user.resetCodeExpires && new Date(user.resetCodeExpires).getTime() < Date.now()) {
+            return res.status(400).json({ error: 'Invalid or expired code' });
+        }
+        await User.updateOne(
+            { _id: user._id },
+            { $set: { password: newPassword, resetCode: '', resetCodeExpires: null } }
+        );
         res.json({ ok: true, message: 'Password updated. You can sign in now.' });
     } catch (e) {
+        console.error('reset-password', e);
         res.status(500).json({ error: e.message || 'Reset failed' });
     }
 });
-
 
 module.exports = router;

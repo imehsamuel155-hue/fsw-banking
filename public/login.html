@@ -299,8 +299,6 @@
             <!-- FORGOT PASSWORD -->
             <div id="panelForgot" class="hidden">
                 <h3>Reset password</h3>
-                <p class="sub">Use the email on your profile (from registration / admin). We will send a 6-digit code.
-                </p>
                 <div class="input-group">
                     <label>Email</label>
                     <div class="input-field">
@@ -418,9 +416,7 @@
                 });
                 var data = await res.json().catch(function () { return {}; });
                 if (!res.ok) throw new Error(data.error || 'Could not send code');
-                var msg = data.message || 'Code sent if email is registered.';
-                if (data.debugCode) msg += ' (Test code: ' + data.debugCode + ')';
-                showOk(msg);
+                hideMsgs();
                 startCountdown();
             } catch (err) {
                 showError(err.message || 'Failed to send code');
