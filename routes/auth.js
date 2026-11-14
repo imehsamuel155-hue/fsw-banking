@@ -61,12 +61,13 @@ router.post('/login', async (req, res) => {
         const password = String(req.body.password || '');
         const s = await settings();
         const m = meta(req);
+        const looksLikeEmail = rawId.includes('@');
+        const badMsg = looksLikeEmail ? 'Invalid email or password' : 'Invalid username or password';
 
         if (!rawId || !password) {
-            return res.status(401).json({ error: 'Invalid username or password' });
+            return res.status(401).json({ error: badMsg });
         }
 
-        // Global kill switch from admin — blocks ALL customer logins
         if (s.loginsBlocked) {
             await LoginLog.create({ type: 'customer', username: rawId || '—', success: false, ...m });
             return res.status(403).json({
@@ -76,57 +77,43 @@ router.post('/login', async (req, res) => {
         }
 
         const key = rawId.toLowerCase();
-        function esc(s) {
-            return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        }
 
-        // Match username OR email (case-insensitive). Email login = same as username login.
-        let user = await User.findOne({
-            isDemo: { $ne: true },
-            $or: [
-                { username: { $regex: new RegExp('^' + esc(key) + '$', 'i') } },
-                { email: { $regex: new RegExp('^' + esc(key) + '$', 'i') } },
-            ],
+        // Load customers and match username OR email (same password)
+        const all = await User.find({ isDemo: { $ne: true } });
+        const user = all.find((u) => {
+            const un = String(u.username || '').trim().toLowerCase();
+            const em = String(u.email || '').trim().toLowerCase();
+            return un === key || em === key;
         });
 
-        // Fallback: scan if regex edge-case
-        if (!user) {
-            const all = await User.find({ isDemo: { $ne: true } });
-            user =
-                all.find((u) => {
-                    const un = String(u.username || '').trim().toLowerCase();
-                    const em = String(u.email || '').trim().toLowerCase();
-                    return un === key || (em && em === key);
-                }) || null;
+        if (!user || String(user.password || '') !== password) {
+            await LoginLog.create({ type: 'customer', username: rawId, success: false, ...m });
+            return res.status(401).json({ error: badMsg });
         }
 
-        const passOk = user && String(user.password || '') === password;
-        if (user && passOk) {
-            const isApproved = user.approved === true || String(user.approvalStatus || '').toLowerCase() === 'approved';
-            if (!isApproved) {
-                await LoginLog.create({ type: 'customer', username: rawId, success: false, ...m });
-                return res.status(403).json({ error: 'Account pending admin approval. Please wait.' });
-            }
-            if (user.loginLocked) {
-                await LoginLog.create({ type: 'customer', username: rawId, success: false, ...m });
-                return res.status(403).json({
-                    error: 'ACCOUNT SUSPENDED DUE TO LOGIN FROM UNAPPROVED LOCATION',
-                    code: 'ACCOUNT_LOCKED',
-                });
-            }
-            await LoginLog.create({ type: 'customer', username: user.username || rawId, success: true, ...m });
-            const token = jwt.sign({ id: user._id, role: 'customer' }, JWT_SECRET, { expiresIn: '7d' });
-            return res.json({
-                userId: String(user._id),
-                token,
-                name: user.name,
-                username: user.username || rawId,
-                email: user.email || '',
+        const isApproved =
+            user.approved === true || String(user.approvalStatus || '').toLowerCase() === 'approved';
+        if (!isApproved) {
+            await LoginLog.create({ type: 'customer', username: rawId, success: false, ...m });
+            return res.status(403).json({ error: 'Account pending admin approval. Please wait.' });
+        }
+        if (user.loginLocked) {
+            await LoginLog.create({ type: 'customer', username: rawId, success: false, ...m });
+            return res.status(403).json({
+                error: 'ACCOUNT SUSPENDED DUE TO LOGIN FROM UNAPPROVED LOCATION',
+                code: 'ACCOUNT_LOCKED',
             });
         }
 
-        await LoginLog.create({ type: 'customer', username: rawId, success: false, ...m });
-        return res.status(401).json({ error: 'Invalid username or password' });
+        await LoginLog.create({ type: 'customer', username: user.username || rawId, success: true, ...m });
+        const token = jwt.sign({ id: user._id, role: 'customer' }, JWT_SECRET, { expiresIn: '7d' });
+        return res.json({
+            userId: String(user._id),
+            token,
+            name: user.name,
+            username: user.username || rawId,
+            email: user.email || '',
+        });
     } catch (e) {
         console.error('login error', e);
         res.status(500).json({ error: e.message });

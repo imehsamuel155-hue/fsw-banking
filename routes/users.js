@@ -113,7 +113,7 @@ router.post('/register-profile', async (req, res) => {
         }
         const user = await User.create({
             name: b.name || 'New Customer',
-            email: b.email || '',
+            email: String(b.email || '').trim().toLowerCase(),
             username,
             password,
             phone: b.phone || '',
@@ -304,11 +304,16 @@ router.put('/:id', adminAuth, async (req, res) => {
         ];
         const updates = {};
         allowed.forEach((k) => { if (req.body[k] !== undefined) updates[k] = req.body[k]; });
+        if (updates.email !== undefined) updates.email = String(updates.email || '').trim().toLowerCase();
         const existingU = await User.findById(req.params.id);
         if (existingU) {
-            // Permanent credentials — never change username/password after create
+            // Username stays permanent; password can be updated by admin
             delete updates.username;
-            delete updates.password;
+            if (updates.password !== undefined) {
+                const p = String(updates.password || '');
+                if (!p) delete updates.password;
+                else if (p.length < 4) return res.status(400).json({ error: 'Password must be at least 4 characters' });
+            }
         }
         const user = await User.findByIdAndUpdate(req.params.id, updates, { new: true, runValidators: true });
         if (!user) return res.status(404).json({ error: 'User not found' });
