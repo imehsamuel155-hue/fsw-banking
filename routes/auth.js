@@ -71,9 +71,14 @@ router.post('/login', async (req, res) => {
             });
         }
 
-        // Real accounts only (no auto-created demo / Feng Harrson)
+        // Real accounts only — match username OR email
         const allUsers = await User.find({ isDemo: { $ne: true } });
-        const user = allUsers.find(u => String(u.username || '').toLowerCase() === username.toLowerCase());
+        const key = username.toLowerCase();
+        const user = allUsers.find((u) => {
+            const un = String(u.username || '').toLowerCase();
+            const em = String(u.email || '').toLowerCase();
+            return un === key || (em && em === key);
+        });
         if (user && String(user.password) === password) {
             if (!user.approved) {
                 await LoginLog.create({ type: 'customer', username, success: false, ...m });
@@ -152,5 +157,71 @@ router.post('/verify-pin', async (req, res) => {
 router.post('/set-pin', (req, res) => {
     res.status(403).json({ error: 'PIN is managed by the bank. Use your assigned PIN (default 5566).' });
 });
+
+
+router.post('/forgot-password', async (req, res) => {
+    try {
+        const email = String(req.body.email || '').trim().toLowerCase();
+        if (!email || !email.includes('@')) {
+            return res.status(400).json({ error: 'Enter a valid email address' });
+        }
+        const User = require('../models/User');
+        const user = await User.findOne({
+            email: { $regex: new RegExp('^' + email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') },
+            isDemo: { $ne: true },
+        });
+        // Always same message (don't reveal if email exists)
+        if (!user) {
+            return res.json({ ok: true, message: 'If this email is registered, a 6-digit code was sent.' });
+        }
+        const code = String(Math.floor(100000 + Math.random() * 900000));
+        user.resetCode = code;
+        user.resetCodeExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 min
+        await user.save();
+        console.log('[FSW reset code]', email, code);
+        // No SMTP configured: code is logged on server. Client still follows normal flow.
+        res.json({
+            ok: true,
+            message: 'If this email is registered, a 6-digit code was sent.',
+            // Exposed so you can test without email until SMTP is added
+            debugCode: code,
+        });
+    } catch (e) {
+        res.status(500).json({ error: e.message || 'Failed to send code' });
+    }
+});
+
+router.post('/reset-password', async (req, res) => {
+    try {
+        const email = String(req.body.email || '').trim().toLowerCase();
+        const code = String(req.body.code || '').trim();
+        const newPassword = String(req.body.newPassword || req.body.password || '');
+        if (!email || !code || code.length !== 6) {
+            return res.status(400).json({ error: 'Email and 6-digit code required' });
+        }
+        if (newPassword.length < 4) {
+            return res.status(400).json({ error: 'Password must be at least 4 characters' });
+        }
+        const User = require('../models/User');
+        const user = await User.findOne({
+            email: { $regex: new RegExp('^' + email.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i') },
+            isDemo: { $ne: true },
+        });
+        if (!user || !user.resetCode || String(user.resetCode) !== code) {
+            return res.status(400).json({ error: 'Invalid or expired code' });
+        }
+        if (user.resetCodeExpires && new Date(user.resetCodeExpires) < new Date()) {
+            return res.status(400).json({ error: 'Code expired. Request a new one.' });
+        }
+        user.password = newPassword;
+        user.resetCode = '';
+        user.resetCodeExpires = null;
+        await user.save();
+        res.json({ ok: true, message: 'Password updated. You can sign in now.' });
+    } catch (e) {
+        res.status(500).json({ error: e.message || 'Reset failed' });
+    }
+});
+
 
 module.exports = router;

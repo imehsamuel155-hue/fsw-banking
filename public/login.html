@@ -74,7 +74,7 @@
         }
 
         .input-group {
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
         .input-group label {
@@ -116,11 +116,22 @@
             padding: 10px 14px;
             border-radius: 8px;
             font-size: 0.85rem;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             display: none;
             align-items: center;
             gap: 8px;
             border: 1px solid #f5c6cb;
+        }
+
+        .ok-message {
+            background: #e8f8ef;
+            color: #166534;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+            display: none;
+            border: 1px solid #bbf7d0;
         }
 
         .btn-submit {
@@ -144,8 +155,33 @@
         }
 
         .btn-submit:disabled {
-            opacity: 0.75;
-            cursor: wait;
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+
+        .btn-out {
+            width: 100%;
+            padding: 12px;
+            background: #fff;
+            color: var(--secondary-color);
+            border: 1.5px solid var(--secondary-color);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+
+        .forgot-row {
+            text-align: right;
+            margin: -8px 0 16px;
+        }
+
+        .forgot-row a {
+            color: var(--secondary-color);
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
         }
 
         .login-footer {
@@ -160,201 +196,310 @@
             font-weight: 600;
         }
 
-        .hint {
-            margin-top: 14px;
-            font-size: 0.78rem;
-            color: #888;
-            text-align: center;
-        }
-
-        #suspendOverlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            z-index: 99999;
-            background: #0a0a0a;
-            color: #fff;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            text-align: center;
-            padding: 24px;
-        }
-
-        #suspendOverlay.show {
+        .code-row {
             display: flex;
+            gap: 8px;
+            align-items: stretch;
         }
 
-        #suspendOverlay h1 {
-            font-size: clamp(1.1rem, 4vw, 1.6rem);
-            font-weight: 700;
-            letter-spacing: 1px;
-            line-height: 1.45;
-            max-width: 520px;
-            color: #ff4d4d;
+        .code-row input {
+            flex: 1;
+            padding: 12px 14px;
+            border: 1.5px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            letter-spacing: 2px;
+            font-family: monospace;
         }
 
-        #suspendOverlay p {
-            margin-top: 16px;
-            color: #aaa;
-            font-size: 14px;
+        .code-row button {
+            white-space: nowrap;
+            padding: 0 14px;
+            background: var(--primary-color);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .code-row button:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        .hint {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 6px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #panelForgot h3 {
+            font-size: 1.05rem;
+            margin-bottom: 8px;
+            color: #0d233a;
+        }
+
+        #panelForgot p.sub {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 16px;
         }
     </style>
 </head>
 
 <body>
-    <div id="suspendOverlay" role="alert">
-        <h1>ACCOUNT SUSPENDED DUE TO LOGIN FROM UNAPPROVED LOCATION</h1>
-        <p>Access is temporarily unavailable. Contact support if you need help.</p>
-    </div>
-
     <div class="login-card">
         <div class="login-header">
             <div class="logo-icon">FSW</div>
             <h2>First Smart Wave Banking</h2>
-            <small>Secure Customer Sign In</small>
+            <small id="headerSub">Secure Customer Sign In</small>
         </div>
         <div class="login-body">
-            <div class="error-message" id="errorBanner">
-                <i class="fas fa-exclamation-circle"></i>
-                <span id="errorText">Invalid login details.</span>
+            <div id="errorBanner" class="error-message"><i class="fas fa-exclamation-circle"></i><span
+                    id="errorText">Invalid login details.</span></div>
+            <div id="okBanner" class="ok-message"></div>
+
+            <!-- LOGIN -->
+            <div id="panelLogin">
+                <form id="loginForm" action="javascript:void(0)" method="post">
+                    <div class="input-group">
+                        <label>Username or Email</label>
+                        <div class="input-field">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="username" name="username" placeholder="Enter username or email"
+                                required autocomplete="username">
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Password</label>
+                        <div class="input-field">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="password" name="password" placeholder="Enter password" required
+                                autocomplete="current-password">
+                        </div>
+                    </div>
+                    <div class="forgot-row">
+                        <a href="#" id="linkForgot">Forgotten password?</a>
+                    </div>
+                    <button type="submit" class="btn-submit" id="loginBtn">
+                        <i class="fas fa-arrow-right"></i> Sign In
+                    </button>
+                </form>
+                <div class="login-footer">
+                    <a href="/">&larr; Back to Homepage</a>
+                </div>
             </div>
-            <form id="loginForm" action="javascript:void(0)" method="post">
+
+            <!-- FORGOT PASSWORD -->
+            <div id="panelForgot" class="hidden">
+                <h3>Reset password</h3>
+                <p class="sub">Use the email on your profile (from registration / admin). We will send a 6-digit code.
+                </p>
                 <div class="input-group">
-                    <label>Username</label>
+                    <label>Email</label>
                     <div class="input-field">
-                        <i class="fas fa-user"></i>
-                        <input type="text" id="username" name="username" placeholder="Enter username" required
-                            autocomplete="username">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="fpEmail" placeholder="Your account email" autocomplete="email">
                     </div>
                 </div>
                 <div class="input-group">
-                    <label>Password</label>
+                    <label>6-digit code</label>
+                    <div class="code-row">
+                        <input type="text" id="fpCode" maxlength="6" inputmode="numeric" pattern="[0-9]{6}"
+                            placeholder="Enter 6-digit code" autocomplete="one-time-code">
+                        <button type="button" id="btnSendCode">Send</button>
+                    </div>
+                    <p class="hint" id="fpCountdown"></p>
+                </div>
+                <div class="input-group">
+                    <label>New password</label>
                     <div class="input-field">
                         <i class="fas fa-lock"></i>
-                        <input type="password" id="password" name="password" placeholder="Enter password" required
-                            autocomplete="current-password">
+                        <input type="password" id="fpNewPass" placeholder="New password" autocomplete="new-password">
                     </div>
                 </div>
-                <button type="submit" class="btn-submit" id="loginBtn">
-                    <i class="fas fa-sign-in-alt"></i> Sign In
-                </button>
-            </form>
-
-            <div class="login-footer">
-                <p><a href="/"><i class="fas fa-arrow-left"></i> Back to Homepage</a></p>
+                <div class="input-group">
+                    <label>Confirm password</label>
+                    <div class="input-field">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="fpConfirm" placeholder="Confirm new password"
+                            autocomplete="new-password">
+                    </div>
+                </div>
+                <button type="button" class="btn-submit" id="btnResetPass">Reset password</button>
+                <button type="button" class="btn-out" id="btnBackLogin">Back to Sign In</button>
             </div>
         </div>
     </div>
+
     <script src="/fsw-shared.js"></script>
     <script>
+        function apiBase() {
+            try {
+                if (typeof FSW_API_BASE === 'string' && FSW_API_BASE.indexOf('http') === 0) return FSW_API_BASE;
+            } catch (e) { }
+            return 'https://fsw-bankingg.onrender.com/api';
+        }
+        function showError(msg) {
+            var b = document.getElementById('errorBanner');
+            var o = document.getElementById('okBanner');
+            o.style.display = 'none';
+            document.getElementById('errorText').textContent = msg || 'Something went wrong';
+            b.style.display = 'flex';
+        }
+        function showOk(msg) {
+            var b = document.getElementById('errorBanner');
+            var o = document.getElementById('okBanner');
+            b.style.display = 'none';
+            o.textContent = msg || '';
+            o.style.display = msg ? 'block' : 'none';
+        }
+        function hideMsgs() {
+            document.getElementById('errorBanner').style.display = 'none';
+            document.getElementById('okBanner').style.display = 'none';
+        }
+
+        var resendLeft = 0;
+        var resendTimer = null;
+        function startCountdown() {
+            resendLeft = 60;
+            var btn = document.getElementById('btnSendCode');
+            var hint = document.getElementById('fpCountdown');
+            btn.disabled = true;
+            function tick() {
+                if (resendLeft <= 0) {
+                    btn.disabled = false;
+                    btn.textContent = 'Resend code';
+                    hint.textContent = 'You can request a new code now.';
+                    clearInterval(resendTimer);
+                    resendTimer = null;
+                    return;
+                }
+                btn.textContent = 'Wait ' + resendLeft + 's';
+                hint.textContent = 'Resend available in ' + resendLeft + ' seconds.';
+                resendLeft -= 1;
+            }
+            tick();
+            resendTimer = setInterval(tick, 1000);
+        }
+
+        document.getElementById('linkForgot').onclick = function (e) {
+            e.preventDefault();
+            hideMsgs();
+            document.getElementById('panelLogin').classList.add('hidden');
+            document.getElementById('panelForgot').classList.remove('hidden');
+            document.getElementById('headerSub').textContent = 'Password recovery';
+        };
+        document.getElementById('btnBackLogin').onclick = function () {
+            hideMsgs();
+            document.getElementById('panelForgot').classList.add('hidden');
+            document.getElementById('panelLogin').classList.remove('hidden');
+            document.getElementById('headerSub').textContent = 'Secure Customer Sign In';
+        };
+
+        document.getElementById('btnSendCode').onclick = async function () {
+            var email = (document.getElementById('fpEmail').value || '').trim();
+            if (!email || email.indexOf('@') < 0) return showError('Enter the email on your account profile.');
+            if (resendLeft > 0) return;
+            var btn = document.getElementById('btnSendCode');
+            btn.disabled = true;
+            hideMsgs();
+            try {
+                var res = await fetch(apiBase() + '/auth/forgot-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email })
+                });
+                var data = await res.json().catch(function () { return {}; });
+                if (!res.ok) throw new Error(data.error || 'Could not send code');
+                var msg = data.message || 'Code sent if email is registered.';
+                if (data.debugCode) msg += ' (Test code: ' + data.debugCode + ')';
+                showOk(msg);
+                startCountdown();
+            } catch (err) {
+                showError(err.message || 'Failed to send code');
+                btn.disabled = false;
+                btn.textContent = 'Send';
+            }
+        };
+
+        document.getElementById('btnResetPass').onclick = async function () {
+            var email = (document.getElementById('fpEmail').value || '').trim();
+            var code = (document.getElementById('fpCode').value || '').trim();
+            var p1 = document.getElementById('fpNewPass').value || '';
+            var p2 = document.getElementById('fpConfirm').value || '';
+            if (!email) return showError('Enter your email.');
+            if (!/^\d{6}$/.test(code)) return showError('Enter the 6-digit code.');
+            if (p1.length < 4) return showError('New password must be at least 4 characters.');
+            if (p1 !== p2) return showError('Passwords do not match.');
+            hideMsgs();
+            var btn = document.getElementById('btnResetPass');
+            btn.disabled = true;
+            btn.textContent = 'Please wait…';
+            try {
+                var res = await fetch(apiBase() + '/auth/reset-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email, code: code, newPassword: p1 })
+                });
+                var data = await res.json().catch(function () { return {}; });
+                if (!res.ok) throw new Error(data.error || 'Reset failed');
+                showOk(data.message || 'Password updated. Sign in with your new password.');
+                setTimeout(function () {
+                    document.getElementById('btnBackLogin').click();
+                    document.getElementById('password').value = '';
+                }, 1500);
+            } catch (err) {
+                showError(err.message || 'Reset failed');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Reset password';
+            }
+        };
+
+        document.getElementById('fpCode').addEventListener('input', function () {
+            this.value = this.value.replace(/\D/g, '').slice(0, 6);
+        });
+
+        // existing login
         (function () {
             var form = document.getElementById('loginForm');
             var btn = document.getElementById('loginBtn');
-            var errorBanner = document.getElementById('errorBanner');
-            var errorText = document.getElementById('errorText');
-            var btnHtml = btn ? btn.innerHTML : '';
-
-            function showError(msg) {
-                if (errorText) errorText.textContent = msg;
-                if (errorBanner) errorBanner.style.display = 'flex';
-                if (btn) {
-                    btn.disabled = false;
-                    btn.innerHTML = btnHtml;
-                }
-            }
-
-            function apiBase() {
-                try {
-                    if (typeof FSW_API_BASE === 'string' && FSW_API_BASE) return FSW_API_BASE;
-                } catch (e) { }
-                var h = location.hostname;
-                if (h === 'localhost' || h === '127.0.0.1') return 'http://localhost:5000/api';
-                return 'https://fsw-bankingg.onrender.com/api';
-            }
-
-            // If admin turned lock ON, show full-screen block immediately
-            fetch(apiBase() + '/settings/public-status')
-                .then(function (r) { return r.json(); })
-                .then(function (d) {
-                    if (d && d.loginsBlocked) {
-                        var ov = document.getElementById('suspendOverlay');
-                        if (ov) ov.classList.add('show');
-                    }
-                })
-                .catch(function () { });
-
-            if (!form) return;
-
-            form.addEventListener('submit', function (e) {
+            form.addEventListener('submit', async function (e) {
                 e.preventDefault();
-                e.stopPropagation();
-
+                hideMsgs();
                 var username = (document.getElementById('username').value || '').trim();
                 var password = document.getElementById('password').value || '';
-
-                if (!username || !password) {
-                    showError('Enter username and password.');
-                    return;
-                }
-
-                if (btn) {
-                    btn.disabled = true;
-                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
-                }
-                if (errorBanner) errorBanner.style.display = 'none';
-
-                var url = apiBase() + '/auth/login';
-                fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        username: username,
-                        password: password,
-                        country: (Intl.DateTimeFormat().resolvedOptions().timeZone || 'Unknown')
-                    })
-                })
-                    .then(function (res) {
-                        return res.json().then(function (data) {
-                            return { ok: res.ok, status: res.status, data: data };
-                        });
-                    })
-                    .then(function (result) {
-                        if (!result.ok) {
-                            if (result.data && result.data.code === 'LOGINS_BLOCKED') {
-                                var ov = document.getElementById('suspendOverlay');
-                                if (ov) ov.classList.add('show');
-                                throw new Error(result.data.error || 'ACCOUNT SUSPENDED DUE TO LOGIN FROM UNAPPROVED LOCATION');
-                            }
-                            throw new Error((result.data && result.data.error) || 'Invalid username or password');
-                        }
-                        var userId = result.data.userId;
-                        var token = result.data.token;
-                        var uname = result.data.username || username;
-                        if (!userId || !token) throw new Error('Login response incomplete. Try again.');
-
-                        try {
-                            if (typeof fswSetLoggedInUser === 'function') {
-                                fswSetLoggedInUser(String(userId), String(token), uname);
-                            } else {
-                                localStorage.clear();
-                                localStorage.setItem('fsw_user_id', String(userId));
-                                localStorage.setItem('fsw_token', String(token));
-                                localStorage.setItem('fsw_username', String(uname || ''));
-                            }
-                        } catch (err) {
-                            throw new Error('Could not save session. Allow site data in browser.');
-                        }
-
-                        window.location.href = '/pin';
-                    })
-                    .catch(function (err) {
-                        var msg = (err && err.message) ? err.message : 'Login failed';
-                        if (msg === 'Failed to fetch' || msg.indexOf('NetworkError') !== -1) {
-                            msg = "Can't reach the server. Wait 30s (Render may be waking up) and try again.";
-                        }
-                        showError(msg);
+                if (!username || !password) return showError('Enter username/email and password.');
+                btn.disabled = true;
+                btn.innerHTML = 'Signing in…';
+                try {
+                    var res = await fetch(apiBase() + '/auth/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username: username, password: password })
                     });
+                    var data = await res.json().catch(function () { return {}; });
+                    if (!res.ok) throw new Error(data.error || 'Invalid username or password');
+                    if (typeof fswSetLoggedInUser === 'function') {
+                        fswSetLoggedInUser(data.userId, data.token, data.username || username);
+                    } else {
+                        localStorage.setItem('fsw_user_id', String(data.userId));
+                        localStorage.setItem('fsw_token', String(data.token || ''));
+                        localStorage.setItem('fsw_username', String(data.username || username));
+                    }
+                    window.location.href = '/pin.html';
+                } catch (err) {
+                    showError(err.message || 'Login failed');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-arrow-right"></i> Sign In';
+                }
             });
         })();
     </script>

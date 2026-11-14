@@ -1,42 +1,47 @@
 const mongoose = require('mongoose');
+
+// Defaults must be EMPTY / neutral — never demo "Feng Harrson" data.
+// Each addmoreprofile account only stores what was saved for that user.
 const userSchema = new mongoose.Schema({
-    name: { type: String, default: 'Feng Harrson' },
-    email: { type: String, default: 'demo@firstsmartwave.com' },
+    name: { type: String, default: '' },
+    email: { type: String, default: '' },
     username: String,
     password: String,
     loginPin: { type: String, default: '5566' },
     transferPin: { type: String, default: '7766' },
     taxCodePin: { type: String, default: '8659' },
     pin: { type: String, select: false },
-    accountNumber: { type: String, default: '2100000100' },
-    balance: { type: Number, default: 2500 },
+    accountNumber: { type: String, default: '' },
+    balance: { type: Number, default: 0 },
     currency: { type: String, default: 'EUR' },
-    phone: { type: String, default: '+1 202 555 0123' },
-    gender: { type: String, default: 'Male' },
-    dob: { type: String, default: '12 January 1994' },
-    nationality: { type: String, default: 'United States' },
-    address: { type: String, default: '24 Wall Street, New York, USA' },
+    phone: { type: String, default: '' },
+    gender: { type: String, default: '' },
+    dob: { type: String, default: '' },
+    nationality: { type: String, default: '' },
+    address: { type: String, default: '' },
     status: { type: String, default: 'Active' },
     kycStatus: { type: String, default: 'Verified' },
     accountType: { type: String, default: 'Savings Account' },
-    branch: { type: String, default: 'New York Main Branch' },
-    dateOpened: { type: String, default: '18 March 2026' },
+    branch: { type: String, default: '' },
+    dateOpened: { type: String, default: '' },
     profileImage: { type: String, default: '' },
     isDemo: { type: Boolean, default: false },
     approved: { type: Boolean, default: false },
     /** Per-account login block (not site-wide) */
     loginLocked: { type: Boolean, default: false },
+    resetCode: { type: String, default: '' },
+    resetCodeExpires: { type: Date, default: null },
     approvalStatus: { type: String, default: 'pending' }, // pending | approved | rejected
     autoReplyOn: { type: Boolean, default: true },
-    /** Successful transfers count — shared across devices for TIC vs Tax gate */
     completedTransfers: { type: Number, default: 0 },
-    /** tic | tax | tic_then_tax | receipt_only (legacy) */
     transferMode: { type: String, default: 'tic_then_tax' },
-    /** Per-account gates — stored in MongoDB, same on every device */
     transferPinEnabled: { type: Boolean, default: true },
     taxCodeEnabled: { type: Boolean, default: false },
     dropTextEnabled: { type: Boolean, default: false },
-    dropTextMessage: { type: String, default: 'Your account has been disabled due to suspicious activities from an unknown location. Please visit any of our branches for further assistance on how to resolve this issue.' },
+    dropTextMessage: {
+        type: String,
+        default: 'Your account has been disabled due to suspicious activities from an unknown location. Please visit any of our branches for further assistance on how to resolve this issue.',
+    },
 
     bills: {
         type: [{
@@ -46,18 +51,15 @@ const userSchema = new mongoose.Schema({
             status: { type: String, default: 'Auto-Pay Enabled' },
             icon: { type: String, default: 'bolt' },
         }],
-        default: () => ([
-            { title: 'Electric & Utilities Direct Debit', schedule: 'Scheduled for 3rd of Next Month', amount: 142.80, status: 'Auto-Pay Enabled', icon: 'bolt' },
-            { title: 'High-Speed Fiber Internet', schedule: 'Scheduled for 10th of Next Month', amount: 59.99, status: 'Auto-Pay Enabled', icon: 'wifi' },
-        ]),
+        default: () => [],
     },
     goals: {
-        emergencySaved: { type: Number, default: 15000 },
-        emergencyTarget: { type: Number, default: 20000 },
-        emergencyPct: { type: Number, default: 75 },
-        investmentSaved: { type: Number, default: 20000 },
-        investmentTarget: { type: Number, default: 50000 },
-        investmentPct: { type: Number, default: 40 },
+        emergencySaved: { type: Number, default: 0 },
+        emergencyTarget: { type: Number, default: 0 },
+        emergencyPct: { type: Number, default: 0 },
+        investmentSaved: { type: Number, default: 0 },
+        investmentTarget: { type: Number, default: 0 },
+        investmentPct: { type: Number, default: 0 },
     },
     cards: {
         type: [{
@@ -66,10 +68,8 @@ const userSchema = new mongoose.Schema({
             holder: String,
             expiry: String,
         }],
-        default: () => ([
-            { type: 'Savings', number: '**** **** **** 1457', holder: 'Feng Harrson', expiry: '09/31' },
-            { type: 'Current', number: '**** **** **** 8976', holder: 'Feng Harrson', expiry: '11/31' },
-        ]),
+        default: () => [],
     },
 }, { timestamps: true });
+
 module.exports = mongoose.model('User', userSchema);
