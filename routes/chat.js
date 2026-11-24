@@ -96,7 +96,13 @@ router.get('/:userId', optionalCustomerAuth, async (req, res) => {
             } catch (_) { }
         }
 
-        const msgs = await Chat.find({ userId: oid }).sort({ createdAt: 1 }).lean();
+        // Cap history — old chats with many photos were multi‑MB and blocked admin switch
+        const msgs = await Chat.find({ userId: oid })
+            .sort({ createdAt: -1 })
+            .limit(120)
+            .select('userId sender text image fileName fileType readByAdmin readByCustomer createdAt')
+            .lean();
+        msgs.reverse();
         res.json(msgs);
     } catch (e) {
         res.status(500).json({ error: e.message });
@@ -117,7 +123,13 @@ router.delete('/:userId/messages/:msgId', adminAuth, async (req, res) => {
         }
         const deleted = await Chat.findOneAndDelete(q);
         if (!deleted) return res.status(404).json({ error: 'Message not found' });
-        const msgs = await Chat.find({ userId: oid }).sort({ createdAt: 1 }).lean();
+        // Cap history — old chats with many photos were multi‑MB and blocked admin switch
+        const msgs = await Chat.find({ userId: oid })
+            .sort({ createdAt: -1 })
+            .limit(120)
+            .select('userId sender text image fileName fileType readByAdmin readByCustomer createdAt')
+            .lean();
+        msgs.reverse();
         res.json({ success: true, messages: msgs });
     } catch (e) {
         res.status(500).json({ error: e.message });
@@ -203,4 +215,3 @@ router.delete('/:userId', adminAuth, async (req, res) => {
 });
 
 module.exports = router;
-

@@ -181,7 +181,11 @@ router.get('/pending/list', adminAuth, async (req, res) => {
 
 router.get('/admin/manage-list', adminAuth, async (req, res) => {
     try {
-        const list = await User.find({ isDemo: { $ne: true } }).sort({ createdAt: -1 });
+        // Never send profileImage / cards blobs in list — that made admin dropdown/switch hang
+        const list = await User.find({ isDemo: { $ne: true } })
+            .sort({ createdAt: -1 })
+            .select('-profileImage -cards -goals -bills -password')
+            .lean();
         res.json(list);
     } catch (e) {
         res.status(500).json({ error: e.message });
@@ -202,14 +206,57 @@ router.get('/admin/all-customers', adminAuth, async (req, res) => {
 // Conversations summary for admin chat switcher
 router.get('/admin/conversations', adminAuth, async (req, res) => {
     try {
-        const users = await User.find({}).select('name username accountNumber isDemo approved approvalStatus');
+        // One aggregation instead of 3 queries per user (was very slow with many accounts)
+        const Chat = require('../models/Chat');
+        const rows = await Chat.aggregate([
+            { $sort: { createdAt: -1 } },
+            {
+                $group: {
+                    _id: '$userId',
+                    messageCount: { $sum: 1 },
+                    unreadCount: {
+                        $sum: {
+                            $cond: [
+                                { $and: [{ $eq: ['$sender', 'customer'] }, { $ne: ['$readByAdmin', true] }] },
+                                1,
+                                0,
+                            ],
+                        },
+                    },
+                    lastText: { $first: '$text' },
+                    lastImage: { $first: '$image' },
+                    lastSender: { $first: '$sender' },
+                    lastAt: { $first: '$createdAt' },
+                },
+            },
+            { $sort: { lastAt: -1 } },
+            { $limit: 300 },
+        ]);
+
+        const ids = rows.map((r) => r._id).filter(Boolean);
+        const users = await User.find({
+            $or: [
+                { _id: { $in: ids } },
+                { approved: true },
+                { isDemo: true },
+            ],
+        })
+            .select('name username accountNumber isDemo approved approvalStatus')
+            .lean();
+
+        const byId = new Map(users.map((x) => [String(x._id), x]));
+        const chatBy = new Map(rows.map((r) => [String(r._id), r]));
         const out = [];
-        for (const u of users) {
-            const count = await Chat.countDocuments({ userId: u._id });
-            const unread = await Chat.countDocuments({ userId: u._id, sender: 'customer', readByAdmin: { $ne: true } });
-            const last = await Chat.findOne({ userId: u._id }).sort({ createdAt: -1 });
-            // Always show if they have messages OR are approved/demo
-            if (count === 0 && !(u.approved || u.isDemo)) continue;
+        const seen = new Set();
+
+        for (const r of rows) {
+            const id = String(r._id);
+            const u = byId.get(id);
+            if (!u) continue;
+            seen.add(id);
+            const lastMessage = (r.lastText && String(r.lastText).trim())
+                ? String(r.lastText).slice(0, 120)
+                : (r.lastImage ? '[Photo]' : '');
             out.push({
                 userId: u._id,
                 name: u.name || 'Customer',
@@ -217,19 +264,34 @@ router.get('/admin/conversations', adminAuth, async (req, res) => {
                 accountNumber: u.accountNumber || '',
                 isDemo: !!u.isDemo,
                 approved: !!u.approved,
-                messageCount: count,
-                unreadCount: unread,
-                lastMessage: last ? (last.text || (last.image ? '[Photo]' : '')) : '',
-                lastSender: last ? last.sender : '',
-                lastAt: last ? last.createdAt : null,
-                unreadHint: !!(last && last.sender === 'customer'),
+                messageCount: r.messageCount || 0,
+                unreadCount: r.unreadCount || 0,
+                lastMessage,
+                lastSender: r.lastSender || '',
+                lastAt: r.lastAt || null,
+                unreadHint: r.lastSender === 'customer',
             });
         }
-        out.sort((a, b) => {
-            const ta = a.lastAt ? new Date(a.lastAt).getTime() : 0;
-            const tb = b.lastAt ? new Date(b.lastAt).getTime() : 0;
-            return tb - ta;
-        });
+        // Approved/demo with no messages yet still appear at the end
+        for (const u of users) {
+            const id = String(u._id);
+            if (seen.has(id)) continue;
+            if (!(u.approved || u.isDemo)) continue;
+            out.push({
+                userId: u._id,
+                name: u.name || 'Customer',
+                username: u.username || '',
+                accountNumber: u.accountNumber || '',
+                isDemo: !!u.isDemo,
+                approved: !!u.approved,
+                messageCount: 0,
+                unreadCount: 0,
+                lastMessage: '',
+                lastSender: '',
+                lastAt: null,
+                unreadHint: false,
+            });
+        }
         res.json(out);
     } catch (e) {
         res.status(500).json({ error: e.message });
@@ -265,11 +327,14 @@ router.delete('/:id', adminAuth, async (req, res) => {
 
 router.get('/:id', async (req, res) => {
     try {
-        const user = await User.findById(req.params.id);
+        // ?light=1 skips huge profileImage base64 (fast account switch / chat header)
+        const light = String(req.query.light || '') === '1';
+        let q = User.findById(req.params.id);
+        if (light) q = q.select('-profileImage');
+        const user = await q.lean();
         if (!user) return res.status(404).json({ error: 'User not found' });
 
-        // Non-demo accounts: never show old demo name on cards
-        const obj = user.toObject();
+        const obj = user;
         if (!obj.isDemo && Array.isArray(obj.cards) && obj.name) {
             obj.cards = obj.cards.map((c, i) => {
                 const card = c && typeof c === 'object' ? { ...c } : {};
@@ -288,7 +353,12 @@ router.get('/:id', async (req, res) => {
 
 router.get('/', adminAuth, async (req, res) => {
     try {
-        res.json(await User.find().sort({ createdAt: -1 }));
+        res.json(
+            await User.find()
+                .sort({ createdAt: -1 })
+                .select('-profileImage -cards -goals -bills -password')
+                .lean()
+        );
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
@@ -315,9 +385,15 @@ router.put('/:id', adminAuth, async (req, res) => {
                 else if (p.length < 4) return res.status(400).json({ error: 'Password must be at least 4 characters' });
             }
         }
-        const user = await User.findByIdAndUpdate(req.params.id, updates, { new: true, runValidators: true });
+        const user = await User.findByIdAndUpdate(req.params.id, updates, { new: true, runValidators: true })
+            .select('-password');
         if (!user) return res.status(404).json({ error: 'User not found' });
-        res.json(user);
+        const obj = user.toObject ? user.toObject() : user;
+        // If client did not send a new image, omit huge base64 from response to speed admin saves
+        if (updates.profileImage === undefined && obj.profileImage && String(obj.profileImage).length > 5000) {
+            obj.profileImage = '[stored]';
+        }
+        res.json(obj);
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
