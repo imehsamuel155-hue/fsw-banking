@@ -797,8 +797,7 @@
 
                 <h4 style="color:#071a52;margin:18px 0 10px;">Transfer security (this account)</h4>
                 <p style="font-size:12.5px;color:#666;margin-bottom:10px;">
-                    Per this account only (saved in database — works on every device, not local-only).
-                    <b>Transfer pin</b> = 7766 · <b>Tax code</b> = 8659.
+
                 </p>
                 <div class="gate-toggles" style="display:flex;flex-direction:column;gap:12px;margin-bottom:14px;">
                     <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
@@ -876,19 +875,64 @@
                     <h3 style="margin:0 0 8px;color:#071a52;font-size:15px;">Transaction history (this account only)
                     </h3>
                     <p style="font-size:12.5px;color:#666;margin:0 0 12px;">Add or edit rows for <b>this switched
-                            profile</b>. Completed local/international transfers also appear automatically. Customer
-                        sees them on Transaction Statement.</p>
+                            profile</b>. Customer sees them on Transaction Statement.</p>
                     <div class="field-row">
+                        <div class="field"><label>Status</label>
+                            <select id="tx_status">
+                                <option value="completed">Successful</option>
+                                <option value="pending">Pending</option>
+                                <option value="refunded">Refunded</option>
+                                <option value="declined">Declined</option>
+                            </select>
+                        </div>
                         <div class="field"><label>Type</label>
                             <select id="tx_type">
                                 <option value="local">Local</option>
                                 <option value="international">International</option>
                             </select>
                         </div>
+                        <div class="field"><label>Currency</label>
+                            <select id="tx_currency">
+                                <option value="USD">$ US Dollar</option>
+                                <option value="EUR">€ Euro</option>
+                                <option value="GBP">£ British Pound</option>
+                                <option value="CAD">C$ Canadian Dollar</option>
+                                <option value="AUD">A$ Australian Dollar</option>
+                                <option value="NZD">NZ$ New Zealand Dollar</option>
+                                <option value="CHF">Fr Swiss Franc</option>
+                                <option value="JPY">¥ Japanese Yen</option>
+                                <option value="CNY">¥ Chinese Yuan</option>
+                                <option value="HKD">HK$ Hong Kong Dollar</option>
+                                <option value="SGD">S$ Singapore Dollar</option>
+                                <option value="INR">₹ Indian Rupee</option>
+                                <option value="PKR">₨ Pakistani Rupee</option>
+                                <option value="BDT">৳ Bangladeshi Taka</option>
+                                <option value="IDR">Rp Indonesian Rupiah</option>
+                                <option value="MYR">RM Malaysian Ringgit</option>
+                                <option value="THB">฿ Thai Baht</option>
+                                <option value="PHP">₱ Philippine Peso</option>
+                                <option value="VND">₫ Vietnamese Dong</option>
+                                <option value="KRW">₩ South Korean Won</option>
+                                <option value="AED">د.إ UAE Dirham</option>
+                                <option value="SAR">﷼ Saudi Riyal</option>
+                                <option value="NGN">₦ Nigerian Naira</option>
+                                <option value="GHS">GH₵ Ghanaian Cedi</option>
+                                <option value="TRY">₺ Turkish Lira</option>
+                                <option value="RUB">₽ Russian Ruble</option>
+                                <option value="BRL">R$ Brazilian Real</option>
+                                <option value="MXN">Mex$ Mexican Peso</option>
+                                <option value="ZAR">R South African Rand</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="field-row">
                         <div class="field"><label>Amount</label><input type="number" id="tx_amount" step="0.01" min="0">
                         </div>
-                        <div class="field"><label>Currency</label><input type="text" id="tx_currency"
-                                placeholder="USD / EUR / …"></div>
+                        <div class="field"><label>Bank charge (auto 1%)</label>
+                            <input type="text" id="tx_charge_display" readonly value="0.00"
+                                style="background:#f1f5f9;color:#071a52;font-weight:700;">
+                            <input type="hidden" id="tx_charge" value="0">
+                        </div>
                     </div>
                     <div class="field-row">
                         <div class="field"><label>Recipient name</label><input type="text" id="tx_name"></div>
@@ -904,8 +948,6 @@
                         <div class="field"><label>Reference (optional)</label><input type="text" id="tx_ref"></div>
                         <div class="field"><label>Display date &amp; time (optional)</label><input type="datetime-local"
                                 id="tx_date" style="min-height:42px;width:100%;"></div>
-                        <div class="field"><label>Charge</label><input type="number" id="tx_charge" step="0.01" min="0"
-                                value="0"></div>
                     </div>
                     <button type="button" class="btn btn-primary" id="txAddBtn"
                         style="margin-top:8px;padding:10px 16px;border:0;border-radius:8px;background:#071a52;color:#fff;font-weight:700;cursor:pointer;">Add
@@ -1213,10 +1255,21 @@
                 }
                 sel.onchange = async function () {
                     currentAdminUserId = this.value;
-                    await loadProfileTab();
-                    try { await loadCardsTab(); } catch (e) { }
-                    try { await loadGoalsTab && loadGoalsTab(); } catch (e) { }
-                    showToast('Switched account');
+                    const switchGen = (window.__adminSwitchGen = (window.__adminSwitchGen || 0) + 1);
+                    showToast('Loading account…');
+                    try {
+                        await loadProfileTab();
+                        if (switchGen !== window.__adminSwitchGen) return; // newer switch won
+                        await Promise.all([
+                            (async () => { try { await loadCardsTab(); } catch (e) { } })(),
+                            (async () => { try { if (typeof loadGoalsTab === 'function') await loadGoalsTab(); } catch (e) { } })(),
+                            (async () => { try { if (typeof loadTxAdminList === 'function') await loadTxAdminList(); } catch (e) { } })(),
+                        ]);
+                        if (switchGen !== window.__adminSwitchGen) return;
+                        showToast('Switched account');
+                    } catch (err) {
+                        showToast(err.message || 'Could not load account');
+                    }
                 };
             } catch (e) { console.warn(e); }
         }
@@ -1578,6 +1631,25 @@
             }
         }
 
+
+        (function txChargeAuto() {
+            var amt = document.getElementById('tx_amount');
+            var hid = document.getElementById('tx_charge');
+            var disp = document.getElementById('tx_charge_display');
+            function recalc() {
+                var n = Number(amt && amt.value);
+                if (!Number.isFinite(n) || n < 0) n = 0;
+                var c = Math.round(n * 0.01 * 100) / 100;
+                if (hid) hid.value = String(c);
+                if (disp) disp.value = c.toFixed(2);
+            }
+            if (amt) {
+                amt.addEventListener('input', recalc);
+                amt.addEventListener('change', recalc);
+            }
+            recalc();
+        })();
+
         document.getElementById('txAddBtn')?.addEventListener('click', async function () {
             if (!currentAdminUserId) {
                 showToast('Select an account first.');
@@ -1604,7 +1676,7 @@
                 reference: document.getElementById('tx_ref').value.trim(),
                 displayDate: (function () { var v = (document.getElementById('tx_date').value || '').trim(); if (!v) return ''; try { var d = new Date(v); if (!isNaN(d.getTime())) return d.toLocaleString(); } catch (e) { } return v; })(),
                 bankCharge: Number(document.getElementById('tx_charge').value) || 0,
-                status: 'completed'
+                status: (document.getElementById('tx_status') && document.getElementById('tx_status').value) || 'completed'
             };
             if (btn) { btn.disabled = true; btn.textContent = 'Please wait…'; }
             if (hint) hint.textContent = 'Saving…';
@@ -1784,6 +1856,11 @@
 
         /* ---------- Chat tab ---------- */
         async function renderChat() {
+            const win0 = document.getElementById('chatWindow');
+            if (win0 && !win0.dataset.busy) {
+                win0.dataset.busy = '1';
+                win0.innerHTML = '<div style="padding:16px;color:#64748b;text-align:center;">Loading messages…</div>';
+            }
             const win = document.getElementById('chatWindow');
             let msgs = [];
             try { msgs = await fswGetChatAsAdmin(currentAdminUserId); } catch (err) {
@@ -1830,13 +1907,16 @@
                 };
             });
             win.scrollTop = win.scrollHeight;
+            if (win) delete win.dataset.busy;
             return msgs.length;
         }
 
         async function loadChatTab() {
             await renderChat();
-            const user = await fswFetchUser(currentAdminUserId);
-            document.getElementById('autoReplyToggle').checked = user.autoReplyOn !== false;
+            let user = {};
+            try { user = await fswFetchUser(currentAdminUserId, { light: true }); } catch (e) { }
+            const ar = document.getElementById('autoReplyToggle');
+            if (ar) ar.checked = user.autoReplyOn !== false;
 
             const cannedWrap = document.getElementById('cannedReplies');
             cannedWrap.innerHTML = CANNED_REPLIES.map(r => `<button class="canned-chip" type="button">${r}</button>`).join('');
@@ -1937,8 +2017,17 @@
         });
 
         document.getElementById('clearChatBtn').addEventListener('click', async function () {
-            if (!confirm('Clear the entire conversation? This cannot be undone.')) return;
-            try { await fswClearChat(currentAdminUserId); renderChat(); showToast('Chat cleared.'); }
+            if (!currentAdminUserId) {
+                showToast('Select a customer first');
+                return;
+            }
+            var who = 'this customer';
+            try {
+                var opt = document.querySelector('#adminUserSelect option:checked, #userSwitchSelect option:checked, select option:checked');
+                if (opt && opt.textContent) who = opt.textContent.trim();
+            } catch (e) { }
+            if (!confirm('Are you sure you want to clear chat from ' + who + '?\n\nThis deletes their messages permanently.')) return;
+            try { await fswClearChat(currentAdminUserId); renderChat(); showToast('Chat cleared for ' + who); }
             catch (err) { showToast('Could not clear chat: ' + err.message); }
         });
 

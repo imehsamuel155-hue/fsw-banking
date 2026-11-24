@@ -10,13 +10,14 @@
     <style>
         body {
             margin: 0;
-            font-family: system-ui, sans-serif;
-            background: linear-gradient(135deg, #071a52, #0b63ce);
+            font-family: system-ui, -apple-system, sans-serif;
+            background: #f1f5f9;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
+            color: #0f172a;
         }
 
         .card {
@@ -25,123 +26,123 @@
             padding: 32px 28px;
             max-width: 420px;
             width: 100%;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, .25);
+            box-shadow: 0 10px 40px rgba(15, 23, 42, 0.12);
             text-align: center;
-        }
-
-        .card h2 {
-            color: #071a52;
-            margin: 0 0 8px;
-            font-size: 22px;
-        }
-
-        .card p {
-            color: #666;
-            font-size: 14px;
-            margin: 0 0 24px;
+            border: 1px solid #e2e8f0;
         }
 
         .icon {
             width: 64px;
             height: 64px;
+            margin: 0 auto 16px;
             border-radius: 50%;
-            background: #eef4ff;
-            color: #0b63ce;
+            background: #eff6ff;
             display: flex;
             align-items: center;
             justify-content: center;
+            color: #1d4ed8;
             font-size: 28px;
-            margin: 0 auto 16px;
+        }
+
+        h2 {
+            margin: 0 0 8px;
+            color: #0f172a;
+            font-size: 22px;
+        }
+
+        .card>p {
+            color: #475569;
+            font-size: 14px;
+            margin: 0 0 18px;
+            line-height: 1.5;
+        }
+
+        .error {
+            display: none;
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 10px 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            margin-bottom: 12px;
+            text-align: left;
         }
 
         input {
             width: 100%;
             box-sizing: border-box;
             padding: 14px 16px;
-            border: 1px solid #d0d7e6;
+            border: 1.5px solid #cbd5e1;
             border-radius: 10px;
-            font-size: 18px;
-            letter-spacing: 4px;
+            font-size: 22px;
+            letter-spacing: 10px;
             text-align: center;
-            margin-bottom: 12px;
+            margin-bottom: 14px;
+            color: #0f172a;
+            background: #fff;
         }
 
         input:focus {
             outline: none;
-            border-color: #0b63ce;
+            border-color: #1d4ed8;
+            box-shadow: 0 0 0 3px rgba(29, 78, 216, .15);
         }
 
-        button[type=submit] {
+        button[type="submit"] {
             width: 100%;
             padding: 14px;
-            border: none;
+            border: 0;
             border-radius: 10px;
-            background: #0b63ce;
+            background: #071a52;
             color: #fff;
-            font-weight: 600;
-            font-size: 16px;
+            font-weight: 700;
+            font-size: 15px;
             cursor: pointer;
         }
 
-        button[type=submit]:hover {
-            background: #094fa3;
+        button[type="submit"]:hover {
+            background: #0a2a7a;
         }
 
-        .error {
-            display: none;
-            background: #fde8e8;
-            color: #a6432b;
-            padding: 10px 12px;
-            border-radius: 8px;
-            font-size: 13px;
-            margin-bottom: 12px;
-        }
-
-        .back {
+        a.back {
             display: inline-block;
             margin-top: 16px;
-            color: #0b63ce;
+            color: #1d4ed8;
             text-decoration: none;
             font-size: 14px;
+            font-weight: 600;
         }
 
-        /* Floating customer service — same idea as dashboard */
+        a.back:hover {
+            text-decoration: underline;
+        }
+
+        /* Customer service — always visible on light bg */
         .customer-service {
             position: fixed;
-            bottom: 24px;
-            right: 24px;
-            width: 56px;
-            height: 56px;
+            right: 18px;
+            bottom: 22px;
+            z-index: 50;
+            width: 54px;
+            height: 54px;
             border-radius: 50%;
-            background: #0b63ce;
+            border: 0;
+            cursor: pointer;
+            background: #071a52;
             color: #fff;
+            box-shadow: 0 8px 24px rgba(7, 26, 82, 0.35);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
-            cursor: pointer;
-            box-shadow: 0 8px 24px rgba(11, 99, 206, .4);
-            z-index: 100;
-            border: none;
+            font-size: 22px;
         }
 
         .customer-service:hover {
-            background: #094fa3;
-            transform: scale(1.05);
+            background: #0a2a7a;
         }
 
-        @media (max-width: 480px) {
-            .customer-service {
-                bottom: 16px;
-                right: 16px;
-                width: 50px;
-                height: 50px;
-                font-size: 22px;
-            }
-
-            .card {
-                padding: 24px 18px;
-            }
+        .customer-service i {
+            color: #fff;
         }
     </style>
 </head>

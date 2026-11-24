@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,10 +7,7 @@
     <link rel="stylesheet" href="/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <style>
-        * {
-            box-sizing: border-box;
-        }
-
+        * { box-sizing: border-box; }
         body {
             margin: 0;
             background: #f4f7fc;
@@ -20,7 +16,6 @@
             display: flex;
             flex-direction: column;
         }
-
         .dashboard-header {
             background: #071a52;
             color: #fff;
@@ -29,57 +24,33 @@
             align-items: center;
             gap: 15px;
         }
-
-        .dashboard-header h2 {
-            margin: 0;
-            font-size: 20px;
-        }
-
-        .dashboard-header a {
-            color: #fff;
-            text-decoration: none;
-            font-size: 22px;
-        }
-
+        .dashboard-header h2 { margin: 0; font-size: 20px; }
+        .dashboard-header a { color: #fff; text-decoration: none; font-size: 22px; }
         .statement-container {
             width: 92%;
             max-width: 920px;
             margin: 24px auto 40px;
             flex: 1;
         }
-
         .statement-card {
             background: #fff;
             border-radius: 18px;
             padding: 28px 22px;
-            box-shadow: 0 12px 30px rgba(0, 0, 0, .08);
+            box-shadow: 0 12px 30px rgba(0,0,0,.08);
         }
-
         .statement-card h2 {
             color: #071a52;
             margin: 0 0 8px;
             font-size: 22px;
         }
-
-        .sub {
-            color: #64748b;
-            font-size: 14px;
-            margin-bottom: 20px;
-        }
-
-        .tx-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
+        .sub { color: #64748b; font-size: 14px; margin-bottom: 20px; }
+        .tx-list { display: flex; flex-direction: column; gap: 12px; }
         .tx-item {
             border: 1px solid #e2e8f0;
             border-radius: 14px;
             padding: 14px 16px;
             background: #fafbfc;
         }
-
         .tx-top {
             display: flex;
             justify-content: space-between;
@@ -87,20 +58,8 @@
             align-items: flex-start;
             flex-wrap: wrap;
         }
-
-        .tx-name {
-            font-weight: 700;
-            color: #071a52;
-            font-size: 15px;
-        }
-
-        .tx-amt {
-            font-weight: 800;
-            color: #b91c1c;
-            font-size: 16px;
-            white-space: nowrap;
-        }
-
+        .tx-name { font-weight: 700; color: #071a52; font-size: 15px; }
+        .tx-amt { font-weight: 800; color: #b91c1c; font-size: 16px; white-space: nowrap; }
         .tx-meta {
             display: flex;
             flex-wrap: wrap;
@@ -109,7 +68,6 @@
             font-size: 12.5px;
             color: #64748b;
         }
-
         .badge {
             display: inline-block;
             padding: 3px 10px;
@@ -118,31 +76,13 @@
             font-weight: 700;
             text-transform: uppercase;
         }
-
-        .badge.local {
-            background: #e0f2fe;
-            color: #0369a1;
-        }
-
-        .badge.intl {
-            background: #fef3c7;
-            color: #b45309;
-        }
-
-        .badge.ok {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .tx-actions {
-            margin-top: 12px;
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .tx-actions button,
-        .tx-actions a {
+        .badge.local { background: #e0f2fe; color: #0369a1; }
+        .badge.intl { background: #fef3c7; color: #b45309; }
+        .badge.ok { background: #dcfce7; color: #166534; }
+        .badge.pending { background: #fef3c7; color: #92400e; }
+        .badge.declined, .badge.refunded { background: #fee2e2; color: #b91c1c; }
+        .tx-actions { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+        .tx-actions button, .tx-actions a {
             border: 0;
             background: #071a52;
             color: #fff;
@@ -153,12 +93,10 @@
             cursor: pointer;
             text-decoration: none;
         }
-
         .tx-actions button.ghost {
             background: #e2e8f0;
             color: #071a52;
         }
-
         .tx-detail {
             display: none;
             margin-top: 12px;
@@ -168,25 +106,19 @@
             color: #334155;
             line-height: 1.55;
         }
-
-        .tx-detail.open {
-            display: block;
-        }
-
+        .tx-detail.open { display: block; }
         .empty {
             text-align: center;
             padding: 40px 16px;
             color: #64748b;
             font-size: 15px;
         }
-
         .buttons {
             display: flex;
             gap: 12px;
             margin-top: 28px;
             flex-wrap: wrap;
         }
-
         .buttons a {
             flex: 1;
             min-width: 160px;
@@ -198,19 +130,12 @@
             font-weight: bold;
             background: #071a52;
         }
-
-        .buttons a.secondary {
-            background: #64748b;
-        }
-
+        .buttons a.secondary { background: #64748b; }
         @media (max-width: 600px) {
-            .statement-card {
-                padding: 20px 14px;
-            }
+            .statement-card { padding: 20px 14px; }
         }
     </style>
 </head>
-
 <body>
     <header class="dashboard-header">
         <a href="/dashboard" title="Back"><i class="fas fa-arrow-left"></i></a>
@@ -220,8 +145,7 @@
     <div class="statement-container">
         <div class="statement-card">
             <h2><i class="fas fa-file-invoice"></i> Transaction History</h2>
-            <p class="sub">Local and international transfers appear here after they complete. Tap a row for more details
-                or open the slip.</p>
+            <p class="sub">Local and international transfers appear here after they complete. Tap a row for more details or open the slip.</p>
             <div id="txList" class="tx-list">
                 <div class="empty">Loading history…</div>
             </div>
@@ -257,7 +181,7 @@
         function render(list) {
             var box = document.getElementById('txList');
             if (!list || !list.length) {
-                box.innerHTML = '<div class="empty">No completed transfers yet.<br>When you finish a local or international transfer, it will show here.</div>';
+                box.innerHTML = '<div class="empty">No transfers yet.<br>When you finish a transfer (or admin adds one), it will show here.</div>';
                 return;
             }
             box.innerHTML = '';
@@ -272,7 +196,7 @@
                     '</div>' +
                     '<div class="tx-meta">' +
                     '<span class="badge ' + (isIntl ? 'intl' : 'local') + '">' + (isIntl ? 'International' : 'Local') + '</span>' +
-                    '<span class="badge ok">' + (t.status || 'completed') + '</span>' +
+                    (function(){ var st=String(t.status||'completed').toLowerCase(); var label='Successful'; var cls='ok'; if(st==='pending'){label='⏳ Pending';cls='pending';} else if(st==='declined'||st==='failed'){label='❌ Declined';cls='declined';} else if(st==='refunded'){label='❌ Refunded';cls='refunded';} return '<span class="badge '+cls+'">'+label+'</span>'; })() +
                     '<span>' + fmtDate(t) + '</span>' +
                     '<span>Ref: ' + (t.reference || '—') + '</span>' +
                     '</div>' +
@@ -318,5 +242,4 @@
         })();
     </script>
 </body>
-
 </html>

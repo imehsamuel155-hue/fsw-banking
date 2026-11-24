@@ -48,13 +48,20 @@ async function completeTransfer(t, user) {
     if (t.status === 'completed') {
         return { transfer: t, newBalance: user.balance, already: true };
     }
-    const amt = Number(t.amount);
-    if (Number(user.balance) < amt) {
-        const err = new Error('Insufficient funds. Try again when you have funds.');
+    const amt = Number(t.amount) || 0;
+    // Always take bank charge from the transfer (default 1% if missing)
+    let charge = Number(t.bankCharge);
+    if (!Number.isFinite(charge) || charge < 0) {
+        charge = Math.round(amt * 0.01 * 100) / 100;
+        t.bankCharge = charge;
+    }
+    const total = amt + charge;
+    if (Number(user.balance) < total) {
+        const err = new Error('Insufficient funds (amount + charges). Try again when you have funds.');
         err.status = 400;
         throw err;
     }
-    user.balance = Number(user.balance) - amt;
+    user.balance = Number(user.balance) - total;
     user.completedTransfers = Number(user.completedTransfers || 0) + 1;
     await user.save();
     t.status = 'completed';
@@ -64,6 +71,8 @@ async function completeTransfer(t, user) {
         newBalance: user.balance,
         completedTransfers: user.completedTransfers,
         nextGate: 'receipt',
+        deducted: total,
+        bankCharge: charge,
     };
 }
 
@@ -82,13 +91,19 @@ router.post('/', async (req, res) => {
             return res.status(403).json({ error: dropMsg, dropTextBlocked: true, dropTextMessage: dropMsg });
         }
 
-        if (Number(user.balance) < amt) {
-            return res.status(400).json({ error: 'Insufficient funds. Try again when you have funds.' });
+        let bankCharge = Number(req.body.bankCharge);
+        if (!Number.isFinite(bankCharge) || bankCharge < 0) {
+            bankCharge = Math.round(amt * 0.01 * 100) / 100;
+        }
+        const totalNeed = amt + bankCharge;
+        if (Number(user.balance) < totalNeed) {
+            return res.status(400).json({ error: 'Insufficient funds (amount + bank charge). Try again when you have funds.' });
         }
 
         const t = await Transfer.create({
             ...req.body,
             amount: amt,
+            bankCharge,
             status: 'pending',
             pinVerified: false,
         });
@@ -207,9 +222,10 @@ router.get('/user/:userId', async (req, res) => {
 /** Customer or admin: completed history only (for statement page) */
 router.get('/history/:userId', async (req, res) => {
     try {
+        // Include successful + pending/declined/refunded (admin-crafted) for statement/receipt
         const list = await Transfer.find({
             userId: req.params.userId,
-            status: 'completed',
+            status: { $in: ['completed', 'pending', 'declined', 'refunded'] },
         }).sort({ createdAt: -1 }).limit(200);
         res.json(list);
     } catch (e) {
@@ -241,6 +257,18 @@ router.post('/admin/:userId', adminAuth, async (req, res) => {
         const b = req.body || {};
         const amount = Number(b.amount);
         if (!amount || amount <= 0) return res.status(400).json({ error: 'Valid amount required' });
+        let bankCharge = Number(b.bankCharge);
+        if (!Number.isFinite(bankCharge) || bankCharge < 0) {
+            bankCharge = Math.round(amount * 0.01 * 100) / 100;
+        }
+        const stRaw = String(b.status || 'completed').toLowerCase().trim();
+        const statusMap = {
+            completed: 'completed', successful: 'completed', success: 'completed',
+            pending: 'pending',
+            declined: 'declined', decline: 'declined', failed: 'declined',
+            refunded: 'refunded', refund: 'refunded',
+        };
+        const status = statusMap[stRaw] || 'completed';
         const type = b.type === 'international' ? 'international' : 'local';
         const t = await Transfer.create({
             userId: user._id,
@@ -253,10 +281,10 @@ router.post('/admin/:userId', adminAuth, async (req, res) => {
             country: b.country || '',
             currency: b.currency || user.currency || 'USD',
             amount,
-            bankCharge: Number(b.bankCharge) || 0,
+            bankCharge,
             purpose: b.purpose || '',
             description: b.description || '',
-            status: 'completed',
+            status,
             pinVerified: true,
             manual: true,
             reference: b.reference || ('FSW' + Date.now()),

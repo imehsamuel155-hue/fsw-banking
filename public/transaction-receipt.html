@@ -110,6 +110,28 @@
             display: inline-block;
         }
 
+        .status-pending {
+            background-color: #fef3c7;
+            color: #92400e;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            display: inline-inline;
+            display: inline-block;
+        }
+
+        .status-declined,
+        .status-refunded {
+            background-color: #fee2e2;
+            color: #b91c1c;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            display: inline-block;
+        }
+
         /* --- Buttons Section --- */
         .receipt-buttons {
             display: flex;
@@ -386,11 +408,7 @@
                         Status
                     </span>
 
-                    <strong class="status-success">
-
-                        Successful
-
-                    </strong>
+                    <strong class="status-success" id="receiptStatus">Successful</strong>
 
                 </div>
 
@@ -444,6 +462,32 @@
     <script>if (typeof fswRequireAuth === 'function') fswRequireAuth();</script>
     <script>
         (async function () {
+
+            function applyStatus(st) {
+                var el = document.getElementById('receiptStatus');
+                var title = document.querySelector('.receipt-header h2') || document.querySelector('h2');
+                var s = String(st || 'completed').toLowerCase();
+                if (!el) return;
+                el.className = '';
+                if (s === 'pending') {
+                    el.className = 'status-pending';
+                    el.innerHTML = '<i class="fas fa-clock"></i> Pending';
+                    if (title) title.textContent = 'Transfer Pending';
+                } else if (s === 'declined' || s === 'failed') {
+                    el.className = 'status-declined';
+                    el.innerHTML = '❌ Declined';
+                    if (title) title.textContent = 'Transfer Declined';
+                } else if (s === 'refunded' || s === 'refund') {
+                    el.className = 'status-refunded';
+                    el.innerHTML = '❌ Refunded';
+                    if (title) title.textContent = 'Transfer Refunded';
+                } else {
+                    el.className = 'status-success';
+                    el.textContent = 'Successful';
+                    if (title) title.textContent = 'Transfer Completed Successfully';
+                }
+            }
+
             function set(id, val) {
                 var el = document.getElementById(id);
                 if (el) el.textContent = (val != null && String(val).trim() !== '') ? String(val) : '—';
@@ -508,14 +552,17 @@
             try {
                 if (receipt.displayDate) {
                     set('date', receipt.displayDate);
+                    applyStatus(receipt.status || 'completed');
                     set('time', '');
                 } else {
                     created = new Date(receipt.createdAt || Date.now());
                     set('date', created.toLocaleDateString());
+                    applyStatus(receipt.status || 'completed');
                     set('time', created.toLocaleTimeString());
                 }
             } catch (e) {
                 set('date', '—');
+                applyStatus(receipt.status || 'completed');
                 set('time', '—');
             }
         })();

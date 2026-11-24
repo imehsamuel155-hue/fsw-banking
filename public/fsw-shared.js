@@ -176,23 +176,31 @@ function fswGetCachedUser() {
     }
 }
 
-async function fswFetchUser(userId) {
+async function fswFetchUser(userId, opts) {
+    opts = opts || {};
+    const light = !!opts.light;
     let id = userId;
     if (!id || id === 'null' || id === 'undefined') {
         id = await fswGetCurrentUserId();
     }
-    // Never fall back to demo / first account — only the logged-in (or admin-selected) id
     if (!id || id === 'null' || id === 'undefined') {
         throw new Error('Not logged in');
     }
-    const res = await fetch(FSW_API_BASE + '/users/' + encodeURIComponent(id) + '?_=' + Date.now(), {
+    // Short memory cache for rapid account switching in admin (2s)
+    try {
+        window.__fswUserCache = window.__fswUserCache || {};
+        const ck = String(id) + (light ? ':L' : ':F');
+        const hit = window.__fswUserCache[ck];
+        if (hit && (Date.now() - hit.t) < 2000) return hit.u;
+    } catch (e) { }
+    const qs = (light ? 'light=1&' : '') + '_=' + Date.now();
+    const res = await fetch(FSW_API_BASE + '/users/' + encodeURIComponent(id) + '?' + qs, {
         cache: 'no-store',
         headers: { 'Cache-Control': 'no-cache', Pragma: 'no-cache' },
     });
     if (!res.ok) {
         let err = 'Could not load user';
         try { err = (await res.json()).error || err; } catch (_) { }
-        // Prefer last good cache over empty UI
         if (!userId) {
             const cached = fswGetCachedUser();
             if (cached) return cached;
@@ -200,7 +208,6 @@ async function fswFetchUser(userId) {
         throw new Error(err);
     }
     const user = await res.json();
-    // Safety: customer session must match this id (never swap in demo payload)
     try {
         const sessionId = fswSessionGet(FSW_SESSION_KEYS.userId);
         if (sessionId && user && user._id && String(user._id) !== String(sessionId) && !userId) {
@@ -210,6 +217,10 @@ async function fswFetchUser(userId) {
         if (String(e.message).includes('Session mismatch')) throw e;
     }
     if (!userId) fswCacheUser(user);
+    try {
+        window.__fswUserCache = window.__fswUserCache || {};
+        window.__fswUserCache[String(id) + (light ? ':L' : ':F')] = { t: Date.now(), u: user };
+    } catch (e) { }
     return user;
 }
 async function fswUpdateUser(userId, updates) {
@@ -259,7 +270,7 @@ function fswPaintDashboard(user) {
         dashImg.onerror = function () { this.onerror = null; this.src = fallback; };
         dashImg.src = user.profileImage || fallback;
     }
-    fswApplyStatusEl(document.getElementById('dashAccountStatus'), user.status || 'Active');
+    // Account status only on "Account Status:" line (not next to clock)
     const statusLabel = document.getElementById('dashStatusLabel');
     if (statusLabel) statusLabel.textContent = user.status || 'Active';
 }

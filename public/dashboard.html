@@ -1830,6 +1830,48 @@ SCHEDULED PAYMENTS
                     <span id="currencySymbol"></span>
 
                     <span id="accountBalance"></span>
+                    <script>
+                        /* Instant fill from cache — runs as HTML parses, no empty balance/name */
+                        (function () {
+                            try {
+                                var id = localStorage.getItem('fsw_user_id');
+                                var raw = sessionStorage.getItem('fsw_user') || localStorage.getItem('fsw_user');
+                                if (!id || !raw) return;
+                                var u = JSON.parse(raw);
+                                if (!u || !u._id || String(u._id) !== String(id)) return;
+                                var syms = { USD: '$', EUR: '€', GBP: '£', CAD: 'C$', AUD: 'A$', JPY: '¥', CHF: 'Fr', CNY: '¥', INR: '₹', GHS: 'GH₵', NGN: '₦' };
+                                function money(n) { return Number(n != null ? n : 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+                                var w = document.getElementById('welcomeName');
+                                if (w && u.name) w.textContent = 'Welcome Back, ' + String(u.name).split(' ')[0];
+                                var bal = document.getElementById('accountBalance');
+                                if (bal) bal.textContent = money(u.balance);
+                                var cs = document.getElementById('currencySymbol');
+                                if (cs) cs.textContent = syms[u.currency] || (u.currency || '') || '€';
+                                var an = document.getElementById('dashAccountNumber');
+                                if (an) an.textContent = 'Acc: ' + (u.accountNumber || '');
+                                var nm = document.getElementById('dashAccountName');
+                                if (nm) nm.textContent = u.name || '';
+                                var sl = document.getElementById('dashStatusLabel');
+                                if (sl) {
+                                    sl.textContent = u.status || 'Active';
+                                    var st = String(u.status || 'Active').toLowerCase();
+                                    if (st.indexOf('suspend') >= 0 || st.indexOf('block') >= 0 || st.indexOf('inactiv') >= 0) {
+                                        sl.style.background = '#fee2e2'; sl.style.color = '#b91c1c';
+                                    } else if (st.indexOf('pend') >= 0) {
+                                        sl.style.background = '#fef3c7'; sl.style.color = '#92400e';
+                                    } else {
+                                        sl.style.background = 'rgba(255,255,255,.25)'; sl.style.color = '#fff';
+                                    }
+                                }
+                                var img = document.getElementById('dashProfileImg');
+                                if (img) {
+                                    img.alt = '';
+                                    if (u.profileImage) img.src = u.profileImage;
+                                    else if (u.name) img.src = 'https://api.dicebear.com/7.x/initials/svg?seed=' + encodeURIComponent(u.name);
+                                }
+                            } catch (e) { }
+                        })();
+                    </script>
 
                 </h1>
 
@@ -1846,18 +1888,13 @@ SCHEDULED PAYMENTS
             <div class="balance-time">
                 <i class="fas fa-clock"></i>
                 <span id="liveTime"></span>
-                <span id="dashAccountStatus" class="status-pill status-active"
-                    style="margin-left:10px;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;"></span>
             </div>
 
             <p>
 
                 Account Status:
-                <span class="active" id="dashStatusLabel">
-
-                    Active
-
-                </span>
+                <span class="active" id="dashStatusLabel"
+                    style="display:inline-block;padding:4px 12px;border-radius:20px;font-weight:700;background:rgba(255,255,255,.2);">Active</span>
 
             </p>
 
@@ -2092,6 +2129,9 @@ SCHEDULED PAYMENTS
         </div>
 
     </section>
+
+
+
 
     <!-- ================= QUICK ACTIONS ================= -->
 
