@@ -439,7 +439,7 @@
                     <div class="mode" id="modeLabel">Open the menu to pick who to reply</div>
                 </div>
                 <button type="button" id="clearBtn"
-                    style="border:none;border-radius:8px;padding:8px 12px;background:#a6432b;color:#fff;cursor:pointer;font-size:12px;">Clear…</button>
+                    style="border:none;border-radius:8px;padding:8px 12px;background:#a6432b;color:#fff;cursor:pointer;font-size:12px;">Clear</button>
             </div>
             <div id="chatMessages"></div>
             <div class="footer">
@@ -675,35 +675,29 @@
             };
             document.getElementById('clearBtn').onclick = async function () {
                 try {
-                    await loadConvs();
-                    var lines = ['1) Clear ALL chats'];
-                    convs.forEach(function (c, i) {
-                        if (c.messageCount > 0) lines.push((lines.length + 1) + ') Clear only: ' + (c.name || c.username || c.userId));
-                    });
-                    var choice = prompt(lines.join('\n') + '\n\nType the number:');
-                    var n = parseInt(choice, 10);
-                    if (!n || n < 1 || n > lines.length) return;
-                    if (n === 1) {
-                        if (!confirm('Delete ALL chats?')) return;
-                        await fetch(FSW_API_BASE + '/chat/admin/clear', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + fswGetAdminToken() },
-                            body: JSON.stringify({ userIds: 'all' })
-                        });
+                    if (!selectedId) {
+                        alert('Open a conversation first (pick the person on the left / menu), then tap Clear.');
+                        return;
+                    }
+                    var who = selectedName || 'this person';
+                    if (!confirm('Are you sure you want to clear chat from ' + who + '?\n\nThis deletes their messages from the database and cannot be undone.')) {
+                        return;
+                    }
+                    // Delete only this customer's messages in MongoDB
+                    if (typeof fswClearChat === 'function') {
+                        await fswClearChat(selectedId);
                     } else {
-                        var withMsg = convs.filter(function (c) { return c.messageCount > 0; });
-                        var target = withMsg[n - 2];
-                        if (!target || !confirm('Clear chat for ' + target.name + '?')) return;
-                        await fetch(FSW_API_BASE + '/chat/admin/clear', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + fswGetAdminToken() },
-                            body: JSON.stringify({ userIds: [target.userId] })
+                        var res = await fetch(FSW_API_BASE + '/chat/' + encodeURIComponent(selectedId), {
+                            method: 'DELETE',
+                            headers: { Authorization: 'Bearer ' + fswGetAdminToken() }
                         });
+                        if (!res.ok) throw new Error('Could not clear chat');
                     }
                     lastCount = -1; lastFp = '';
                     await loadConvs();
                     await loadMessages(true);
-                } catch (e) { alert(e.message); }
+                    alert('Chat with ' + who + ' has been cleared.');
+                } catch (e) { alert(e.message || 'Could not clear chat'); }
             };
 
             loadConvs().catch(function (e) {
