@@ -435,11 +435,26 @@ async function fswGetChatAsAdmin(customerUserId) {
     if (!customerUserId) throw new Error('Select a customer first');
     const adminTok = fswGetAdminToken();
     if (!adminTok) throw new Error('Admin login required');
-    const res = await fetch(FSW_API_BASE + '/chat/' + encodeURIComponent(customerUserId), {
-        headers: { Authorization: 'Bearer ' + adminTok },
-        cache: 'no-store',
-    });
-    if (!res.ok) throw new Error('Could not load chat');
+    const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const timer = controller ? setTimeout(function () { try { controller.abort(); } catch (e) { } }, 45000) : null;
+    let res;
+    try {
+        res = await fetch(FSW_API_BASE + '/chat/' + encodeURIComponent(customerUserId) + '?_=' + Date.now(), {
+            headers: { Authorization: 'Bearer ' + adminTok },
+            cache: 'no-store',
+            signal: controller ? controller.signal : undefined,
+        });
+    } catch (e) {
+        if (timer) clearTimeout(timer);
+        if (e && e.name === 'AbortError') throw new Error('Chat took too long to load. Try again.');
+        throw new Error('Could not reach backend. Check network or API host.');
+    }
+    if (timer) clearTimeout(timer);
+    if (!res.ok) {
+        let err = 'Could not load chat';
+        try { err = (await res.json()).error || err; } catch (e) { }
+        throw new Error(err);
+    }
     return res.json();
 }
 async function fswSendCustomerMessage(text, image) {

@@ -523,17 +523,19 @@
                 listEl.querySelectorAll('.conv').forEach(function (el) {
                     el.onclick = function () {
                         selectedId = el.dataset.id;
-                        selectedName = el.dataset.name;
+                        selectedName = el.dataset.name || 'Customer';
                         document.getElementById('whoTitle').textContent = selectedName;
                         document.getElementById('modeLabel').textContent = 'Replying only to this customer — messages stay private to this account';
                         lastCount = -1; lastFp = '';
                         closeNav();
-                        // Mark this conversation read (clears the 1 badge for this user only)
-                        fetch(FSW_API_BASE + '/chat/' + selectedId + '/mark-read', {
+                        // Show messages immediately — do NOT wait for full conversation list (that was why some chats stayed blank)
+                        loadMessages(true);
+                        fetch(FSW_API_BASE + '/chat/' + encodeURIComponent(selectedId) + '/mark-read', {
                             method: 'POST',
                             headers: { Authorization: 'Bearer ' + fswGetAdminToken() }
                         }).catch(function () { });
-                        loadConvs().then(function () { loadMessages(true); });
+                        // Refresh sidebar badges in background
+                        loadConvs().catch(function () { });
                     };
                 });
             }
@@ -545,6 +547,14 @@
                 var b = document.createElement('div');
                 b.className = 'bubble ' + (admin ? 'admin' : 'customer');
                 var mid = msg._id ? String(msg._id) : '';
+                if (msg._hadImage && !msg.image) {
+                    var ph = document.createElement('div');
+                    ph.className = 'chat-text';
+                    ph.style.fontStyle = 'italic';
+                    ph.style.opacity = '0.85';
+                    ph.textContent = '[Photo in this message]';
+                    b.appendChild(ph);
+                }
                 if (msg.text) {
                     var t = document.createElement('div');
                     t.className = 'chat-text';
@@ -607,17 +617,37 @@
                     box.innerHTML = '<div style="text-align:center;color:#888;padding:40px 16px;font-size:14px;">Open the <b>menu</b> (☰) and pick conversation <b>1</b>, <b>2</b>, <b>3</b>… to reply.<br><br>Each customer only sees their own chat.</div>';
                     return;
                 }
-                var msgs = await fswGetChatAsAdmin(selectedId);
-                if (!Array.isArray(msgs)) msgs = [];
-                var fp = chatFp(msgs);
-                // Re-render when count changes OR Seen/Sent status changes (same length)
-                if (!force && msgs.length === lastCount && fp === lastFp) return;
-                lastCount = msgs.length;
-                lastFp = fp;
-                box.innerHTML = '';
-                if (!msgs.length) box.innerHTML = '<div style="text-align:center;color:#888;padding:30px;">No messages yet for this customer.</div>';
-                else msgs.forEach(addBubble);
-                box.scrollTop = box.scrollHeight;
+                var loadFor = String(selectedId);
+                if (force) {
+                    box.innerHTML = '<div style="text-align:center;color:#64748b;padding:40px 16px;font-size:14px;">Loading messages…</div>';
+                }
+                try {
+                    var msgs = await fswGetChatAsAdmin(loadFor);
+                    // Ignore stale response if user switched to another person
+                    if (String(selectedId) !== loadFor) return;
+                    if (!Array.isArray(msgs)) {
+                        if (msgs && Array.isArray(msgs.messages)) msgs = msgs.messages;
+                        else msgs = [];
+                    }
+                    var fp = chatFp(msgs);
+                    if (!force && msgs.length === lastCount && fp === lastFp) return;
+                    lastCount = msgs.length;
+                    lastFp = fp;
+                    box.innerHTML = '';
+                    if (!msgs.length) {
+                        box.innerHTML = '<div style="text-align:center;color:#888;padding:30px;">No messages yet for this customer.</div>';
+                    } else {
+                        msgs.forEach(addBubble);
+                    }
+                    box.scrollTop = box.scrollHeight;
+                } catch (e) {
+                    if (String(selectedId) !== loadFor) return;
+                    box.innerHTML = '<div style="text-align:center;color:#b91c1c;padding:40px 16px;font-size:14px;">Could not load this chat.<br><br>' +
+                        (e.message || 'Poor network or backend busy') +
+                        '<br><br><button type="button" id="retryChatLoad" style="padding:10px 16px;border:0;border-radius:8px;background:#071a52;color:#fff;font-weight:700;cursor:pointer;">Try again</button></div>';
+                    var rb = document.getElementById('retryChatLoad');
+                    if (rb) rb.onclick = function () { loadMessages(true); };
+                }
             }
 
             var sending = false;

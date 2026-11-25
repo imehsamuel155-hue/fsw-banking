@@ -96,14 +96,31 @@ router.get('/:userId', optionalCustomerAuth, async (req, res) => {
             } catch (_) { }
         }
 
-        // Cap history — old chats with many photos were multi‑MB and blocked admin switch
+        // Cap history; slim giant base64 so heavy chats still open (blank chat fix)
         const msgs = await Chat.find({ userId: oid })
             .sort({ createdAt: -1 })
             .limit(120)
-            .select('userId sender text image fileName fileType readByAdmin readByCustomer createdAt')
+            .select('userId sender text image readByAdmin readByCustomer createdAt')
             .lean();
         msgs.reverse();
-        res.json(msgs);
+        const slim = msgs.map(function (m) {
+            const img = m.image || '';
+            if (img.length > 400000) {
+                return {
+                    _id: m._id,
+                    userId: m.userId,
+                    sender: m.sender,
+                    text: m.text || '',
+                    image: '',
+                    _hadImage: true,
+                    readByAdmin: m.readByAdmin,
+                    readByCustomer: m.readByCustomer,
+                    createdAt: m.createdAt,
+                };
+            }
+            return m;
+        });
+        res.json(slim);
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
