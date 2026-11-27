@@ -96,31 +96,14 @@ router.get('/:userId', optionalCustomerAuth, async (req, res) => {
             } catch (_) { }
         }
 
-        // Cap history; slim giant base64 so heavy chats still open (blank chat fix)
+        // Cap history — return full images so admin/customer can see photos
         const msgs = await Chat.find({ userId: oid })
             .sort({ createdAt: -1 })
-            .limit(120)
+            .limit(80)
             .select('userId sender text image readByAdmin readByCustomer createdAt')
             .lean();
         msgs.reverse();
-        const slim = msgs.map(function (m) {
-            const img = m.image || '';
-            if (img.length > 400000) {
-                return {
-                    _id: m._id,
-                    userId: m.userId,
-                    sender: m.sender,
-                    text: m.text || '',
-                    image: '',
-                    _hadImage: true,
-                    readByAdmin: m.readByAdmin,
-                    readByCustomer: m.readByCustomer,
-                    createdAt: m.createdAt,
-                };
-            }
-            return m;
-        });
-        res.json(slim);
+        res.json(msgs);
     } catch (e) {
         res.status(500).json({ error: e.message });
     }

@@ -457,14 +457,61 @@ async function fswGetChatAsAdmin(customerUserId) {
     }
     return res.json();
 }
+
+/** Resize/compress chat photos so they always display (avoid multi‑MB base64) */
+function fswCompressImage(dataUrl, maxW, quality) {
+    maxW = maxW || 1280;
+    quality = quality || 0.72;
+    return new Promise(function (resolve) {
+        try {
+            if (!dataUrl || String(dataUrl).indexOf('data:image') !== 0) {
+                resolve(dataUrl || '');
+                return;
+            }
+            var img = new Image();
+            img.onload = function () {
+                try {
+                    var w = img.width || 1;
+                    var h = img.height || 1;
+                    if (w > maxW) {
+                        h = Math.round(h * (maxW / w));
+                        w = maxW;
+                    }
+                    var canvas = document.createElement('canvas');
+                    canvas.width = w;
+                    canvas.height = h;
+                    var ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    var out = canvas.toDataURL('image/jpeg', quality);
+                    // If still huge, compress harder
+                    if (out.length > 900000) {
+                        out = canvas.toDataURL('image/jpeg', 0.55);
+                    }
+                    resolve(out);
+                } catch (e) {
+                    resolve(dataUrl);
+                }
+            };
+            img.onerror = function () { resolve(dataUrl); };
+            img.src = dataUrl;
+        } catch (e) {
+            resolve(dataUrl || '');
+        }
+    });
+}
+
 async function fswSendCustomerMessage(text, image) {
     const id = await fswGetCurrentUserId();
     const tok = fswGetToken();
     if (!tok) throw new Error('Not logged in');
+    let img = image || '';
+    if (img && typeof fswCompressImage === 'function') {
+        img = await fswCompressImage(img);
+    }
     const res = await fetch(FSW_API_BASE + '/chat/' + encodeURIComponent(id), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + tok },
-        body: JSON.stringify({ text: text || '', image: image || '' }),
+        body: JSON.stringify({ text: text || '', image: img }),
     });
     if (!res.ok) {
         let err = 'Could not send message';
@@ -477,10 +524,14 @@ async function fswSendAdminReply(userId, text, image) {
     if (!userId) throw new Error('Select a customer conversation first');
     const adminTok = fswGetAdminToken();
     if (!adminTok) throw new Error('Admin login required');
+    let img = image || '';
+    if (img && typeof fswCompressImage === 'function') {
+        img = await fswCompressImage(img);
+    }
     const res = await fetch(FSW_API_BASE + '/chat/' + encodeURIComponent(userId) + '/admin-reply', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + adminTok },
-        body: JSON.stringify({ text: text || '', image: image || '' }),
+        body: JSON.stringify({ text: text || '', image: img }),
     });
     if (!res.ok) throw new Error('Could not send reply');
     return res.json();
